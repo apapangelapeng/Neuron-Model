@@ -11,8 +11,6 @@ using namespace std;
 IDEAS:
 1) Adding dependence on lipids would be very cool. I.e., sphingomyelin is neutral and on 
 extracellcular side, some lipids have negative charge and reside on the cytoplasmic side. 
-
-
 */
 
 vector<double> vec1, vec2, vec3, vec4, vecE, vecG;
@@ -95,16 +93,10 @@ int Questions(int x){
   cout << "In case 1 the first ion channel likely can not activate the second. \n" << endl;
   //Presumably if the charge difference is only very slight and just at the membrane, if another VGCC is on the opposite end of the cross section, maybe it will not be activated by the action potential?
   //Secondly, having a larger diameter will increase the "wire resistance." This seems to be linked to the comment above.
-  cout << "2. How to encode conductance/how can you know the flow through a channel?" << endl;
-  cout << "3. See comment for more. Different measures of wire resistance? Should \"axonal\" be calculated locally for small stretches of axon? How to calculate \"transmembrane\"?" << endl;
-  //In theory, resistance of the wire should be a constant if the wire is perfectly cylindrical and composition does not change. 
-  //So I am wondering if these minor changes will ever be important? Supposedly axon diameter can change a fair bit to traffic mitochondria and such.
-  cout << "4. Dynamically changing with time?" << endl;
-  cout << "5. Will there need to be different computation (resistance, conductance, flow, etc.) for every type of ion channel?" << endl;
+  cout << "2. Dynamically changing with time?" << endl;
   //I am wondering if people just average all of the sodium channels, potassium channels, etc. 
-  cout << "6. Wire model does not consider spacing or density of ion channels? Voltage divider does not care about distance." << endl;
-  cout << "7. Where do the equations at the bottom of page 37 come from? Experimental fits?" << endl;
-  cout << "IMPORANT 8. Conductance and R_input needs to be re-written by the proportion of channels open, correct? So why does the model not include this?" << endl;
+  cout << "3. Wire model does not consider spacing or density of ion channels? Voltage divider does not care about distance." << endl;
+  cout << "4. Conductance and R_input needs to be re-written by the proportion of channels open, correct? So why does the model not include this?" << endl;
   return(0);
 }
 
@@ -264,7 +256,7 @@ double Voltage_displacement(double x, double injected){
     //cout << "V_TEMP_REST: " << V_temp_rest << endl;
     magnitude = injected*R_temp_inp; 
     //cout << "R = " << R_temp_inp << endl;
-    cout << "Displaced voltage: " << V_disp << endl;
+    //cout << "Displaced voltage: " << V_disp << endl;
     //cout << "Magnitude of displacement: " << magnitude << endl;
     return (V_disp);
 }
@@ -453,12 +445,12 @@ int Output_file(int x) {
 double Propagating_AP(double x){
   double V_dt = 0; 
   current_injector(0);
-  //THIS IS WRONG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   for(int i = 0; i < vec1.size(); i++){
   V_dt = ((radius/(2*resistivity)) - vec1[i] - vec_K_I[0] - vec_Na_I[0])/C_sum; 
   vec_V_dt.push_back(V_dt);
-  //cout << "C SUM " << C_sum << endl;
-  //cout << "V dt : " << vec_V_dt[i] << endl;
+  cout << "C SUM " << C_sum << endl;
+  cout << "V dt : " << vec_V_dt[i] << endl;
+  //WHAT IS THE TIME DEPENDENCE IN THIS CASE?
   }
   return(0); 
 }

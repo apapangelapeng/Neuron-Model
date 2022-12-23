@@ -11,14 +11,27 @@ using namespace std;
 THIS FILE IS JUST FOR ME TO TEST THINGIES
 */
 
-vector<double> vec1;
 double a_n, b_n, a_h, b_h, a_m, b_m;
 double n_dynamic, m_dynamic, h_dynamic, n_inf, m_inf, h_inf;
 vector<double> vec_n, vec_m, vec_h, vec_Nap, vec_Kp;
 double tau_n, tau_m, tau_h;
 vector<double> vec_tau_n, vec_tau_m, vec_tau_h;
 
+/*
+n is a kinetic equation built to track ONE kind of POTASSIUM channel's opening
+it will be a proportion of channels open, and or the activation of the channel
+potassium current can be generalized as: g*n^4*(V - E)
+Where V is resting voltage, E is membrane potential, and g is conductance
+
+m is the same, but for Na 
+h represents INACTIVATION of Na channels, so h and m compete
+
+The formulas are taken from page 37 of the Electrophysiology textbook
+*/
+
 double dynamical_h(double V){
+    //for some reason I decided to add in double h, so that we can store this value local to the method
+    //and, h_dynamic can be shared to main. I forget why I did this lol, I probably had something in mind
     double h;
     a_h = 0.07*exp(-V/20);
     b_h = ((1)/(exp((30-V)/10) - 1));
@@ -26,12 +39,14 @@ double dynamical_h(double V){
     tau_h = 1/(a_h + b_h);
     h_dynamic = (h_inf - h)/tau_h;
     h = h_dynamic;
+    //the if statements are added to expunge NaN from the data
     if (tau_h != tau_h){
         tau_h = 0; 
     }
     if (h != h){
         h = 0; 
     }
+    //storing the values in vectors so that they can be easily written to a csv file
     vec_h.push_back(h);
     vec_tau_h.push_back(tau_h);
     //cout << "h: " << h << endl;
@@ -80,10 +95,14 @@ double dynamical_m(double V){
 
 double Proportion_open(int a, int b, int c){
     double V_temp = 0;
+    //This scales between membrane voltages of -40 to 100, which is near the typical operating range of neurons
     for(int i = -40; i <= 100; i++){
         double V_temp = i;
-        cout << V_temp << endl;
+        //cout << V_temp << endl;
         double m_temp, h_temp, n_temp = 1;
+        //inputs a, b, and c are dependent on the type of channel
+        //Sodium channels will only utilize a and b
+        //Potassium channels will only use c
         if(a != 0){
             m_temp = dynamical_m(V_temp);
         }
@@ -110,8 +129,8 @@ double Proportion_open(int a, int b, int c){
 
 int output_file(int x){
     ofstream myfile;
-    Proportion_open(3,1,0); //Na 
-    Proportion_open(0,0,4); //K
+    Proportion_open(3,1,0); //This will call the proportion method to calculate for SODIUM!!
+    Proportion_open(0,0,4); //Same but for POTASSIUM!!!
     myfile.open("TestingDynamicVars.csv");
     myfile << "\n N, ";
     for(int i = 0; i < vec_n.size(); i++){
@@ -150,6 +169,12 @@ int output_file(int x){
 }
 
 int main(void) {
+/*
+Program workflow is main -calls-> ouput_file -calls-> Porportion_open for Sodium and Potassium individually
+Proportion_open -calls-> the dynamical variables, which stores the values in vectors, and also calculates
+the actual proportion open. 
+Output_file then writes then info to TestingDynamicVars.csv
+*/
   cout << "Ran" << endl;
   output_file(0);
 }

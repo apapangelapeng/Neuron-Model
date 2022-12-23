@@ -1,3 +1,5 @@
 *.o
 cpp_code/Try2
 .DS_Store
+cpp_code/NeuronModel
+*.exe

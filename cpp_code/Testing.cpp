@@ -109,10 +109,12 @@ double Proportion_open(int a, int b, int c){
 }
 
 int output_file(int x){
-    ofstream myfile;
+    const char *path="../data_files/test_output.csv";
+    ofstream myfile(path);
+    myfile.open(path);
+    cout<<path;
     Proportion_open(3,1,0); //Na 
     Proportion_open(0,0,4); //K
-    myfile.open("TestingDynamicVars.csv");
     myfile << "\n N, ";
     for(int i = 0; i < vec_n.size(); i++){
        myfile << vec_n[i] << ","; 

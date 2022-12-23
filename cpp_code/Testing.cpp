@@ -129,7 +129,8 @@ double Proportion_open(int a, int b, int c){
 
 int output_file(int x){
     const char *path="../data_files/test_output.csv";
-    ofstream myfile(path);
+     ofstream create_file(path);
+    ofstream myfile;
     myfile.open(path);
     cout << path;
 

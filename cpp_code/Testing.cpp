@@ -8,7 +8,7 @@
 using namespace std;
 
 /*
-THIS FILE IS JUST FOR ME TO TEST THINGIES
+THIS FILE IS JUST FOR ME TO TEST THINGS
 */
 
 double a_n, b_n, a_h, b_h, a_m, b_m;
@@ -53,7 +53,7 @@ double dynamical_h(double V){
     vec_tau_h.push_back(tau_h);
     vec_inf_h.push_back(h_inf);
     //cout << "h: " << h << endl;
-    return(h_inf);
+    return(h_dynamic);
 }
 
 double dynamical_n(double V){
@@ -74,7 +74,7 @@ double dynamical_n(double V){
     vec_tau_n.push_back(tau_n);
     vec_inf_n.push_back(n_inf);
     //cout << "n: " << n << endl;
-    return (n_inf);
+    return (n_dynamic);
 }
 
 double dynamical_m(double V){
@@ -95,7 +95,7 @@ double dynamical_m(double V){
     vec_tau_m.push_back(tau_m);
     vec_inf_m.push_back(m_inf);
     //cout << "m: " << m << endl;
-    return (m_inf);
+    return (m_dynamic);
 }
 
 double Proportion_open(int a, int b, int c){

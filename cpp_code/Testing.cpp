@@ -13,9 +13,11 @@ THIS FILE IS JUST FOR ME TO TEST THINGIES
 
 double a_n, b_n, a_h, b_h, a_m, b_m;
 double n_dynamic, m_dynamic, h_dynamic, n_inf, m_inf, h_inf;
-vector<double> vec_n, vec_m, vec_h, vec_Nap, vec_Kp;
-double tau_n, tau_m, tau_h;
+vector<double> vec_n, vec_m, vec_h;
+vector<double> vec_inf_n, vec_inf_m, vec_inf_h;
+vector<double> vec_Nap, vec_Kp;
 vector<double> vec_tau_n, vec_tau_m, vec_tau_h;
+double tau_n, tau_m, tau_h;
 
 /*
 n is a kinetic equation built to track ONE kind of POTASSIUM channel's opening
@@ -34,7 +36,7 @@ double dynamical_h(double V){
     //and, h_dynamic can be shared to main. I forget why I did this lol, I probably had something in mind
     double h;
     a_h = 0.07*exp(-V/20);
-    b_h = ((1)/(exp((30-V)/10) - 1));
+    b_h = ((1)/(exp((30-V)/10) + 1));
     h_inf = a_h/(a_h + b_h);
     tau_h = 1/(a_h + b_h);
     h_dynamic = (h_inf - h)/tau_h;
@@ -49,8 +51,9 @@ double dynamical_h(double V){
     //storing the values in vectors so that they can be easily written to a csv file
     vec_h.push_back(h);
     vec_tau_h.push_back(tau_h);
+    vec_inf_h.push_back(h_inf);
     //cout << "h: " << h << endl;
-    return(h_dynamic);
+    return(h_inf);
 }
 
 double dynamical_n(double V){
@@ -69,8 +72,9 @@ double dynamical_n(double V){
     }
     vec_n.push_back(n);
     vec_tau_n.push_back(tau_n);
+    vec_inf_n.push_back(n_inf);
     //cout << "n: " << n << endl;
-    return (n_dynamic);
+    return (n_inf);
 }
 
 double dynamical_m(double V){
@@ -89,8 +93,9 @@ double dynamical_m(double V){
     }
     vec_m.push_back(m);
     vec_tau_m.push_back(tau_m);
+    vec_inf_m.push_back(m_inf);
     //cout << "m: " << m << endl;
-    return (m_dynamic);
+    return (m_inf);
 }
 
 double Proportion_open(int a, int b, int c){
@@ -159,6 +164,18 @@ int output_file(int x){
     myfile << "\n Tau_H, ";
     for(int i = 0; i < vec_tau_h.size(); i++){
         myfile << vec_tau_h[i] << ","; 
+    }
+    myfile << "\n Inf_n, ";
+    for(int i = 0; i < vec_inf_n.size(); i++){
+       myfile << vec_inf_n[i] << ","; 
+    }
+    myfile << "\n Inf_M, ";
+    for(int i = 0; i < vec_inf_m.size(); i++){
+       myfile << vec_inf_m[i] << ","; 
+    }
+    myfile << "\n Inf_H, ";
+    for(int i = 0; i < vec_inf_h.size(); i++){
+        myfile << vec_inf_h[i] << ","; 
     }
     myfile << "\n Nap, ";
     for(int i = 0; i < vec_Nap.size(); i++){

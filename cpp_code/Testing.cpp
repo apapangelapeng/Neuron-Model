@@ -11,6 +11,9 @@ using namespace std;
 THIS FILE IS JUST FOR ME TO TEST THINGS
 */
 
+const char *path1="../data_files/test_output.csv";
+const char *path2="../data_files/testV_output.csv";
+
 double a_n, b_n, a_h, b_h, a_m, b_m;
 double n_dynamic, m_dynamic, h_dynamic, n_inf, m_inf, h_inf;
 vector<double> vec_n, vec_m, vec_h;
@@ -18,6 +21,18 @@ vector<double> vec_inf_n, vec_inf_m, vec_inf_h;
 vector<double> vec_Nap, vec_Kp;
 vector<double> vec_tau_n, vec_tau_m, vec_tau_h;
 double tau_n, tau_m, tau_h;
+
+double V_dt; 
+vector<double> vec_V;
+
+double C_m = 1; 
+double g_k = 36; 
+double g_Na = 120;
+double g_l = 0.3; 
+double E_k = -12; 
+double E_Na = 120; 
+double E_l = 10.6; 
+
 
 /*
 n is a kinetic equation built to track ONE kind of POTASSIUM channel's opening
@@ -79,7 +94,7 @@ double dynamical_n(double V){
 
 double dynamical_m(double V){
     double m;
-    a_m = 0.01*((25 - V)/(exp((25-V)/10) - 1));
+    a_m = 0.1*((25 - V)/(exp((25-V)/10) - 1));
     b_m = 4*exp(-V/18);
     m_inf = a_m/(a_m + b_m);
     tau_m = 1/(a_m + b_m);
@@ -98,8 +113,7 @@ double dynamical_m(double V){
     return (m_dynamic);
 }
 
-double Proportion_open(int a, int b, int c){
-    double V_temp = 0;
+double Proportion_open(int a, int b, int c, double V_temp){
     //This scales between membrane voltages of -40 to 100, which is near the typical operating range of neurons
     for(int i = -40; i <= 100; i++){
         double V_temp = i;
@@ -133,14 +147,12 @@ double Proportion_open(int a, int b, int c){
 }
 
 int output_file(int x){
-    const char *path="../data_files/test_output.csv";
-     ofstream create_file(path);
+    ofstream create_file(path1);
     ofstream myfile;
-    myfile.open(path);
-    cout << path;
-
-    Proportion_open(3,1,0); //This will call the proportion method to calculate for SODIUM!!
-    Proportion_open(0,0,4); //Same but for POTASSIUM!!!
+    myfile.open(path1);
+    //cout << path;
+    Proportion_open(3,1,0,0); //This will call the proportion method to calculate for SODIUM!!
+    Proportion_open(0,0,4,0); //Same but for POTASSIUM!!!
     myfile << "\n N, ";
     for(int i = 0; i < vec_n.size(); i++){
        myfile << vec_n[i] << ","; 
@@ -189,6 +201,35 @@ int output_file(int x){
     return(0);
 }
 
+double Static_AP(double current, double V){
+    double V_temp;
+    V_dt = (current - (g_k*Proportion_open(0,0,4,V)*(V - E_k)) - (g_Na*Proportion_open(3,1,0,V)*(V - E_Na)) - (g_l*(V - E_l)))/C_m;
+    V_temp += V_dt; 
+    //cout << V_dt << endl;
+    vec_V.push_back(V_temp);
+    return(V_temp);
+}
+
+double Run_time(double x){
+    ofstream create_file(path2);
+    ofstream myfile;
+    myfile.open(path2);
+    double V_temp = 0;
+    double V_temp2;
+    for(int i = 0; i <= 50; i ++){
+        V_temp2 = Static_AP(5,V_temp);
+        V_temp += V_temp2;
+        //cout << V_temp << endl;
+    }
+    myfile << "\n VOLTAGES, ";
+    for(int i = 0; i < vec_V.size(); i++){
+        myfile << vec_V[i] << ","; 
+        //cout << vec_V[i] << endl;
+    }
+    myfile.close();
+    return(x);
+}
+
 int main(void) {
 /*
 Program workflow is main -calls-> ouput_file -calls-> Porportion_open for Sodium and Potassium individually
@@ -198,4 +239,5 @@ Output_file then writes then info to TestingDynamicVars.csv
 */
   cout << "Ran" << endl;
   output_file(0);
+  Run_time(0);
 }

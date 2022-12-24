@@ -89,6 +89,7 @@ double dynamical_n(double V){
     vec_tau_n.push_back(tau_n);
     vec_inf_n.push_back(n_inf);
     //cout << "n: " << n << endl;
+    //cout << V << endl;
     return (n_dynamic);
 }
 
@@ -113,7 +114,7 @@ double dynamical_m(double V){
     return (m_dynamic);
 }
 
-double Proportion_open(int a, int b, int c, double V_temp){
+double Proportion_open_test(int a, int b, int c, double V_temp){
     //This scales between membrane voltages of -40 to 100, which is near the typical operating range of neurons
     for(int i = -40; i <= 100; i++){
         double V_temp = i;
@@ -146,13 +147,29 @@ double Proportion_open(int a, int b, int c, double V_temp){
   return (0);
 }
 
+double Proportion_open(int a, int b, int c, double V_temp){
+        double m_temp, h_temp, n_temp = 1;
+        if(a != 0){
+            m_temp = dynamical_m(V_temp);
+        }
+        if(b != 0){
+            h_temp = dynamical_h(V_temp);
+        }
+        if(c != 0){
+            n_temp = dynamical_n(V_temp);
+        }
+        double temp_P = pow(m_temp,a)*pow(h_temp,b)*pow(n_temp,c);
+        //cout << temp_P << endl;
+  return (0);
+}
+
 int output_file(int x){
     ofstream create_file(path1);
     ofstream myfile;
     myfile.open(path1);
     //cout << path;
-    Proportion_open(3,1,0,0); //This will call the proportion method to calculate for SODIUM!!
-    Proportion_open(0,0,4,0); //Same but for POTASSIUM!!!
+    Proportion_open_test(3,1,0,0); //This will call the proportion method to calculate for SODIUM!!
+    Proportion_open_test(0,0,4,0); //Same but for POTASSIUM!!!
     myfile << "\n N, ";
     for(int i = 0; i < vec_n.size(); i++){
        myfile << vec_n[i] << ","; 
@@ -203,24 +220,22 @@ int output_file(int x){
 
 double Static_AP(double current, double V){
     double V_temp;
-    V_dt = (current - (g_k*Proportion_open(0,0,4,V)*(V - E_k)) - (g_Na*Proportion_open(3,1,0,V)*(V - E_Na)) - (g_l*(V - E_l)))/C_m;
-    V_temp += V_dt; 
-    //cout << V_dt << endl;
-    vec_V.push_back(V_temp);
-    return(V_temp);
+    double V_in = V + 65;
+    for(double i = 0; i <= 15; i += 0.1){
+        V_temp = (0.1*(current - (g_k*Proportion_open(0,0,4,V_in)*(V_in - E_k)) - (g_Na*Proportion_open(3,1,0,V_in)*(V_in - E_Na)) - (g_l*(V_in - E_l))))/C_m;
+        V = V + V_temp;
+        vec_V.push_back(V);
+        cout << V << endl;
+        //cout << V_temp << endl;
+    }
+    return(0);
 }
 
 double Run_time(double x){
     ofstream create_file(path2);
     ofstream myfile;
     myfile.open(path2);
-    double V_temp = 0;
-    double V_temp2;
-    for(int i = 0; i <= 50; i ++){
-        V_temp2 = Static_AP(5,V_temp);
-        V_temp += V_temp2;
-        //cout << V_temp << endl;
-    }
+    Static_AP(5, -70);
     myfile << "\n VOLTAGES, ";
     for(int i = 0; i < vec_V.size(); i++){
         myfile << vec_V[i] << ","; 

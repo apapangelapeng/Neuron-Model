@@ -162,7 +162,7 @@ double Proportion_open(int a, int b, int c, double V_temp){
         }
         double temp_P = pow(m_temp,a)*pow(h_temp,b)*pow(n_temp,c);
         //cout << temp_P << endl;
-  return (0);
+  return (temp_P);
 }
 
 int output_file(int x){
@@ -242,20 +242,28 @@ int output_file(int x){
 }
 
 double Static_AP(int x){
-    double V = -65;
+    double V = 0;
     double current;
     double V_temp;
-    for(double i = 0; i <= 10; i += 0.1){
-        if(i <= 4 && i >= 2){
-            current = 20;
+    double Na_I_temp, K_I_temp, L_I_temp;
+    for(double i = 0; i <= 8; i += 2){
+        if(i <= 3 && i >= 2){
+            current = 0;
         }
         else{
             current = 0;
         }
-        V_dt = ((current - (g_k*Proportion_open(0,0,4,V)*((V+65) - E_k)) - (g_Na*Proportion_open(3,1,0,V)*((V+65) - E_Na)) - (g_l*((V+65) - E_l))));
-        V = V + V_dt;
-        vec_V.push_back(V);
+        K_I_temp = (g_k*Proportion_open(0,0,4,V)*((V) - E_k));
+        Na_I_temp = (g_Na*Proportion_open(3,1,0,V)*((V) - E_Na));
+        L_I_temp = (g_l*((V) - E_l));
         cout << V << endl;
+        V_dt = 0.1*(current - K_I_temp - Na_I_temp - L_I_temp);
+        V = V + V_dt;
+        vec_V.push_back(V-65);
+        vec_Na_I.push_back(Na_I_temp);
+        vec_K_I.push_back(K_I_temp);
+        vec_L_I.push_back(L_I_temp);
+        //cout << V << endl;
         //cout << V_temp << endl;
     }
     return(0);
@@ -266,9 +274,24 @@ double Run_time(double x){
     ofstream myfile;
     myfile.open(path2);
     Static_AP(0);
-    myfile << "VOLTAGES\n ";
+    myfile << "\n V,";
     for(int i = 0; i < vec_V.size(); i++){
-        myfile << vec_V[i] << "\n"; 
+        myfile << vec_V[i] << ","; 
+        //cout << vec_V[i] << endl;
+    }
+    myfile << "\n K_I, ";
+    for(int i = 0; i < vec_K_I.size(); i++){
+        myfile << vec_K_I[i] << ","; 
+        //cout << vec_K_I[i] << endl;
+    }
+    myfile << "\n Na_I,";
+    for(int i = 0; i < vec_Na_I.size(); i++){
+        myfile << vec_Na_I[i] << ","; 
+        //cout << vec_V[i] << endl;
+    }
+    myfile << "\n L_I,";
+    for(int i = 0; i < vec_L_I.size(); i++){
+        myfile << vec_L_I[i] << ","; 
         //cout << vec_V[i] << endl;
     }
     myfile.close();

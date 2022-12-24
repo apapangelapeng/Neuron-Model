@@ -23,12 +23,14 @@ vector<double> vec_tau_n, vec_tau_m, vec_tau_h;
 double tau_n, tau_m, tau_h;
 
 double V_dt; 
-vector<double> vec_V;
+vector<double> vec_V, vec_Na_I, vec_K_I, vec_L_I; 
 
 double C_m = 1; 
+
 double g_k = 36; 
 double g_Na = 120;
 double g_l = 0.3; 
+
 double E_k = -12; 
 double E_Na = 120; 
 double E_l = 10.6; 
@@ -73,7 +75,7 @@ double dynamical_h(double V){
 
 double dynamical_n(double V){
     double n;
-    a_n = 0.01*((10 - V)/(exp((10-V)/10) - 1));
+    a_n = 0.01*((10-V)/(exp((10-V)/10) - 1));
     b_n = 0.125*exp(-V/80);
     n_inf = a_n/(a_n + b_n);
     tau_n = 1/(a_n + b_n);
@@ -171,59 +173,87 @@ int output_file(int x){
     Proportion_open_test(3,1,0,0); //This will call the proportion method to calculate for SODIUM!!
     Proportion_open_test(0,0,4,0); //Same but for POTASSIUM!!!
     myfile << "\n N, ";
-    for(int i = 0; i < vec_n.size(); i++){
+    for(int i = 0; i <= vec_n.size(); i++){
        myfile << vec_n[i] << ","; 
     }
     myfile << "\n M, ";
-    for(int i = 0; i < vec_m.size(); i++){
+    for(int i = 0; i <= vec_m.size(); i++){
        myfile << vec_m[i] << ","; 
     }
     myfile << "\n H, ";
-    for(int i = 0; i < vec_h.size(); i++){
+    for(int i = 0; i <= vec_h.size(); i++){
         myfile << vec_h[i] << ","; 
     }
     myfile << "\n Tau_n, ";
-    for(int i = 0; i < vec_tau_n.size(); i++){
+    for(int i = 0; i <= vec_tau_n.size(); i++){
        myfile << vec_tau_n[i] << ","; 
     }
     myfile << "\n Tau_M, ";
-    for(int i = 0; i < vec_tau_m.size(); i++){
+    for(int i = 0; i <= vec_tau_m.size(); i++){
        myfile << vec_tau_m[i] << ","; 
     }
     myfile << "\n Tau_H, ";
-    for(int i = 0; i < vec_tau_h.size(); i++){
+    for(int i = 0; i <= vec_tau_h.size(); i++){
         myfile << vec_tau_h[i] << ","; 
     }
     myfile << "\n Inf_n, ";
-    for(int i = 0; i < vec_inf_n.size(); i++){
+    for(int i = 0; i <= vec_inf_n.size(); i++){
        myfile << vec_inf_n[i] << ","; 
     }
     myfile << "\n Inf_M, ";
-    for(int i = 0; i < vec_inf_m.size(); i++){
+    for(int i = 0; i <= vec_inf_m.size(); i++){
        myfile << vec_inf_m[i] << ","; 
     }
     myfile << "\n Inf_H, ";
-    for(int i = 0; i < vec_inf_h.size(); i++){
+    for(int i = 0; i <= vec_inf_h.size(); i++){
         myfile << vec_inf_h[i] << ","; 
     }
     myfile << "\n Nap, ";
-    for(int i = 0; i < vec_Nap.size(); i++){
+    for(int i = 0; i <= vec_Nap.size(); i++){
         myfile << vec_Nap[i] << ","; 
     }
     myfile << "\n Kp, ";
-    for(int i = 0; i < vec_Kp.size(); i++){
+    for(int i = 0; i <= vec_Kp.size(); i++){
         myfile << vec_Kp[i] << ","; 
         //cout << vec_Kp[i] << endl;
+    }
+    myfile << "\n Na_I, ";
+    for(int i = 0; i <= vec_Nap.size(); i++){
+        double Na_I_temp = vec_Nap[i]*g_Na*(i - E_Na);
+        vec_Na_I.push_back(Na_I_temp);
+        myfile << Na_I_temp << ","; 
+        cout << Na_I_temp << endl;
+    }
+    myfile << "\n K_I, ";
+    for(int i = 0; i <= vec_Kp.size(); i++){
+        double K_I_temp = vec_Kp[i]*g_k*(i - E_k);
+        vec_K_I.push_back(K_I_temp);
+        myfile << K_I_temp << ","; 
+        cout << vec_K_I[i] << endl;
+    }
+    myfile << "\n L_I, ";
+    for(int i = 0; i < 140; i++){
+        double L_I_temp = (g_l*(i - E_l));
+        vec_L_I.push_back(L_I_temp);
+        myfile << L_I_temp << ","; 
+        cout << vec_L_I[i] << endl;
     }
     return(0);
 }
 
-double Static_AP(double current, double V){
+double Static_AP(int x){
+    double V = -65;
+    double current;
     double V_temp;
-    double V_in = V + 65;
-    for(double i = 0; i <= 15; i += 0.1){
-        V_temp = (0.1*(current - (g_k*Proportion_open(0,0,4,V_in)*(V_in - E_k)) - (g_Na*Proportion_open(3,1,0,V_in)*(V_in - E_Na)) - (g_l*(V_in - E_l))))/C_m;
-        V = V + V_temp;
+    for(double i = 0; i <= 10; i += 0.01){
+        if(i <= 0.3 && i >= 0.2){
+            current = 1000;
+        }
+        else{
+            current = 0;
+        }
+        V_dt = 0.01*((current - (g_k*Proportion_open(0,0,4,V)*((V+65) - E_k)) - (g_Na*Proportion_open(3,1,0,V)*((V+65) - E_Na)) - (g_l*((V+65) - E_l))));
+        V = V + V_dt;
         vec_V.push_back(V);
         cout << V << endl;
         //cout << V_temp << endl;
@@ -235,7 +265,7 @@ double Run_time(double x){
     ofstream create_file(path2);
     ofstream myfile;
     myfile.open(path2);
-    Static_AP(5, -70);
+    Static_AP(0);
     myfile << "\n VOLTAGES, ";
     for(int i = 0; i < vec_V.size(); i++){
         myfile << vec_V[i] << ","; 
@@ -253,6 +283,6 @@ the actual proportion open.
 Output_file then writes then info to TestingDynamicVars.csv
 */
   cout << "Ran" << endl;
-  output_file(0);
-  //Run_time(0);
+  //output_file(0);
+  Run_time(0);
 }

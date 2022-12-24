@@ -265,10 +265,21 @@ double Run_time(double x){
     ofstream create_file(path2);
     ofstream myfile;
     myfile.open(path2);
+<<<<<<< Updated upstream
     Static_AP(0);
     myfile << "\n VOLTAGES, ";
+=======
+    double V_temp = 0;
+    double V_temp2;
+    for(int i = 0; i <= 50; i ++){
+        V_temp2 = Static_AP(5,V_temp);
+        V_temp += V_temp2;
+        //cout << V_temp << endl;
+    }
+    myfile << "VOLTAGES \n ";
+>>>>>>> Stashed changes
     for(int i = 0; i < vec_V.size(); i++){
-        myfile << vec_V[i] << ","; 
+        myfile << vec_V[i] << "\n"; 
         //cout << vec_V[i] << endl;
     }
     myfile.close();

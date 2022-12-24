@@ -1,13 +1,28 @@
-.PHONY : all
-all : neuronmodel
+# Makefile for Writing Make Files Example
+ 
+# *****************************************************
+# Variables to control Makefile operation
+ 
+CC = g++
+CFLAGS = -Wall -g
+ 
+# ****************************************************
+# Targets needed to bring the executable up to date
+#makes the neuron model dependencies
+neuronmodel: neuronmodel.o
+	$(CC) $(CFLAGS) -o neuronmodel neuronmodel.o
 
-neuronmodel:
-	g++ -o neuronmodel NeuronModel.cpp
+test: test.o
+	$(CC) $(CFLAGS) -o test test.o
 
-test:
-	g++ -o test Testing.cpp
 
-# "make clean" removes all generated files
+# The main.o target can be written more simply
+ 
+neuronmodel.o: NeuronModel.cpp 
+	$(CC) $(CFLAGS) NeuronModel.cpp -c -o neuronmodel.o
+
+test.o: Testing.cpp 
+	$(CC) $(CFLAGS) Testing.cpp -c -o test.o
 
 .PHONY : clean
 clean :

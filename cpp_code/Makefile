@@ -28,3 +28,7 @@ test.o: Testing.cpp
 clean :
 	rm -rf neuronmodel test
 	rm -rf *.ll *.exe *.s *.o testall.log
+	
+.PHONY : clean_img
+clean_img:
+	rm -rf ../graphs/*.png

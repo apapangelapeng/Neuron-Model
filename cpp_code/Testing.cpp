@@ -266,7 +266,7 @@ double Run_time(double x){
     ofstream myfile;
     myfile.open(path2);
     Static_AP(0);
-    myfile << "\n VOLTAGES, ";
+    myfile << "VOLTAGES\n ";
     for(int i = 0; i < vec_V.size(); i++){
         myfile << vec_V[i] << "\n"; 
         //cout << vec_V[i] << endl;

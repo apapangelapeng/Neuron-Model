@@ -6,3 +6,6 @@ cpp_code/NeuronModel
 cpp_code/test
 cpp_code/test
 cpp_code/test
+cpp_code/test
+
+*.png

@@ -245,14 +245,14 @@ double Static_AP(int x){
     double V = -65;
     double current;
     double V_temp;
-    for(double i = 0; i <= 10; i += 0.01){
-        if(i <= 0.3 && i >= 0.2){
-            current = 1000;
+    for(double i = 0; i <= 10; i += 0.1){
+        if(i <= 4 && i >= 2){
+            current = 20;
         }
         else{
             current = 0;
         }
-        V_dt = 0.01*((current - (g_k*Proportion_open(0,0,4,V)*((V+65) - E_k)) - (g_Na*Proportion_open(3,1,0,V)*((V+65) - E_Na)) - (g_l*((V+65) - E_l))));
+        V_dt = ((current - (g_k*Proportion_open(0,0,4,V)*((V+65) - E_k)) - (g_Na*Proportion_open(3,1,0,V)*((V+65) - E_Na)) - (g_l*((V+65) - E_l))));
         V = V + V_dt;
         vec_V.push_back(V);
         cout << V << endl;

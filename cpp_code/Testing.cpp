@@ -116,7 +116,7 @@ double dynamical_m(double V){
 
 double Proportion_open_test(int a, int b, int c, double V_temp){
     //This scales between membrane voltages of -40 to 100, which is near the typical operating range of neurons
-    for(int i = -40; i <= 100; i++){
+    for(double i = -40; i <= 100; i++){
         double V_temp = i;
         //cout << V_temp << endl;
         double m_temp, h_temp, n_temp = 1;
@@ -254,5 +254,5 @@ Output_file then writes then info to TestingDynamicVars.csv
 */
   cout << "Ran" << endl;
   output_file(0);
-  Run_time(0);
+  //Run_time(0);
 }

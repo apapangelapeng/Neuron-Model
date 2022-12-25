@@ -78,6 +78,9 @@ double dynamical_h(double V){
 
 double dynamical_n(double V){
     a_n = 0.01*((10-V)/(exp((10-V)/10) - 1));
+    if(V == 10){
+        a_n = 0.1; // This is the Taylor approx value for when divide by 0
+    }
     b_n = 0.125*exp(-V/80);
     n_inf = a_n/(a_n + b_n);
     tau_n = 1/(a_n + b_n);
@@ -90,6 +93,9 @@ double dynamical_n(double V){
 
 double dynamical_m(double V){
     a_m = 0.1*((25 - V)/(exp((25-V)/10) - 1));
+    if (V == 25){
+        a_m = 1; // This is the Taylor approx value for when divide by 0
+    }
     b_m = 4*exp(-V/18);
     m_inf = a_m/(a_m + b_m);
     tau_m = 1/(a_m + b_m);
@@ -212,7 +218,6 @@ double Run_time(double x){
     myfile.open(path2);
 
     reset_vecs(0);
-
     Static_AP(0);
 
     myfile << "V,";
@@ -246,7 +251,8 @@ Proportion_open -calls-> the dynamical variables, which stores the values in vec
 the actual proportion open. 
 Output_file then writes then info to TestingDynamicVars.csv
 */
-  cout << "Ran" << endl;
+  cout << "Begin" << endl;
   output_file(0);
   Run_time(0);
+  cout << "End" << endl;
 }

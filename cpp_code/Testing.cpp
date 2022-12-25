@@ -35,6 +35,7 @@ double E_k = -12;
 double E_Na = 120; 
 double E_l = 10.6; 
 
+double delta_t = 0.1;
 
 /*
 n is a kinetic equation built to track ONE kind of POTASSIUM channel's opening
@@ -57,7 +58,6 @@ double dynamical_h(double V){
     h_inf = a_h/(a_h + b_h);
     tau_h = 1/(a_h + b_h);
     h_dynamic = (h_inf - h)/tau_h;
-    h = h_dynamic;
     //the if statements are added to expunge NaN from the data
     if (tau_h != tau_h){
         tau_h = 0; 
@@ -66,11 +66,12 @@ double dynamical_h(double V){
         h = 0; 
     }
     //storing the values in vectors so that they can be easily written to a csv file
+    h = h + delta_t*h_dynamic;
     vec_h.push_back(h);
     vec_tau_h.push_back(tau_h);
     vec_inf_h.push_back(h_inf);
     //cout << "h: " << h << endl;
-    return(h_dynamic);
+    return(h);
 }
 
 double dynamical_n(double V){
@@ -80,29 +81,28 @@ double dynamical_n(double V){
     n_inf = a_n/(a_n + b_n);
     tau_n = 1/(a_n + b_n);
     n_dynamic = (n_inf - n)/tau_n;
-    n = n_dynamic;
     if (tau_n != tau_n){
         tau_n = 0; 
     }
     if (n != n){
         n = 0; 
     }
+    n = n + delta_t*n_dynamic;
     vec_n.push_back(n);
     vec_tau_n.push_back(tau_n);
     vec_inf_n.push_back(n_inf);
     //cout << "n: " << n << endl;
     //cout << V << endl;
-    return (n_dynamic);
+    return (n);
 }
 
 double dynamical_m(double V){
-    double m;
+    double m, m_temp, m_new;
     a_m = 0.1*((25 - V)/(exp((25-V)/10) - 1));
     b_m = 4*exp(-V/18);
     m_inf = a_m/(a_m + b_m);
     tau_m = 1/(a_m + b_m);
     m_dynamic = (m_inf - m)/tau_m;
-    m = m_dynamic;
     if (tau_m != tau_m){
         tau_m = 0; 
     }
@@ -112,8 +112,9 @@ double dynamical_m(double V){
     vec_m.push_back(m);
     vec_tau_m.push_back(tau_m);
     vec_inf_m.push_back(m_inf);
-    //cout << "m: " << m << endl;
-    return (m_dynamic);
+    cout << "m: " << m << endl;
+    cout << "m_dynamic: " << m_dynamic << endl;
+    return (m);
 }
 
 double Proportion_open_test(int a, int b, int c, double V_temp){
@@ -246,7 +247,7 @@ double Static_AP(int x){
     double current;
     double V_temp;
     double Na_I_temp, K_I_temp, L_I_temp;
-    for(double i = 0; i <= 8; i += 2){
+    for(double i = 0; i <= 8; i += 0.01){
         if(i <= 3 && i >= 2){
             current = 0;
         }
@@ -256,8 +257,8 @@ double Static_AP(int x){
         K_I_temp = (g_k*Proportion_open(0,0,4,V)*((V) - E_k));
         Na_I_temp = (g_Na*Proportion_open(3,1,0,V)*((V) - E_Na));
         L_I_temp = (g_l*((V) - E_l));
-        cout << V << endl;
-        V_dt = 0.1*(current - K_I_temp - Na_I_temp - L_I_temp);
+        //cout << V << endl;
+        V_dt = delta_t*(current - K_I_temp - Na_I_temp - L_I_temp)/C_m;
         V = V + V_dt;
         vec_V.push_back(V-65);
         vec_Na_I.push_back(Na_I_temp);

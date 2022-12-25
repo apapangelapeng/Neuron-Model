@@ -170,9 +170,9 @@ double Static_AP(int arbitrary_variable){
     vec_m.push_back(0);
     vec_h.push_back(0);
 
-    for(double i = 0; i <= 10; i += 0.1){
+    for(double i = 0; i <= 10; i += delta_t){
         if(i <= 4 && i >= 2){
-            current = 0;
+            current = 20;
         }
         else{
             current = 0;
@@ -198,8 +198,8 @@ double Static_AP(int arbitrary_variable){
 
         //cout << V << endl;
 
-        V_dt = delta_t*(current - K_I_temp - Na_I_temp - L_I_temp)/C_m;
-        vec_V.push_back(vec_V[x] + V_dt);
+        V_dt = (current - K_I_temp - Na_I_temp - L_I_temp)/C_m;
+        vec_V.push_back(vec_V[x] + delta_t*V_dt);
 
         vec_Na_I.push_back(Na_I_temp);
         vec_K_I.push_back(K_I_temp);

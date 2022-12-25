@@ -48,6 +48,19 @@ h represents INACTIVATION of Na channels, so h and m compete
 
 The formulas are taken from page 37 of the Electrophysiology textbook
 */
+int reset_vecs(int x){
+    vec_V.clear();
+    vec_n.clear();
+    vec_m.clear();
+    vec_h.clear();
+    vec_tau_m.clear();
+    vec_inf_m.clear();
+    vec_tau_h.clear();
+    vec_inf_h.clear();
+    vec_tau_n.clear();
+    vec_inf_n.clear();
+    return(0);
+}
 
 double dynamical_h(double V){
     //for some reason I decided to add in double h, so that we can store this value local to the method
@@ -93,75 +106,32 @@ double dynamical_m(double V){
     return (0);
 }
 
-double Proportion_open_test(int a, int b, int c, double V_temp){
+double Proportion_open_test(int x){
+    reset_vecs(0);
     //This scales between membrane voltages of -40 to 100, which is near the typical operating range of neurons
     for(double i = -40; i <= 100; i++){
         double V_temp = i;
         //cout << V_temp << endl;
-        double m_temp, h_temp, n_temp = 1;
+        double m_temp, h_temp, n_temp;
+        cout << V_temp << endl;
         //inputs a, b, and c are dependent on the type of channel
         //Sodium channels will only utilize a and b
         //Potassium channels will only use c
-        if(a != 0){
             m_temp = dynamical_m(V_temp);
-        }
-        if(b != 0){
             h_temp = dynamical_h(V_temp);
-        }
-        if(c != 0){
             n_temp = dynamical_n(V_temp);
         }
-        double temp_P = pow(m_temp,a)*pow(h_temp,b)*pow(n_temp,c);
-        //cout << temp_P << endl;
-        if (temp_P != temp_P){
-            temp_P = 0; 
-        }
-        if(a != 0){
-            vec_Nap.push_back(temp_P);
-        }
-        if(c != 0){
-            vec_Kp.push_back(temp_P);
-        }
-    }
   return (0);
-}
-
-double Proportion_open(int a, int b, int c, double V_temp){
-        double m_temp, h_temp, n_temp = 1;
-        if(a != 0){
-            m_temp = dynamical_m(V_temp);
-        }
-        if(b != 0){
-            h_temp = dynamical_h(V_temp);
-        }
-        if(c != 0){
-            n_temp = dynamical_n(V_temp);
-        }
-        double temp_P = pow(m_temp,a)*pow(h_temp,b)*pow(n_temp,c);
-        //cout << temp_P << endl;
-  return (temp_P);
 }
 
 int output_file(int x){
     ofstream create_file(path1);
     ofstream myfile;
     myfile.open(path1);
-    //cout << path;
-    Proportion_open_test(3,1,0,0); //This will call the proportion method to calculate for SODIUM!!
-    Proportion_open_test(0,0,4,0); //Same but for POTASSIUM!!!
-    myfile << "\n N, ";
-    for(int i = 0; i <= vec_n.size(); i++){
-       myfile << vec_n[i] << ","; 
-    }
-    myfile << "\n M, ";
-    for(int i = 0; i <= vec_m.size(); i++){
-       myfile << vec_m[i] << ","; 
-    }
-    myfile << "\n H, ";
-    for(int i = 0; i <= vec_h.size(); i++){
-        myfile << vec_h[i] << ","; 
-    }
-    myfile << "\n Tau_n, ";
+
+    Proportion_open_test(0);
+
+    myfile << "Tau_n, ";
     for(int i = 0; i <= vec_tau_n.size(); i++){
        myfile << vec_tau_n[i] << ","; 
     }
@@ -185,40 +155,12 @@ int output_file(int x){
     for(int i = 0; i <= vec_inf_h.size(); i++){
         myfile << vec_inf_h[i] << ","; 
     }
-    myfile << "\n Nap, ";
-    for(int i = 0; i <= vec_Nap.size(); i++){
-        myfile << vec_Nap[i] << ","; 
-    }
-    myfile << "\n Kp, ";
-    for(int i = 0; i <= vec_Kp.size(); i++){
-        myfile << vec_Kp[i] << ","; 
-        //cout << vec_Kp[i] << endl;
-    }
-    myfile << "\n Na_I, ";
-    for(int i = 0; i <= vec_Nap.size(); i++){
-        double Na_I_temp = vec_Nap[i]*g_Na*(i - E_Na);
-        vec_Na_I.push_back(Na_I_temp);
-        myfile << Na_I_temp << ","; 
-        cout << Na_I_temp << endl;
-    }
-    myfile << "\n K_I, ";
-    for(int i = 0; i <= vec_Kp.size(); i++){
-        double K_I_temp = vec_Kp[i]*g_k*(i - E_k);
-        vec_K_I.push_back(K_I_temp);
-        myfile << K_I_temp << ","; 
-        cout << vec_K_I[i] << endl;
-    }
-    myfile << "\n L_I, ";
-    for(int i = 0; i < 140; i++){
-        double L_I_temp = (g_l*(i - E_l));
-        vec_L_I.push_back(L_I_temp);
-        myfile << L_I_temp << ","; 
-        cout << vec_L_I[i] << endl;
-    }
     return(0);
 }
 
 double Static_AP(int arbitrary_variable){
+    reset_vecs(0);
+
     double V_start = 0;
     double current;
     double V_temp;
@@ -276,8 +218,12 @@ double Run_time(double x){
     ofstream create_file(path2);
     ofstream myfile;
     myfile.open(path2);
+
+    reset_vecs(0);
+
     Static_AP(0);
-    myfile << "\n V,";
+
+    myfile << "V,";
     for(int i = 0; i < vec_V.size(); i++){
         myfile << vec_V[i] << ","; 
         //cout << vec_V[i] << endl;
@@ -309,6 +255,6 @@ the actual proportion open.
 Output_file then writes then info to TestingDynamicVars.csv
 */
   cout << "Ran" << endl;
-  //output_file(0);
+  output_file(0);
   Run_time(0);
 }

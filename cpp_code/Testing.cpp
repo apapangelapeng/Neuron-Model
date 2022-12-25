@@ -70,9 +70,6 @@ double dynamical_h(double V){
     h_inf = a_h/(a_h + b_h);
     tau_h = 1/(a_h + b_h);
     //the if statements are added to expunge NaN from the data
-    if (tau_h != tau_h){
-        tau_h = 0; 
-    }
     //storing the values in vectors so that they can be easily written to a csv file
     vec_tau_h.push_back(tau_h);
     vec_inf_h.push_back(h_inf);
@@ -84,9 +81,7 @@ double dynamical_n(double V){
     b_n = 0.125*exp(-V/80);
     n_inf = a_n/(a_n + b_n);
     tau_n = 1/(a_n + b_n);
-    if (tau_n != tau_n){
-        tau_n = 0; 
-    }
+    //cout << tau_n << endl;
     vec_tau_n.push_back(tau_n);
     vec_inf_n.push_back(n_inf);
     //cout << V << endl;
@@ -98,22 +93,18 @@ double dynamical_m(double V){
     b_m = 4*exp(-V/18);
     m_inf = a_m/(a_m + b_m);
     tau_m = 1/(a_m + b_m);
-    if (tau_m != tau_m){
-        tau_m = 0; 
-    }
+    //cout << tau_m << endl;
     vec_tau_m.push_back(tau_m);
     vec_inf_m.push_back(m_inf);
     return (0);
 }
 
 double Proportion_open_test(int x){
-    reset_vecs(0);
     //This scales between membrane voltages of -40 to 100, which is near the typical operating range of neurons
     for(double i = -40; i <= 100; i++){
         double V_temp = i;
-        //cout << V_temp << endl;
         double m_temp, h_temp, n_temp;
-        cout << V_temp << endl;
+        //cout << V_temp << endl;
         //inputs a, b, and c are dependent on the type of channel
         //Sodium channels will only utilize a and b
         //Potassium channels will only use c
@@ -132,27 +123,28 @@ int output_file(int x){
     Proportion_open_test(0);
 
     myfile << "Tau_n, ";
-    for(int i = 0; i <= vec_tau_n.size(); i++){
+    for(int i = 0; i < vec_tau_n.size(); i++){
        myfile << vec_tau_n[i] << ","; 
     }
     myfile << "\n Tau_M, ";
-    for(int i = 0; i <= vec_tau_m.size(); i++){
+    for(int i = 0; i < vec_tau_m.size(); i++){
        myfile << vec_tau_m[i] << ","; 
+        //cout << vec_tau_m[i] << endl;
     }
     myfile << "\n Tau_H, ";
-    for(int i = 0; i <= vec_tau_h.size(); i++){
+    for(int i = 0; i < vec_tau_h.size(); i++){
         myfile << vec_tau_h[i] << ","; 
     }
     myfile << "\n Inf_n, ";
-    for(int i = 0; i <= vec_inf_n.size(); i++){
+    for(int i = 0; i < vec_inf_n.size(); i++){
        myfile << vec_inf_n[i] << ","; 
     }
     myfile << "\n Inf_M, ";
-    for(int i = 0; i <= vec_inf_m.size(); i++){
+    for(int i = 0; i < vec_inf_m.size(); i++){
        myfile << vec_inf_m[i] << ","; 
     }
     myfile << "\n Inf_H, ";
-    for(int i = 0; i <= vec_inf_h.size(); i++){
+    for(int i = 0; i < vec_inf_h.size(); i++){
         myfile << vec_inf_h[i] << ","; 
     }
     return(0);

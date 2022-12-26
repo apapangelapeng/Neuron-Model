@@ -1,12 +1,15 @@
+*
+!*.*
+!*/
 *.o
-cpp_code/Try2
+data_files/testV_output_*.csv
 .DS_Store
 cpp_code/NeuronModel
 *.exe
 cpp_code/test
-cpp_code/test
-cpp_code/test
-cpp_code/test
+
 
 *.png
 *.json
+cpp_code/static_ap
+cpp_code/*.exe

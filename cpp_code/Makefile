@@ -12,8 +12,8 @@ CFLAGS = -Wall -g
 neuronmodel: neuronmodel.o
 	$(CC) $(CFLAGS) -o neuronmodel neuronmodel.o
 
-test: test.o
-	$(CC) $(CFLAGS) -o test test.o
+static_ap: static_ap.o
+	$(CC) $(CFLAGS) -o static_ap static_ap.o
 
 
 # The main.o target can be written more simply
@@ -21,12 +21,12 @@ test: test.o
 neuronmodel.o: NeuronModel.cpp 
 	$(CC) $(CFLAGS) NeuronModel.cpp -c -o neuronmodel.o
 
-test.o: Testing.cpp 
-	$(CC) $(CFLAGS) Testing.cpp -c -o test.o
+static_ap.o: Static_AP.cpp 
+	$(CC) $(CFLAGS) Static_AP.cpp -c -o static_ap.o
 
 .PHONY : clean
 clean :
-	rm -rf neuronmodel test
+	rm -rf neuronmodel static_ap
 	rm -rf *.ll *.exe *.s *.o testall.log
 	
 .PHONY : clean_img

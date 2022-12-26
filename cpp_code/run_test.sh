@@ -1,3 +1,3 @@
 make clean
-make test
-./test
+make static_ap
+./static_ap $1

@@ -1,5 +1,8 @@
+*
+!*.*
+!*/
 *.o
-
+data_files/testV_output_*.csv
 .DS_Store
 cpp_code/NeuronModel
 *.exe

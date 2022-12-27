@@ -49,7 +49,7 @@ plt.legend(handles, first_3, ncol=1, bbox_to_anchor=(1, 1))
 plt.plot()
 ax.set_title(t)
 plt.tight_layout()
-plt.savefig(f"../graphs/{t}.png")
+plt.savefig(f"../graphs/tau/{t}.png")
 
 
 # # Graph 2
@@ -74,7 +74,7 @@ plt.legend(handles, first_3, ncol=1, bbox_to_anchor=(1, 1))
 plt.plot()
 ax.set_title(t)
 plt.tight_layout()
-plt.savefig(f"../graphs/{t}.png")
+plt.savefig(f"../graphs/inf/{t}.png")
 
 
 # # Graph 6 Voltages
@@ -89,7 +89,7 @@ for f in all_files:
     voltage = voltage.transpose().reset_index(level=0)
     name = str(os.path.basename(f).split(".")[0])
     name = name.split("_")[-1]
-    name = f"(I = {name})"
+    name = f"(I_{name})"
 
     column =list(voltage.iloc[0])
     column = [ i.strip() for i in column]
@@ -97,8 +97,11 @@ for f in all_files:
     voltage = voltage.drop(index=0)
     voltage.columns = column
     issue_col = list(voltage.columns)[0]
-
-    voltage[issue_col] = pd.to_numeric(voltage[issue_col])
+    try:
+        voltage[issue_col] = pd.to_numeric(voltage[issue_col])
+    except:
+        print(name)
+    
 
     #print(voltage) # this shows the voltage 
     def graph_v_output(i, voltage):
@@ -120,7 +123,7 @@ for f in all_files:
         plt.legend(handles, first_3, ncol=1, bbox_to_anchor=(1, 1))
         plt.plot()
         plt.tight_layout()
-        plt.savefig(f"../graphs/{t}.png")
+        plt.savefig(f"../graphs/voltage/{t}.png")
 
     graph_v_output(0, voltage)
 
@@ -142,5 +145,5 @@ for f in all_files:
     plt.legend(handles, first_3, ncol=1, bbox_to_anchor=(1, 1))
     plt.plot()
     plt.tight_layout()
-    plt.savefig(f"../graphs/{t}.png")
+    plt.savefig(f"../graphs/current/{t}.png")
 

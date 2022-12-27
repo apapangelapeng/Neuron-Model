@@ -229,7 +229,7 @@ double Static_AP(int arbitrary_variable)
 
         // cout << V << endl;
 
-        V_dt = (current - K_I_temp - Na_I_temp - L_I_temp) / C_m;
+        V_dt = (local_cur - K_I_temp - Na_I_temp - L_I_temp) / C_m;
         vec_V.push_back(vec_V[x] + delta_t * V_dt);
 
         vec_Na_I.push_back(Na_I_temp);
@@ -305,8 +305,7 @@ int main(int argc, char *argv[])
         throw std::invalid_argument("The given command line input is not a double for current.");
     }
 
-    cout << "Begin" << endl;
+    cout << to_string_with_precision(current,2)<< endl;
     output_file(0);
     Run_time(0);
-    cout << "End" << endl;
 }

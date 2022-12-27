@@ -15,15 +15,16 @@ const char *path1="../data_files/reduced_output.csv";
 
 vector<double> vec_V, vec_N; 
 
-double V_dt;
+double V_dt, N_dt;
 
 double delta_t = 0.1;
-double v_threshold = 100;
-double v_max = 20;
-double gam = 0.5;
+double v_threshold = 0.25;
+double v_max = 1;
+double gam = 0.05;
+double e = 0.05;
 
-int current_range = 25;
-int current_temp;
+double current_range = 0.5;
+double current_temp;
 
 /*
 n is a kinetic equation built to track ONE kind of POTASSIUM channel's opening
@@ -52,21 +53,16 @@ double Reduced_AP(double z){
     double V_start = 0;
     double N_start = 0;
 
-    //cout << "Break Point 2" << endl;
+    //cout << "Break Point 3" << endl;
 
-    vec_V.push_back(V_start);
-    vec_N.push_back(N_start);
-
-    cout << "Break Point 3" << endl;
-
-    for(int current = 0; current <= current_range; current++){
-    
+    for(double current = 0.2; current <= current_range; current += 0.1){
         reset_vecs(0);
         int x = 0;
-        cout << "RESET!!!!" << endl;
+        vec_V.push_back(current);
+        vec_N.push_back(N_start);
 
         for(double i = 0; i <= 10; i += delta_t){
-            if(i <= 4 && i >= 2){
+            if(i <= 0.2){
                 current_temp = current;
             }
             else{
@@ -75,13 +71,14 @@ double Reduced_AP(double z){
 
             //cout << "Break Point 4" << endl;
 
-            V_dt = current + vec_V[x]*(vec_V[x] - v_threshold)*(vec_V[x] - v_max) - vec_N[x];
-            vec_V.push_back(vec_V[x] + delta_t*V_dt);
-            vec_N.push_back(vec_V[x] - (gam*vec_N[x]));
+            V_dt = current + vec_V[x]*(vec_V[x] - v_threshold)*(v_max - vec_V[x]) - vec_N[x];
+            vec_V.push_back(vec_V[x] + V_dt);
+            N_dt = e*(vec_V[x] - (gam*vec_N[x]));
+            vec_N.push_back(vec_N[x] + N_dt);
 
             //cout << "Break Point 5" << endl;
 
-            cout << "x = " << x << endl;
+            //cout << "x = " << x << endl;
 
             x += 1; 
 
@@ -98,7 +95,7 @@ double Reduced_AP(double z){
         for(int i = 0; i < vec_N.size(); i++){
             myfile << vec_N[i] << ","; 
             //cout << vec_N[i] << endl;
-            cout << "Break Point 6" << endl;
+            //cout << "Break Point 6" << endl;
         }
         myfile << "\n";
 

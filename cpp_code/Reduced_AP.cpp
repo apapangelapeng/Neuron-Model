@@ -17,14 +17,25 @@ vector<double> vec_V, vec_N;
 
 double V_dt, N_dt;
 
-double delta_t = 0.1;
-double v_threshold = 0.25;
+double v_threshold = 0.3;
 double v_max = 1;
-double gam = 0.05;
-double e = 0.05;
+
+double gam = 1;
+double gam_range = 0;
+
+double e = 0.001;
 
 double current_range = 0.5;
 double current_temp;
+
+double diffusion = 0; 
+double diffusion_range = 2; 
+
+double spatial_d = 0; 
+double delta_x = 0.1;
+
+double time_d = 0; 
+double delta_t = 0.1;
 
 /*
 n is a kinetic equation built to track ONE kind of POTASSIUM channel's opening
@@ -55,14 +66,15 @@ double Reduced_AP(double z){
 
     //cout << "Break Point 3" << endl;
 
-    for(double current = 0.2; current <= current_range; current += 0.1){
+    for(diffusion = 0; diffusion <= diffusion_range; diffusion += 0.5){
+        double current = 0.05; 
         reset_vecs(0);
         int x = 0;
-        vec_V.push_back(current);
+        vec_V.push_back(V_start);
         vec_N.push_back(N_start);
 
         for(double i = 0; i <= 10; i += delta_t){
-            if(i <= 0.2){
+            if(i <= 10){
                 current_temp = current;
             }
             else{
@@ -71,7 +83,10 @@ double Reduced_AP(double z){
 
             //cout << "Break Point 4" << endl;
 
-            V_dt = current + vec_V[x]*(vec_V[x] - v_threshold)*(v_max - vec_V[x]) - vec_N[x];
+
+            time_d = vec_V[x]*(vec_V[x] - v_threshold)*(v_max - vec_V[x]);
+            spatial_d = diffusion*(vec_V[x] - (2*vec_V[x-1]))*pow(delta_x,2);
+            V_dt = current + time_d - vec_N[x] + spatial_d;
             vec_V.push_back(vec_V[x] + V_dt);
             N_dt = e*(vec_V[x] - (gam*vec_N[x]));
             vec_N.push_back(vec_N[x] + N_dt);
@@ -84,14 +99,14 @@ double Reduced_AP(double z){
 
         }
 
-        myfile << "V" << current << ",";
+        myfile << "V" << diffusion << ",";
         for(int i = 0; i < vec_V.size(); i++){
             myfile << vec_V[i] << ","; 
             //cout << vec_V[i] << endl;
         }
 
         myfile << "\n";
-        myfile << "N" << current << ",";
+        myfile << "N" << diffusion << ",";
         for(int i = 0; i < vec_N.size(); i++){
             myfile << vec_N[i] << ","; 
             //cout << vec_N[i] << endl;
@@ -99,7 +114,7 @@ double Reduced_AP(double z){
         }
         myfile << "\n";
 
-        cout << "CURRENT " << current << endl;
+        cout << "Diffusion: " << diffusion << endl;
     }
     myfile.close();
     return(0);

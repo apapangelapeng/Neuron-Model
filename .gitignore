@@ -13,3 +13,4 @@ cpp_code/test
 *.json
 cpp_code/static_ap
 cpp_code/*.exe
+*.json

@@ -170,8 +170,8 @@ double Static_AP(int arbitrary_variable){
     vec_m.push_back(0);
     vec_h.push_back(0);
 
-    for(double i = 0; i <= 10; i += delta_t){
-        if(i <= 4 && i >= 2){
+    for(double i = 0; i <= 50; i += delta_t){
+        if(i >= 25 && i<= 26){
             current = 20;
         }
         else{
@@ -252,7 +252,7 @@ the actual proportion open.
 Output_file then writes then info to TestingDynamicVars.csv
 */
   cout << "Begin" << endl;
-  output_file(0);
+  //output_file(0);
   Run_time(0);
   cout << "End" << endl;
 }

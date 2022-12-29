@@ -13,29 +13,32 @@ THIS FILE IS JUST FOR ME TO TEST THINGS
 
 const char *path1="../data_files/test_output.csv";
 const char *path2="../data_files/testV_output.csv";
+const char *path3="../data_files/testHCN_output.csv";
 
 double a_n, b_n, a_h, b_h, a_m, b_m;
 double n_dynamic, m_dynamic, h_dynamic, n_inf, m_inf, h_inf;
 vector<double> vec_n, vec_m, vec_h;
 vector<double> vec_inf_n, vec_inf_m, vec_inf_h;
-vector<double> vec_Nap, vec_Kp;
 vector<double> vec_tau_n, vec_tau_m, vec_tau_h;
 double tau_n, tau_m, tau_h;
 
 double V_dt; 
-vector<double> vec_V, vec_Na_I, vec_K_I, vec_L_I; 
+vector<double> vec_V, vec_Na_I, vec_K_I, vec_L_I, vec_HCN_I; 
+vector<double> vec_Nap, vec_Kp, vec_HCNp;
 
 double C_m = 1; 
 
 double g_k = 36; 
 double g_Na = 120;
 double g_l = 0.3; 
+double g_HCN = 1; 
 
 double E_k = -12; 
 double E_Na = 120; 
 double E_l = 10.6; 
+double E_HCN = -1; 
 
-double delta_t = 0.1;
+double delta_t = 0.01;
 
 /*
 n is a kinetic equation built to track ONE kind of POTASSIUM channel's opening
@@ -126,7 +129,7 @@ int output_file(int x){
     ofstream myfile;
     myfile.open(path1);
 
-    Proportion_open_test(0);
+    //Proportion_open_test(0);
 
     myfile << "Tau_n, ";
     for(int i = 0; i < vec_tau_n.size(); i++){
@@ -157,12 +160,11 @@ int output_file(int x){
 }
 
 double Static_AP(int arbitrary_variable){
-    reset_vecs(0);
 
     double V_start = 0;
     double current;
     double V_temp;
-    double Na_I_temp, K_I_temp, L_I_temp;
+    double Na_I_temp, K_I_temp, L_I_temp, HCN_I_temp = 0;
     int x = 0; 
 
     vec_V.push_back(V_start);
@@ -171,8 +173,8 @@ double Static_AP(int arbitrary_variable){
     vec_h.push_back(0);
 
     for(double i = 0; i <= 50; i += delta_t){
-        if(i >= 25 && i<= 26){
-            current = 20;
+        if(0 <= i <= 2 ||  10 <= i <= 12 || 20 <= i <= 22 || 30 <= i <= 32 || 40 <= i <= 42){
+            current = 10;
         }
         else{
             current = 0;
@@ -195,15 +197,20 @@ double Static_AP(int arbitrary_variable){
         K_I_temp = (g_k*pow(vec_n[x+1],4)*((vec_V[x]) - E_k));
         Na_I_temp = (g_Na*pow(vec_m[x+1],3)*pow(vec_h[x+1],1)*((vec_V[x]) - E_Na));
         L_I_temp = (g_l*((vec_V[x]) - E_l));
+        HCN_I_temp = delta_t*(g_HCN*pow(vec_h[x+1],1)*(vec_V[x] - E_HCN));
+
+
 
         //cout << V << endl;
 
-        V_dt = (current - K_I_temp - Na_I_temp - L_I_temp)/C_m;
+        V_dt = (current - K_I_temp - Na_I_temp - L_I_temp - HCN_I_temp)/C_m;
         vec_V.push_back(vec_V[x] + delta_t*V_dt);
 
         vec_Na_I.push_back(Na_I_temp);
         vec_K_I.push_back(K_I_temp);
         vec_L_I.push_back(L_I_temp);
+        vec_HCN_I.push_back(HCN_I_temp);
+
         //cout << V << endl;
         //cout << V_temp << endl;
         x += 1; 
@@ -213,33 +220,41 @@ double Static_AP(int arbitrary_variable){
 }
 
 double Run_time(double x){
-    ofstream create_file(path2);
+    ofstream create_file(path3);
     ofstream myfile;
-    myfile.open(path2);
+    myfile.open(path3);
 
     reset_vecs(0);
     Static_AP(0);
+    output_file(0);
 
-    myfile << "V,";
+    myfile << "\nV,";
     for(int i = 0; i < vec_V.size(); i++){
         myfile << vec_V[i] << ","; 
         //cout << vec_V[i] << endl;
     }
-    myfile << "\n K_I, ";
+    myfile << "\nK_I, ";
     for(int i = 0; i < vec_K_I.size(); i++){
         myfile << vec_K_I[i] << ","; 
         //cout << vec_K_I[i] << endl;
     }
-    myfile << "\n Na_I,";
+    myfile << "\nNa_I,";
     for(int i = 0; i < vec_Na_I.size(); i++){
         myfile << vec_Na_I[i] << ","; 
         //cout << vec_V[i] << endl;
     }
-    myfile << "\n L_I,";
+    myfile << "\nL_I,";
     for(int i = 0; i < vec_L_I.size(); i++){
         myfile << vec_L_I[i] << ","; 
         //cout << vec_V[i] << endl;
     }
+    
+    myfile << "\nHCN_I,";
+    for(int i = 0; i < vec_HCN_I.size(); i++){
+        myfile << vec_HCN_I[i] << ","; 
+        //cout << vec_V[i] << endl;
+    }
+    
     myfile.close();
     return(x);
 }

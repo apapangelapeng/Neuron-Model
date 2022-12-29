@@ -17,13 +17,18 @@ vector<double> vec_V, vec_N, vec_Space;
 
 double V_dt, N_dt;
 
-double v_threshold = 0.3;
+double v_threshold = 0.2;
 double v_max = 1;
+double V_start = 0;
+double v_range = 0.5;
 
-double gam = 0.1;
+double N_start = 0;
+
+
+double gam = 3;
 double gam_range = 0;
 
-double e = 0.03;
+double e = 0.005;
 
 double current = 0.1; 
 double current_range = 0.5;
@@ -40,7 +45,8 @@ double time_d = 0;
 double delta_t = 0.1;
 
 int reset_vecs(int x){
-    vec_Space.clear();
+    vec_N.clear();
+    vec_V.clear();
     return(0);
 }
 
@@ -51,32 +57,31 @@ double Reduced_AP(double z){
 
     //cout << "Break Point 1" << endl;
 
-    double V_start = 0;
-    double N_start = 0;
-
     //cout << "Break Point 3" << endl;
 
-    for(diffusion = 0; diffusion <= diffusion_range; diffusion += 0.5){
+    for(V_start = -0.5; V_start <= v_range; V_start += 0.3){
         double current = 0.05; 
         reset_vecs(0);
         int x = 0;
         vec_V.push_back(V_start);
         vec_N.push_back(N_start);
 
-        for(double i = 0; i <= 10; i += delta_t){
+        
+        for(double i = 0; i <= 50; i += delta_t){
+        /*
             if(i <= 10){
                 current_temp = current;
             }
             else{
                 current_temp = 0;
             }
+        */
 
             //cout << "Break Point 4" << endl;
 
 
             time_d = vec_V[x]*(vec_V[x] - v_threshold)*(v_max - vec_V[x]);
-            spatial_d = diffusion*(vec_V[x] - (2*vec_V[x-1]))*pow(delta_x,2);
-            V_dt = current + time_d - vec_N[x] + spatial_d;
+            V_dt = current + time_d - vec_N[x];
             vec_V.push_back(vec_V[x] + V_dt);
             N_dt = e*(vec_V[x] - (gam*vec_N[x]));
             vec_N.push_back(vec_N[x] + N_dt);
@@ -89,22 +94,24 @@ double Reduced_AP(double z){
 
         }
 
-        myfile << "V" << diffusion << ",";
+        myfile << "V" << V_start << ",";
         for(int i = 0; i < vec_V.size(); i++){
             myfile << vec_V[i] << ","; 
             //cout << vec_V[i] << endl;
         }
 
         myfile << "\n";
-        myfile << "N" << diffusion << ",";
+        /*
+        myfile << "N" << V_start << ",";
         for(int i = 0; i < vec_N.size(); i++){
             myfile << vec_N[i] << ","; 
             //cout << vec_N[i] << endl;
             //cout << "Break Point 6" << endl;
         }
         myfile << "\n";
+        */
 
-        cout << "Diffusion: " << diffusion << endl;
+        cout << "V_start: " << V_start << endl;
     }
     myfile.close();
     return(0);
@@ -129,7 +136,7 @@ double Diffusion_AP(double z){
     vec_N.push_back(N_start);
     vec_Space.push_back(Space_start);
 
-    for(double i = 0; i <= 10; i += delta_t){
+    for(double i = 0; i <= 100; i += delta_t){
 
         reset_vecs(0);
 
@@ -143,12 +150,12 @@ double Diffusion_AP(double z){
         time_d = vec_V[counter]*(vec_V[counter] - v_threshold)*(v_max - vec_V[counter]);
 
         V_dt = current + time_d - vec_N[counter];
-        vec_V.push_back(vec_V[counter] + V_dt);
+        vec_V.push_back(vec_V[counter] + e*V_dt);
 
         //cout << "time d = " << time_d << endl;
         //cout << "v_dt = " << V_dt << endl;
 
-        N_dt = e*(vec_V[counter] - (gam*vec_N[counter]));
+        N_dt = (vec_V[counter] - (gam*vec_N[counter]));
         vec_N.push_back(vec_N[counter] + N_dt);
 
         counter += 1; 
@@ -192,7 +199,7 @@ double Diffusion_AP(double z){
 
         //cout << "Time: " << i << endl;
     }
-
+    /*
     myfile << "Voltage,";
     for(int i = 0; i < vec_V.size(); i++){
         myfile << vec_V[i] << ","; 
@@ -207,6 +214,7 @@ double Diffusion_AP(double z){
         //cout << vec_N[i] << endl;
         //cout << "Break Point 6" << endl;
     }
+    */
     myfile.close();
     return(0);
 }
@@ -214,8 +222,8 @@ double Diffusion_AP(double z){
 int main(void) {
     cout << "Begin" << endl;
 
-    //Reduced_AP(0);
-    Diffusion_AP(0);
+    Reduced_AP(0);
+    //Diffusion_AP(0);
 
   cout << "End" << endl;
 }

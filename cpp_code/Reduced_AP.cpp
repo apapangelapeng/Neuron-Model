@@ -55,21 +55,22 @@ double Reduced_AP(double z){
     ofstream myfile;
     myfile.open(path1);
 
+    
+
     //cout << "Break Point 1" << endl;
 
     //cout << "Break Point 3" << endl;
 
-    for(V_start = -0.5; V_start <= v_range; V_start += 0.3){
-        double current = 0.05; 
+    for(V_start = 0; V_start <= v_range; V_start += 0.1){
         reset_vecs(0);
         int x = 0;
         vec_V.push_back(V_start);
         vec_N.push_back(N_start);
 
         
-        for(double i = 0; i <= 50; i += delta_t){
+        for(double i = 0; i <= 30; i += delta_t){
         /*
-            if(i <= 10){
+            if(i >= 20 && i <=22){
                 current_temp = current;
             }
             else{
@@ -93,7 +94,6 @@ double Reduced_AP(double z){
             x += 1; 
 
         }
-
         myfile << "V" << V_start << ",";
         for(int i = 0; i < vec_V.size(); i++){
             myfile << vec_V[i] << ","; 
@@ -220,7 +220,7 @@ double Diffusion_AP(double z){
 }
 
 int main(void) {
-    cout << "Begin" << endl;
+    cout << "Begin (test)" << endl;
 
     Reduced_AP(0);
     //Diffusion_AP(0);

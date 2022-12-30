@@ -11,7 +11,8 @@ using namespace std;
 THIS FILE IS JUST FOR ME TO TEST THINGS
 */
 
-const char *path1="../data_files/reduced_output.csv";
+const char *path1="../data_files/reduced_V_output.csv";
+const char *path2="../data_files/reduced_null_output.csv";
 
 vector<double> vec_V, vec_N, vec_Space; 
 
@@ -50,13 +51,50 @@ int reset_vecs(int x){
     return(0);
 }
 
-double Reduced_AP(double z){
-    ofstream create_file(path1);
+double nullcline_generation(double x){
+    int y;
+    reset_vecs(0);
+    double local_v_start = -0.3; 
+    double local_n_start = -0.05; 
+    vec_N.push_back(local_n_start);
+    vec_V.push_back(local_v_start);
+
+    y = 0; 
+    for(double v_temp = local_v_start; v_temp <= 1.1; v_temp += 0.01){
+        cout << "v temp : " << v_temp << endl;
+        N_dt = e*(v_temp - (gam*vec_N[y]));
+        vec_N.push_back(vec_N[y] + N_dt);
+        y++;
+    }
+
+    y = 0;
+    for(double n_temp = local_n_start; n_temp <= 0.15; n_temp += 0.005){
+        time_d = vec_V[y]*(vec_V[y] - v_threshold)*(v_max - vec_V[y]);
+        V_dt = current + time_d - n_temp;
+        vec_V.push_back(vec_V[y] + V_dt);
+        y++;
+    }
+    return(0);
+}   
+
+double output__nullcline_file(double x){
+    ofstream create_file(path2);
     ofstream myfile;
-    myfile.open(path1);
+    myfile.open(path2);
 
-    
+    nullcline_generation(0);
 
+    myfile << "N,V\n";
+    for(int i = 0; i < vec_V.size(); i++){
+        myfile << vec_N[i] << ","; 
+        myfile << vec_V[i] << "\n"; 
+        //cout << vec_V[i] << endl;
+    }
+    myfile.close();
+    return(x);
+}
+
+double Reduced_AP(double z){
     //cout << "Break Point 1" << endl;
 
     //cout << "Break Point 3" << endl;
@@ -94,6 +132,7 @@ double Reduced_AP(double z){
             x += 1; 
 
         }
+        /*
         myfile << "V" << V_start << ",";
         for(int i = 0; i < vec_V.size(); i++){
             myfile << vec_V[i] << ","; 
@@ -101,7 +140,6 @@ double Reduced_AP(double z){
         }
 
         myfile << "\n";
-        /*
         myfile << "N" << V_start << ",";
         for(int i = 0; i < vec_N.size(); i++){
             myfile << vec_N[i] << ","; 
@@ -113,8 +151,25 @@ double Reduced_AP(double z){
 
         cout << "V_start: " << V_start << endl;
     }
-    myfile.close();
+
     return(0);
+}
+
+double output_file(double x){
+    ofstream create_file(path1);
+    ofstream myfile;
+    myfile.open(path1);
+
+    Reduced_AP(0);
+
+    myfile << "V\n";
+    for(int i = 0; i < vec_V.size(); i++){
+        //myfile << vec_V[i] << ","; 
+        myfile << vec_V[i] << "\n"; 
+        //cout << vec_V[i] << endl;
+    }
+    myfile.close();
+    return(x);
 }
 
 double Diffusion_AP(double z){
@@ -220,10 +275,12 @@ double Diffusion_AP(double z){
 }
 
 int main(void) {
-    cout << "Begin (test)" << endl;
+    cout << "Begin" << endl;
 
-    Reduced_AP(0);
+    output__nullcline_file(0);
+    //output_file(0);
     //Diffusion_AP(0);
 
   cout << "End" << endl;
 }
+

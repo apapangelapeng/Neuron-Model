@@ -14,4 +14,7 @@ cpp_code/test
 cpp_code/static_ap
 cpp_code/*.exe
 *.json
-*.csv
+data_files/*.csv
+
+data_files/reduced_null_output.csv
+data_files/reduced_null_output.csv

@@ -12,7 +12,7 @@ THIS FILE IS JUST FOR ME TO TEST THINGS
 */
 
 const char *path1 = "../data_files/reduced_V_output.csv";
-const char *path2="../data_files/reduced_null_output.csv";
+const char *path2 = "../data_files/reduced_null_output.csv";
 
 vector<double> vec_V, vec_N, vec_Space;
 
@@ -48,36 +48,40 @@ int reset_vecs(int x)
 {
     vec_N.clear();
     vec_V.clear();
-    return(0);
+    return (0);
 }
 
-double nullcline_generation(double x){
+double nullcline_generation(double x)
+{
     int y;
     reset_vecs(0);
-    double local_v_start = -0.3; 
-    double local_n_start = -0.05; 
+    double local_v_start = -0.3;
+    double local_n_start = -0.05;
     vec_N.push_back(local_n_start);
     vec_V.push_back(local_v_start);
 
-    y = 0; 
-    for(double v_temp = local_v_start; v_temp <= 1.1; v_temp += 0.01){
-        cout << "v temp : " << v_temp << endl;
-        N_dt = e*(v_temp - (gam*vec_N[y]));
+    y = 0;
+    for (double v_temp = local_v_start; v_temp <= 1.1; v_temp += 0.01)
+    {
+        // cout << "v temp : " << v_temp << endl;
+        N_dt = e * (v_temp - (gam * vec_N[y]));
         vec_N.push_back(vec_N[y] + N_dt);
         y++;
     }
 
     y = 0;
-    for(double n_temp = local_n_start; n_temp <= 0.15; n_temp += 0.005){
-        time_d = vec_V[y]*(vec_V[y] - v_threshold)*(v_max - vec_V[y]);
+    for (double n_temp = local_n_start; n_temp <= 0.15; n_temp += 0.005)
+    {
+        time_d = vec_V[y] * (vec_V[y] - v_threshold) * (v_max - vec_V[y]);
         V_dt = current + time_d - n_temp;
         vec_V.push_back(vec_V[y] + V_dt);
         y++;
     }
-    return(0);
-}   
+    return (0);
+}
 
-double output__nullcline_file(double x){
+double output__nullcline_file(double x)
+{
     ofstream create_file(path2);
     ofstream myfile;
     myfile.open(path2);
@@ -85,13 +89,20 @@ double output__nullcline_file(double x){
     nullcline_generation(0);
 
     myfile << "N,V\n";
-    for(int i = 0; i < vec_V.size(); i++){
-        myfile << vec_N[i] << ","; 
-        myfile << vec_V[i] << "\n"; 
-        //cout << vec_V[i] << endl;
+    int max_size = (max(vec_V.size(), vec_N.size()) == vec_N.size()) ? vec_N.size() : vec_V.size();
+    cout << max_size << endl;
+    bool N ;
+    bool V;
+    for (int i = 0; i < max_size; i++)
+    {
+        N = vec_N.size()- i > 1 ? true  : false;
+        V = (vec_V.size() > i) ? true : false;
+        if(N) myfile << vec_N[i] << "," ;
+        if(V) myfile << vec_V[i] ;
+        myfile<<"\n";
     }
     myfile.close();
-    return(x);
+    return (x);
 }
 
 void write_Reduced_AP(vector<vector<double> > &v_map)
@@ -101,15 +112,15 @@ void write_Reduced_AP(vector<vector<double> > &v_map)
     myfile.open(path1);
     for (V_start = -0.5; V_start <= v_range; V_start += 0.3)
     {
-        
-        string end = (V_start >= v_range-0.3) ? "\n" : ",";
-        myfile << "V" << V_start <<end;
+
+        string end = (V_start >= v_range - 0.3) ? "\n" : ",";
+        myfile << "V" << V_start << end;
     }
     for (int i = 0; i < vec_V.size(); i++)
     {
-        for (int j = 0 ; j < v_map.size(); j++)
+        for (int j = 0; j < v_map.size(); j++)
         {
-            string end = (j ==  v_map.size()-1) ? "\n" : ",";
+            string end = (j == v_map.size() - 1) ? "\n" : ",";
             myfile << v_map[j][i] << end;
         }
 
@@ -122,7 +133,7 @@ void write_Reduced_AP(vector<vector<double> > &v_map)
 double Reduced_AP(double z)
 {
 
-    vector< vector<double> > v_map_2d;
+    vector<vector<double> > v_map_2d;
     for (V_start = -0.5; V_start <= v_range; V_start += 0.3)
     {
         double current = 0.05;
@@ -156,8 +167,8 @@ double Reduced_AP(double z)
 
             x += 1;
         }
-        
-        vector<double> vec_V_deep=vec_V;
+
+        vector<double> vec_V_deep = vec_V;
         v_map_2d.push_back(vec_V_deep); // add the current vector into c++
         /*
         myfile << "N" << V_start << ",";
@@ -289,8 +300,8 @@ int main(void)
     cout << "Begin" << endl;
 
     Reduced_AP(0);
+    output__nullcline_file(0);
     // Diffusion_AP(0);
 
     cout << "End" << endl;
 }
-

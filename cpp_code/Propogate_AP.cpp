@@ -11,8 +11,7 @@ using namespace std;
 THIS FILE IS JUST FOR ME TO TEST THINGS
 */
 
-const char *path1="../data_files/test_output.csv";
-const char *path2="../data_files/testV_output.csv";
+const char *path2="../data_files/propogate_output.csv";
 
 double a_n, b_n, a_h, b_h, a_m, b_m;
 double n_dynamic, m_dynamic, h_dynamic, n_inf, m_inf, h_inf;
@@ -163,7 +162,7 @@ double Static_AP(int arbitrary_variable){
     return(0);
 }
 
-double Run_time(double x){
+double voltage_update(double x){
     ofstream create_file(path2);
     ofstream myfile;
     myfile.open(path2);
@@ -171,24 +170,12 @@ double Run_time(double x){
     reset_vecs(0);
     Static_AP(0);
 
-    myfile << "V,";
+    myfile << "V, K_I, Na_I,L_I \n";
     for(int i = 0; i < vec_V.size(); i++){
         myfile << vec_V[i] << ","; 
-        //cout << vec_V[i] << endl;
-    }
-    myfile << "\n K_I, ";
-    for(int i = 0; i < vec_K_I.size(); i++){
         myfile << vec_K_I[i] << ","; 
-        //cout << vec_K_I[i] << endl;
-    }
-    myfile << "\n Na_I,";
-    for(int i = 0; i < vec_Na_I.size(); i++){
         myfile << vec_Na_I[i] << ","; 
-        //cout << vec_V[i] << endl;
-    }
-    myfile << "\n L_I,";
-    for(int i = 0; i < vec_L_I.size(); i++){
-        myfile << vec_L_I[i] << ","; 
+        myfile << vec_L_I[i] << "\n"; 
         //cout << vec_V[i] << endl;
     }
     myfile.close();
@@ -203,7 +190,7 @@ the actual proportion open.
 Output_file then writes then info to TestingDynamicVars.csv
 */
   cout << "Begin" << endl;
-  Run_time(0);
+  voltage_update(0);
   cout << "End" << endl;
 }
 

@@ -15,7 +15,7 @@ const char *path1 = "../data_files/reduced_V_output.csv";
 const char *path2 = "../data_files/reduced_null_output.csv";
 const char *path3 = "../data_files/reduced_diffusion_output.csv";
 
-vector<double> vec_V, vec_N, vec_Space;
+vector<double> vec_V, vec_N, vec_Space,vec_tiny_N,vec_N_Zerodt,vec_V_Zerodt;
 
 vector<double> vec_V_Zerodt, vec_N_Zerodt;
 
@@ -56,17 +56,19 @@ int reset_vecs(int x)
     return (0);
 }
 
-double nullcline_generation(double x)
+double nullcline_generation_a(double x)
 {
     int y;
     reset_vecs(0);
     double local_v_start = -0.3;
     double local_n_start = -0.05;
+    double tiny_n_start = -0.05;
     vec_N.push_back(local_n_start);
     vec_V.push_back(local_v_start);
+    vec_tiny_N.push_back(local_n_start);
 
     y = 0;
-    for (double v_temp = local_v_start; v_temp <= 1.1; v_temp += 0.01)
+    for (double v_temp = local_v_start; v_temp <= 1.1; v_temp += 0.0001)
     {
         // cout << "v temp : " << v_temp << endl;
         N_dt = e * (v_temp - (gam * vec_N[y]));
@@ -75,15 +77,125 @@ double nullcline_generation(double x)
     }
 
     y = 0;
-    for (double n_temp = local_n_start; n_temp <= 0.15; n_temp += 0.005)
+    for (double n_temp = local_n_start; n_temp <= 0.15; n_temp += 0.0001)
     {
         time_d = vec_V[y] * (vec_V[y] - v_threshold) * (v_max - vec_V[y]);
         V_dt = current + time_d - n_temp;
         vec_V.push_back(vec_V[y] + V_dt);
         y++;
     }
+    //vec_tiny_N
+    y = 0;
+    for (double v_temp = local_v_start; v_temp <= 0.5; v_temp += 0.000001)
+    {
+        // cout << "v temp : " << v_temp << endl;
+        N_dt = e * (v_temp - (gam * vec_tiny_N[y]));
+        vec_tiny_N.push_back(vec_tiny_N[y] + N_dt);
+        y++;
+    }
+
+
     return (0);
 }
+
+double nullcline_generation(double x)
+{
+    int y;
+    reset_vecs(0);
+    double local_v_start = -0.3;
+    double local_n_start = -0.05;
+    double tiny_n_start = -0.05;
+    vec_N.push_back(local_n_start);
+    vec_V.push_back(local_v_start);
+    vec_tiny_N.push_back(local_n_start);
+
+    y = 0;
+    for (double v_temp = local_v_start; v_temp <= 1.1; v_temp += 0.0001)
+    {
+        // cout << "v temp : " << v_temp << endl;
+        N_dt = e * (v_temp - (gam * vec_N[y]));
+        vec_N.push_back(vec_N[y] + N_dt);
+        y++;
+    }
+
+    y = 0;
+    for (double n_temp = local_n_start; n_temp <= 0.15; n_temp += 0.0001)
+    {
+        time_d = vec_V[y] * (vec_V[y] - v_threshold) * (v_max - vec_V[y]);
+        V_dt = current + time_d - n_temp;
+        vec_V.push_back(vec_V[y] + V_dt);
+        y++;
+    }
+    for (double v_temp = local_v_start; v_temp <= 1.1; v_temp += 0.01)
+    {
+        for (double n_temp = local_n_start; n_temp <= 0.35; n_temp += 0.005)
+        {
+            time_d = v_temp * (v_temp - v_threshold) * (v_max - v_temp);
+            V_dt = current + time_d - n_temp;
+            if(V_dt <= 0.01 && V_dt >= -0.01){ 
+                vec_N_Zerodt.push_back(n_temp);
+                vec_V_Zerodt.push_back(v_temp);
+            }
+        }
+    }
+    for (double v_temp = local_v_start; v_temp <= 1.1; v_temp += 0.01)
+    {
+        for (double n_temp = local_n_start; n_temp <= 0.15; n_temp += 0.005)
+        {
+            N_dt = (v_temp - (gam * n_temp));
+            if(N_dt <= 0.01 && N_dt >= -0.01){ 
+                vec_N_Zerodt.push_back(n_temp);
+                vec_V_Zerodt.push_back(v_temp);
+            }
+        }
+    }
+    
+
+
+    return (0);
+}
+
+
+double output__nullcline_file_a(double x)
+{
+    ofstream create_file(path2);
+    ofstream myfile;
+    myfile.open(path2);
+
+    nullcline_generation_a(0);
+
+   
+    vector<int> sizes;
+    /*cout<<vec_V.size()<<endl;
+    cout<<vec_N.size()<<endl;
+    cout<<vec_tiny_N.size()<<endl;*/
+    sizes.insert(sizes.begin(),vec_V.size());
+    sizes.insert(sizes.begin(),vec_N.size());
+    sizes.insert(sizes.begin(),vec_tiny_N.size());
+    sort(sizes.begin(), sizes.end());
+    int max_size =sizes.back();
+    
+    cout <<max_size << endl;
+    bool N ;
+    bool V;
+    bool tiny_N;
+    myfile << "N,V,tiny_N\n";
+    for (int i = 0; i < max_size; i++)
+    {
+        N = (vec_N.size()> i) ? true  : false;
+        V = (vec_V.size() > i) ? true : false;
+        tiny_N = (vec_tiny_N.size()> i) ? true  : false;
+        if(N) myfile << vec_N[i] << "," ;
+        if(!N) myfile << "," ;
+        if(V) myfile << vec_V[i]<<"," ;
+        if(!V) myfile <<"," ;
+        if(tiny_N) myfile << vec_tiny_N[i];
+        myfile<<"\n";
+    }
+    myfile.close();
+    return (x);
+}
+
 
 double output__nullcline_file(double x)
 {
@@ -93,17 +205,38 @@ double output__nullcline_file(double x)
 
     nullcline_generation(0);
 
-    myfile << "N,V\n";
-    int max_size = (max(vec_V.size(), vec_N.size()) == vec_N.size()) ? vec_N.size() : vec_V.size();
-    cout << max_size << endl;
+   
+    vector<int> sizes;
+    /*cout<<vec_V.size()<<endl;
+    cout<<vec_N.size()<<endl;
+    cout<<vec_tiny_N.size()<<endl;*/
+    sizes.insert(sizes.begin(),vec_V.size());
+    sizes.insert(sizes.begin(),vec_N.size());
+    sizes.insert(sizes.begin(),vec_N_Zerodt.size());
+    sizes.insert(sizes.begin(),vec_V_Zerodt.size());
+    sort(sizes.begin(), sizes.end());
+    int max_size =sizes.back();
+    
+    cout <<max_size << endl;
     bool N ;
     bool V;
+    bool N_0;
+    bool V_0;
+    myfile << "N,V,N_0,V_0\n";
     for (int i = 0; i < max_size; i++)
     {
-        N = vec_N.size()- i > 1 ? true  : false;
+        N = (vec_N.size()> i) ? true  : false;
         V = (vec_V.size() > i) ? true : false;
+        N_0 = (vec_N_Zerodt.size()> i) ? true  : false;
+        V_0 = (vec_V_Zerodt.size()> i) ? true  : false;
         if(N) myfile << vec_N[i] << "," ;
-        if(V) myfile << vec_V[i] ;
+        if(!N) myfile << "," ;
+        if(V) myfile << vec_V[i]<<"," ;
+        if(!V) myfile <<"," ;
+        if(N_0) myfile << vec_N_Zerodt[i]<<",";
+        if(!N_0) myfile <<",";
+        if(V_0) myfile << vec_V_Zerodt[i];
+        //if(!V_0) myfile << vec_tiny_N[i];
         myfile<<"\n";
     }
     myfile.close();
@@ -146,7 +279,7 @@ double Reduced_AP(double z)
 
     for (V_start = -0.5; V_start <= v_range; V_start += 0.3)
     {
-        double current = 0.05;
+        double current = 0;
         reset_vecs(0);
         int x = 0;
         vec_V.push_back(V_start);

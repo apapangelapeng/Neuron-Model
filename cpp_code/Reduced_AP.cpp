@@ -21,7 +21,7 @@ vector<double> vec_V, vec_N, vec_Space,vec_tiny_N,vec_N_Zerodt,vec_V_Zerodt;
 
 vector<double> vec_V_Zero_dvdt, vec_N_Zero_dvdt, vec_V_Zero_dndt, vec_N_Zero_dndt;
 
-    vector<vector<double>> v_map_2d;
+vector<vector<double> > v_map_2d;
 
 double V_dt, N_dt;
 
@@ -257,7 +257,7 @@ double output__nullcline_file(double x)
     return (x);
 }
 
-void write_Reduced_AP(vector<vector<double>> & v_map){
+void write_Reduced_AP(vector<vector<double> > & v_map){
     cout << "I HAVE BEEN SUMMONED " << endl;
     ofstream create_file(path1);
     ofstream myfile;

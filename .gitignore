@@ -13,3 +13,8 @@ cpp_code/test
 *.json
 cpp_code/static_ap
 cpp_code/*.exe
+*.json
+data_files/*.csv
+
+data_files/reduced_null_output.csv
+data_files/reduced_null_output.csv

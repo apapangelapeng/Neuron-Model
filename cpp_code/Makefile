@@ -24,6 +24,31 @@ neuronmodel.o: NeuronModel.cpp
 static_ap.o: Static_AP.cpp 
 	$(CC) $(CFLAGS) Static_AP.cpp -c -o static_ap.o
 
+
+propogate_ap: propogate_ap.o
+	$(CC) $(CFLAGS) -o propogate_ap propogate_ap.o
+
+
+reduced_ap: reduced_ap.o
+	$(CC) $(CFLAGS) -o reduced_ap reduced_ap.o
+
+
+# The main.o target can be written more simply
+ 
+neuronmodel.o: NeuronModel.cpp 
+	$(CC) $(CFLAGS) NeuronModel.cpp -c -o neuronmodel.o
+
+
+
+propogate_ap.o: Propogate_AP.cpp 
+	$(CC) $(CFLAGS) propogate_AP.cpp -c -o propogate_ap.o
+
+reduced_ap.o: Reduced_AP.cpp
+	$(CC) $(CFLAGS) Reduced_AP.cpp -c -o reduced_ap.o
+
+
+
+
 .PHONY : clean
 clean :
 	rm -rf neuronmodel static_ap
@@ -32,3 +57,6 @@ clean :
 .PHONY : clean_img
 clean_img:
 	rm -rf ../graphs/*.png
+
+clean_csv:
+	rm -rf -rf ../data_files/*.csv

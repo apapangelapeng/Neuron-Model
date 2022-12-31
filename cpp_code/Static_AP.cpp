@@ -4,6 +4,7 @@
 #include <sstream>
 #include <string.h>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -38,7 +39,7 @@ double E_Na = 120;
 double E_l = 10.6; 
 double E_HCN = -1; 
 
-double delta_t = 0.01;
+double delta_t = 0.001;
 
 /*
 n is a kinetic equation built to track ONE kind of POTASSIUM channel's opening
@@ -173,8 +174,10 @@ double Static_AP(int arbitrary_variable){
     vec_h.push_back(0);
 
     for(double i = 0; i <= 50; i += delta_t){
-        if(0 <= i <= 2 ||  10 <= i <= 12 || 20 <= i <= 22 || 30 <= i <= 32 || 40 <= i <= 42){
-            current = 10;
+        //||  10 <= i <= 12 || 20 <= i <= 22 || 30 <= i <= 32 || 40 <= i <= 42
+        if((i <= 25 && i >= 23) || (i <= 28 && i >= 26) || (i <= 31 && i >= 29) || (i <= 34 && i >= 32)){
+            current = -5;
+            //cout << x << endl; 
         }
         else{
             current = 0;
@@ -197,9 +200,7 @@ double Static_AP(int arbitrary_variable){
         K_I_temp = (g_k*pow(vec_n[x+1],4)*((vec_V[x]) - E_k));
         Na_I_temp = (g_Na*pow(vec_m[x+1],3)*pow(vec_h[x+1],1)*((vec_V[x]) - E_Na));
         L_I_temp = (g_l*((vec_V[x]) - E_l));
-        HCN_I_temp = delta_t*(g_HCN*pow(vec_h[x+1],1)*(vec_V[x] - E_HCN));
-
-
+        HCN_I_temp = (g_HCN*pow(vec_h[x+1],1)*(vec_V[x] - E_HCN));
 
         //cout << V << endl;
 
@@ -219,55 +220,70 @@ double Static_AP(int arbitrary_variable){
     return(0);
 }
 
-double Run_time(double x){
+double output_WT_Static_AP(double x)
+{
     ofstream create_file(path3);
     ofstream myfile;
     myfile.open(path3);
 
-    reset_vecs(0);
     Static_AP(0);
-    output_file(0);
 
-    myfile << "\nV,";
-    for(int i = 0; i < vec_V.size(); i++){
-        myfile << vec_V[i] << ","; 
-        //cout << vec_V[i] << endl;
-    }
-    myfile << "\nK_I, ";
-    for(int i = 0; i < vec_K_I.size(); i++){
-        myfile << vec_K_I[i] << ","; 
-        //cout << vec_K_I[i] << endl;
-    }
-    myfile << "\nNa_I,";
-    for(int i = 0; i < vec_Na_I.size(); i++){
-        myfile << vec_Na_I[i] << ","; 
-        //cout << vec_V[i] << endl;
-    }
-    myfile << "\nL_I,";
-    for(int i = 0; i < vec_L_I.size(); i++){
-        myfile << vec_L_I[i] << ","; 
-        //cout << vec_V[i] << endl;
-    }
+    vector<int> sizes;
+    /*cout<<vec_V.size()<<endl;
+    cout<<vec_N.size()<<endl;
+    cout<<vec_tiny_N.size()<<endl;*/
+    sizes.insert(sizes.begin(),vec_V.size());
+    sizes.insert(sizes.begin(),vec_K_I.size());
+    sizes.insert(sizes.begin(),vec_Na_I.size());
+    sizes.insert(sizes.begin(),vec_L_I.size());
+    sizes.insert(sizes.begin(),vec_HCN_I.size());
+    sort(sizes.begin(), sizes.end());
+    int max_size = sizes.back();
     
-    myfile << "\nHCN_I,";
-    for(int i = 0; i < vec_HCN_I.size(); i++){
-        myfile << vec_HCN_I[i] << ","; 
-        //cout << vec_V[i] << endl;
-    }
+    cout << max_size << endl;
+
+    bool V; 
+    bool K_I; 
+    bool Na_I; 
+    bool L_I; 
+    bool HCN_I;
     
+    //cout << "Break point 4" << endl;
+
+    myfile << "V,K_I,Na_I,L_I,HCN_I\n";
+    for (int i = 0; i < max_size; i++)
+    {
+        //cout << "Break point 5" << endl;
+        V = (vec_V.size() > i) ? true : false;
+        K_I = (vec_V.size() > i) ? true : false;
+        Na_I = (vec_V.size() > i) ? true : false;
+        L_I = (vec_V.size() > i) ? true : false;
+        HCN_I = (vec_V.size() > i) ? true : false;
+
+        //cout << "Break point 6" << endl;
+
+        if(V) myfile << vec_V[i] <<"," ;
+        if(!V) myfile <<"," ;
+        if(K_I) myfile << vec_K_I[i] << ",";
+        if(!K_I) myfile << ",";
+        if(Na_I) myfile << vec_Na_I[i] << ",";
+        if(!Na_I) myfile <<",";
+        if(L_I) myfile << vec_L_I[i] << ",";
+        if(!L_I) myfile <<",";
+        if(HCN_I) myfile << vec_HCN_I[i];
+
+        //if(!dn_V_0) myfile << vec_tiny_N[i];
+
+        myfile << "\n";
+        //cout << "Break point 6" << endl;
+    }
     myfile.close();
-    return(x);
+    return (x);
 }
 
 int main(void) {
-/*
-Program workflow is main -calls-> ouput_file -calls-> Porportion_open for Sodium and Potassium individually
-Proportion_open -calls-> the dynamical variables, which stores the values in vectors, and also calculates
-the actual proportion open. 
-Output_file then writes then info to TestingDynamicVars.csv
-*/
   cout << "Begin" << endl;
   //output_file(0);
-  Run_time(0);
+  output_WT_Static_AP(0);
   cout << "End" << endl;
 }

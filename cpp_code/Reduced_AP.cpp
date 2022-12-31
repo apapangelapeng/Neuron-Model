@@ -5,6 +5,8 @@
 #include <string.h>
 #include <vector>
 #include <map>
+#include<algorithm>
+
 using namespace std;
 
 /*
@@ -102,7 +104,7 @@ double nullcline_generation(double x)
 {
     int y;
     reset_vecs(0);
-    double local_v_start = -0.3;
+    double local_v_start = -0.15;
     double local_n_start = -0.05;
     double tiny_n_start = -0.05;
     vec_N.push_back(local_n_start);
@@ -110,7 +112,7 @@ double nullcline_generation(double x)
     vec_tiny_N.push_back(local_n_start);
 
     y = 0;
-    for (double v_temp = local_v_start; v_temp <= 1.1; v_temp += 0.0001)
+    for (double v_temp = local_v_start; v_temp <= 0.45; v_temp += 0.0001)
     {
         // cout << "v temp : " << v_temp << endl;
         N_dt = e * (v_temp - (gam * vec_N[y]));
@@ -119,7 +121,7 @@ double nullcline_generation(double x)
     }
 
     y = 0;
-    for (double n_temp = local_n_start; n_temp <= 0.15; n_temp += 0.0001)
+    for (double n_temp = local_n_start; n_temp <= 0.10; n_temp += 0.0001)
     {
         time_d = vec_V[y] * (vec_V[y] - v_threshold) * (v_max - vec_V[y]);
         V_dt = current + time_d - n_temp;
@@ -128,7 +130,7 @@ double nullcline_generation(double x)
     }
     for (double v_temp = local_v_start; v_temp <= 1.1; v_temp += 0.01)
     {
-        for (double n_temp = local_n_start; n_temp <= 0.35; n_temp += 0.005)
+        for (double n_temp = local_n_start; n_temp <= 0.20; n_temp += 0.005)
         {
             time_d = v_temp * (v_temp - v_threshold) * (v_max - v_temp);
             V_dt = current + time_d - n_temp;
@@ -146,6 +148,8 @@ double nullcline_generation(double x)
             if(N_dt <= 0.01 && N_dt >= -0.01){ 
                 vec_N_Zero_dndt.push_back(n_temp);
                 vec_V_Zero_dndt.push_back(v_temp);
+                //cout << "V " << v_temp << endl;
+                cout << "N " << n_temp << endl;
             }
         }
     }
@@ -196,7 +200,6 @@ double output__nullcline_file_a(double x)
     return (x);
 }
 
-
 double output__nullcline_file(double x)
 {
     ofstream create_file(path2);
@@ -217,7 +220,7 @@ double output__nullcline_file(double x)
     sizes.insert(sizes.begin(),vec_N_Zero_dndt.size());
     sizes.insert(sizes.begin(),vec_V_Zero_dndt.size());
     sort(sizes.begin(), sizes.end());
-    int max_size =sizes.back();
+    int max_size = sizes.back();
     
     cout <<max_size << endl;
     bool N ;
@@ -226,7 +229,7 @@ double output__nullcline_file(double x)
     bool dv_V_0;
     bool dn_N_0;
     bool dn_V_0;
-    myfile << "N,V,N_0,V_0\n";
+    myfile << "N,V,N_dv_0,V_dv_0,N_dn_0,V_dn_0\n";
     for (int i = 0; i < max_size; i++)
     {
         N = (vec_N.size()> i) ? true  : false;
@@ -239,15 +242,15 @@ double output__nullcline_file(double x)
         if(!N) myfile << "," ;
         if(V) myfile << vec_V[i]<<"," ;
         if(!V) myfile <<"," ;
-        if(dv_N_0) myfile << vec_N_Zero_dvdt[i]<<",";
+        if(dv_N_0) myfile << vec_N_Zero_dvdt[i] << ",";
         if(!dv_N_0) myfile <<",";
-        if(dv_V_0) myfile << vec_V_Zero_dvdt[i];
+        if(dv_V_0) myfile << vec_V_Zero_dvdt[i] << ",";
         if(!dv_V_0) myfile <<",";
-        if(dn_N_0) myfile << vec_N_Zero_dndt[i]<<",";
+        if(dn_N_0) myfile << vec_N_Zero_dndt[i] << ",";
         if(!dn_N_0) myfile <<",";
         if(dn_V_0) myfile << vec_V_Zero_dndt[i];
-        if(!dn_V_0) myfile <<",";
-        //if(!V_0) myfile << vec_tiny_N[i];
+        //if(!dn_V_0) myfile <<",";
+        //if(!dn_V_0) myfile << vec_tiny_N[i];
         myfile<<"\n";
     }
     myfile.close();
@@ -456,8 +459,8 @@ int main(void)
     cout << "Begin" << endl;
 
     //Reduced_AP(0);
-    //output__nullcline_file(0);
-    Diffusion_AP(0);
+    output__nullcline_file(0);
+    //Diffusion_AP(0);
 
     cout << "End" << endl;
 }

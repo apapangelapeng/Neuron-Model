@@ -17,7 +17,7 @@ const char *path3 = "../data_files/reduced_diffusion_output.csv";
 
 vector<double> vec_V, vec_N, vec_Space,vec_tiny_N,vec_N_Zerodt,vec_V_Zerodt;
 
-vector<double> vec_V_Zerodt, vec_N_Zerodt;
+vector<double> vec_V_Zero_dvdt, vec_N_Zero_dvdt, vec_V_Zero_dndt, vec_N_Zero_dndt;
 
     vector<vector<double>> v_map_2d;
 
@@ -133,8 +133,8 @@ double nullcline_generation(double x)
             time_d = v_temp * (v_temp - v_threshold) * (v_max - v_temp);
             V_dt = current + time_d - n_temp;
             if(V_dt <= 0.01 && V_dt >= -0.01){ 
-                vec_N_Zerodt.push_back(n_temp);
-                vec_V_Zerodt.push_back(v_temp);
+                vec_N_Zero_dvdt.push_back(n_temp);
+                vec_V_Zero_dvdt.push_back(v_temp);
             }
         }
     }
@@ -144,8 +144,8 @@ double nullcline_generation(double x)
         {
             N_dt = (v_temp - (gam * n_temp));
             if(N_dt <= 0.01 && N_dt >= -0.01){ 
-                vec_N_Zerodt.push_back(n_temp);
-                vec_V_Zerodt.push_back(v_temp);
+                vec_N_Zero_dndt.push_back(n_temp);
+                vec_V_Zero_dndt.push_back(v_temp);
             }
         }
     }
@@ -175,7 +175,7 @@ double output__nullcline_file_a(double x)
     sort(sizes.begin(), sizes.end());
     int max_size =sizes.back();
     
-    cout <<max_size << endl;
+    cout << max_size << endl;
     bool N ;
     bool V;
     bool tiny_N;
@@ -212,30 +212,41 @@ double output__nullcline_file(double x)
     cout<<vec_tiny_N.size()<<endl;*/
     sizes.insert(sizes.begin(),vec_V.size());
     sizes.insert(sizes.begin(),vec_N.size());
-    sizes.insert(sizes.begin(),vec_N_Zerodt.size());
-    sizes.insert(sizes.begin(),vec_V_Zerodt.size());
+    sizes.insert(sizes.begin(),vec_N_Zero_dvdt.size());
+    sizes.insert(sizes.begin(),vec_V_Zero_dvdt.size());
+    sizes.insert(sizes.begin(),vec_N_Zero_dndt.size());
+    sizes.insert(sizes.begin(),vec_V_Zero_dndt.size());
     sort(sizes.begin(), sizes.end());
     int max_size =sizes.back();
     
     cout <<max_size << endl;
     bool N ;
     bool V;
-    bool N_0;
-    bool V_0;
+    bool dv_N_0;
+    bool dv_V_0;
+    bool dn_N_0;
+    bool dn_V_0;
     myfile << "N,V,N_0,V_0\n";
     for (int i = 0; i < max_size; i++)
     {
         N = (vec_N.size()> i) ? true  : false;
         V = (vec_V.size() > i) ? true : false;
-        N_0 = (vec_N_Zerodt.size()> i) ? true  : false;
-        V_0 = (vec_V_Zerodt.size()> i) ? true  : false;
+        dv_N_0 = (vec_N_Zero_dvdt.size()> i) ? true  : false;
+        dv_V_0 = (vec_V_Zero_dvdt.size()> i) ? true  : false;
+        dn_N_0 = (vec_N_Zero_dndt.size()> i) ? true  : false;
+        dn_V_0 = (vec_V_Zero_dndt.size()> i) ? true  : false;
         if(N) myfile << vec_N[i] << "," ;
         if(!N) myfile << "," ;
         if(V) myfile << vec_V[i]<<"," ;
         if(!V) myfile <<"," ;
-        if(N_0) myfile << vec_N_Zerodt[i]<<",";
-        if(!N_0) myfile <<",";
-        if(V_0) myfile << vec_V_Zerodt[i];
+        if(dv_N_0) myfile << vec_N_Zero_dvdt[i]<<",";
+        if(!dv_N_0) myfile <<",";
+        if(dv_V_0) myfile << vec_V_Zero_dvdt[i];
+        if(!dv_V_0) myfile <<",";
+        if(dn_N_0) myfile << vec_N_Zero_dndt[i]<<",";
+        if(!dn_N_0) myfile <<",";
+        if(dn_V_0) myfile << vec_V_Zero_dndt[i];
+        if(!dn_V_0) myfile <<",";
         //if(!V_0) myfile << vec_tiny_N[i];
         myfile<<"\n";
     }

@@ -13,8 +13,13 @@ THIS FILE IS JUST FOR ME TO TEST THINGS
 
 const char *path1 = "../data_files/reduced_V_output.csv";
 const char *path2 = "../data_files/reduced_null_output.csv";
+const char *path3 = "../data_files/reduced_diffusion_output.csv";
 
 vector<double> vec_V, vec_N, vec_Space;
+
+vector<double> vec_V_Zerodt, vec_N_Zerodt;
+
+    vector<vector<double>> v_map_2d;
 
 double V_dt, N_dt;
 
@@ -30,7 +35,7 @@ double gam_range = 0;
 
 double e = 0.005;
 
-double current = 0.1;
+double current = 0;
 double current_range = 0.5;
 double current_temp;
 
@@ -105,17 +110,22 @@ double output__nullcline_file(double x)
     return (x);
 }
 
-void write_Reduced_AP(vector<vector<double> > &v_map)
-{
+void write_Reduced_AP(vector<vector<double>> & v_map){
+    cout << "I HAVE BEEN SUMMONED " << endl;
     ofstream create_file(path1);
     ofstream myfile;
     myfile.open(path1);
+
+    /*
     for (V_start = -0.5; V_start <= v_range; V_start += 0.3)
     {
 
         string end = (V_start >= v_range - 0.3) ? "\n" : ",";
         myfile << "V" << V_start << end;
     }
+    */
+
+    myfile << "V" << V_start << "\n";
     for (int i = 0; i < vec_V.size(); i++)
     {
         for (int j = 0; j < v_map.size(); j++)
@@ -128,12 +138,12 @@ void write_Reduced_AP(vector<vector<double> > &v_map)
     }
 
     myfile << "\n";
+
 }
 
 double Reduced_AP(double z)
 {
 
-    vector<vector<double> > v_map_2d;
     for (V_start = -0.5; V_start <= v_range; V_start += 0.3)
     {
         double current = 0.05;
@@ -169,16 +179,7 @@ double Reduced_AP(double z)
         }
 
         vector<double> vec_V_deep = vec_V;
-        v_map_2d.push_back(vec_V_deep); // add the current vector into c++
-        /*
-        myfile << "N" << V_start << ",";
-        for(int i = 0; i < vec_N.size(); i++){
-            myfile << vec_N[i] << ",";
-            //cout << vec_N[i] << endl;
-            //cout << "Break Point 6" << endl;
-        }
-        myfile << "\n";
-        */
+        v_map_2d.push_back(vec_V_deep); 
 
         cout << "V_start: " << V_start << endl;
     }
@@ -188,13 +189,13 @@ double Reduced_AP(double z)
 
 double Diffusion_AP(double z)
 {
-    ofstream create_file(path1);
+    ofstream create_file(path3);
     ofstream myfile;
-    myfile.open(path1);
+    myfile.open(path3);
 
     // cout << "Break Point 1" << endl;
 
-    double V_start = 0;
+    double V_start = 0.4;
     double N_start = 0;
     double Space_start = 0;
 
@@ -208,9 +209,9 @@ double Diffusion_AP(double z)
 
     for (double i = 0; i <= 100; i += delta_t)
     {
+        vec_Space.clear();
 
-        reset_vecs(0);
-
+        /*
         if (i <= 2)
         {
             current_temp = current;
@@ -219,28 +220,30 @@ double Diffusion_AP(double z)
         {
             current_temp = 0;
         }
+        */
 
         time_d = vec_V[counter] * (vec_V[counter] - v_threshold) * (v_max - vec_V[counter]);
-
         V_dt = current + time_d - vec_N[counter];
-        vec_V.push_back(vec_V[counter] + e * V_dt);
-
-        // cout << "time d = " << time_d << endl;
-        // cout << "v_dt = " << V_dt << endl;
-
-        N_dt = (vec_V[counter] - (gam * vec_N[counter]));
+        vec_V.push_back(vec_V[counter] + V_dt);
+        N_dt = e * (vec_V[counter] - (gam * vec_N[counter]));
         vec_N.push_back(vec_N[counter] + N_dt);
+
+        /*
+        cout << "volt " << vec_V[counter] << endl;
+        cout << "time d = " << time_d << endl;
+        cout << "v_dt = " << V_dt << endl;
+        cout << "n " << vec_N[counter] << endl;
+        cout << "counter " << counter << endl;
+        */
 
         counter += 1;
 
         // cout << "Break Point 4" << endl;
 
-        // cout << "counter = " << counter << endl;
-
         // cout << i << ", and ROUNDED: " << floor(i) << endl;
         if (counter % 10 == 0 || counter == 1)
         {
-            cout << "PASSED counter: " << counter << endl;
+            //cout << "PASSED counter: " << counter << endl;
             vec_Space.push_back(vec_V[counter]);
             vec_Space.push_back(vec_V[counter]);
             vec_Space.push_back(vec_V[counter]);
@@ -253,6 +256,8 @@ double Diffusion_AP(double z)
                 spatial_d = (vec_Space[local_counter] - (2 * vec_Space[local_counter - 1]) + vec_Space[local_counter - 2]);
                 vec_Space.push_back(diffusion * vec_Space[local_counter] - pow(delta_t, 2) * spatial_d);
                 local_counter += 1;
+                //cout << spatial_d << endl;
+                //cout << "counter = " << counter << endl; 
             }
             myfile << "T" << i << ",";
             for (int i = 0; i < vec_Space.size(); i++)
@@ -291,7 +296,14 @@ double Diffusion_AP(double z)
         //cout << "Break Point 6" << endl;
     }
     */
+
     myfile.close();
+
+    vector<double> vec_V_deep = vec_V;
+    v_map_2d.push_back(vec_V_deep); 
+    write_Reduced_AP(v_map_2d);
+
+    cout << "V_start: " << V_start << endl;
     return (0);
 }
 
@@ -299,9 +311,9 @@ int main(void)
 {
     cout << "Begin" << endl;
 
-    Reduced_AP(0);
-    output__nullcline_file(0);
-    // Diffusion_AP(0);
+    //Reduced_AP(0);
+    //output__nullcline_file(0);
+    Diffusion_AP(0);
 
     cout << "End" << endl;
 }

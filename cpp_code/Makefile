@@ -35,12 +35,12 @@ neuronmodel.o: NeuronModel.cpp
 static_ap.o: Static_AP.cpp 
 	$(CC) $(CFLAGS) Static_AP.cpp -c -o static_ap.o
 
-
 propogate_ap.o: Propogate_AP.cpp 
 	$(CC) $(CFLAGS) propogate_AP.cpp -c -o propogate_ap.o
 
 reduced_ap.o: Reduced_AP.cpp
 	$(CC) $(CFLAGS) Reduced_AP.cpp -c -o reduced_ap.o
+
 
 .PHONY : clean
 clean :
@@ -51,7 +51,5 @@ clean :
 clean_img:
 	rm -rf ../graphs/*.png
 
-
-.PHONY : clean_img
 clean_csv:
 	rm -rf -rf ../data_files/*.csv

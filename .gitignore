@@ -4,17 +4,12 @@
 *.o
 data_files/testV_output_*.csv
 .DS_Store
-cpp_code/NeuronModel
+
 *.exe
-cpp_code/test
-
-
 *.png
 *.json
-cpp_code/static_ap
+graphs/*.png
 cpp_code/*.exe
-*.json
 data_files/*.csv
 
-data_files/reduced_null_output.csv
-data_files/reduced_null_output.csv
+

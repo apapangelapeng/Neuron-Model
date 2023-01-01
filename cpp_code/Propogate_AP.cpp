@@ -4,6 +4,8 @@
 #include <sstream>
 #include <string.h>
 #include <vector>
+#include <map>
+#include <algorithm>
 
 using namespace std;
 
@@ -11,187 +13,209 @@ using namespace std;
 THIS FILE IS JUST FOR ME TO TEST THINGS
 */
 
-const char *path2="../data_files/propogate_output.csv";
+const char *path1 = "../data_files/reduced2dV_output.csv";
 
-double a_n, b_n, a_h, b_h, a_m, b_m;
-double n_dynamic, m_dynamic, h_dynamic, n_inf, m_inf, h_inf;
-vector<double> vec_n, vec_m, vec_h;
-vector<double> vec_inf_n, vec_inf_m, vec_inf_h;
-vector<double> vec_Nap, vec_Kp;
-vector<double> vec_tau_n, vec_tau_m, vec_tau_h;
-double tau_n, tau_m, tau_h;
+vector<double> vec_V, vec_N, vec_Space,vec_tiny_N,vec_N_Zerodt,vec_V_Zerodt;
 
-double V_dt; 
-vector<double> vec_V, vec_Na_I, vec_K_I, vec_L_I; 
+vector<double> vec_V_Zero_dvdt, vec_N_Zero_dvdt, vec_V_Zero_dndt, vec_N_Zero_dndt;
 
-vector<double> vec_seg1, vec_seg2, vec_seg3, vec_seg4; 
+vector<double> vec_Vdt, vec_Ndt, vec_x_Vdt, vec_y_Ndt;
 
-double C_m = 1; 
+vector<vector<double>> v_map_2d;
+vector<vector<double>> voltage_2d;
+vector<vector<double>> space_2d;
+vector<vector<double>> n_2d;
 
-double g_k = 36; 
-double g_Na = 120;
-double g_l = 0.3; 
+double V_dt, N_dt;
 
-double E_k = -12; 
-double E_Na = 120; 
-double E_l = 10.6; 
+double v_threshold = 0.2;
+double v_max = 1;
+double V_start = 0;
+double v_range = 0.5;
 
-double delta_t = 0.1;
+double N_start = 0;
 
-/*
-n is a kinetic equation built to track ONE kind of POTASSIUM channel's opening
-it will be a proportion of channels open, and or the activation of the channel
-potassium current can be generalized as: g*n^4*(V - E)
-Where V is resting voltage, E is membrane potential, and g is conductance
+double gam = 3;
+double gam_range = 0;
 
-m is the same, but for Na 
-h represents INACTIVATION of Na channels, so h and m compete
+double e = 0.005;
 
-The formulas are taken from page 37 of the Electrophysiology textbook
-*/
-int reset_vecs(int x){
+//double current = 0;
+double current_range = 0.5;
+double current_temp;
+
+double diffusion = 0.75;
+double diffusion_range = 2;
+
+double spatial_d = 0;
+double delta_x = 0.01;
+double x_range = 0.1; 
+
+double time_d = 0;
+double delta_t = 0.001;
+
+int reset_vecs(int x)
+{
+    vec_N.clear();
     vec_V.clear();
-    vec_n.clear();
-    vec_m.clear();
-    vec_h.clear();
-    vec_tau_m.clear();
-    vec_inf_m.clear();
-    vec_tau_h.clear();
-    vec_inf_h.clear();
-    vec_tau_n.clear();
-    vec_inf_n.clear();
-    return(0);
-}
-
-double dynamical_h(double V){
-    //for some reason I decided to add in double h, so that we can store this value local to the method
-    //and, h_dynamic can be shared to main. I forget why I did this lol, I probably had something in mind
-    a_h = 0.07*exp(-V/20);
-    b_h = ((1)/(exp((30-V)/10) + 1));
-    h_inf = a_h/(a_h + b_h);
-    tau_h = 1/(a_h + b_h);
-    //the if statements are added to expunge NaN from the data
-    //storing the values in vectors so that they can be easily written to a csv file
-    vec_tau_h.push_back(tau_h);
-    vec_inf_h.push_back(h_inf);
-    return(0);
-}
-
-double dynamical_n(double V){
-    a_n = 0.01*((10-V)/(exp((10-V)/10) - 1));
-    if(V == 10){
-        a_n = 0.1; // This is the Taylor approx value for when divide by 0
-    }
-    b_n = 0.125*exp(-V/80);
-    n_inf = a_n/(a_n + b_n);
-    tau_n = 1/(a_n + b_n);
-    //cout << tau_n << endl;
-    vec_tau_n.push_back(tau_n);
-    vec_inf_n.push_back(n_inf);
-    //cout << V << endl;
+    vec_Space.clear();
     return (0);
 }
 
-double dynamical_m(double V){
-    a_m = 0.1*((25 - V)/(exp((25-V)/10) - 1));
-    if (V == 25){
-        a_m = 1; // This is the Taylor approx value for when divide by 0
+void output_file(vector<vector<double>> v_map){
+    cout << "I HAVE BEEN SUMMONED " << endl;
+    ofstream create_file(path1);
+    ofstream myfile;
+    myfile.open(path1);
+
+    int col_num = x_range/delta_x;
+
+    //myfile << "V" << V_start << "\n";
+    for (int j = 0; j < v_map.size(); j++)
+    {
+        for (int i = 0; i < col_num; i++)
+        {
+            if (i == 0)
+            {
+                myfile << v_map[j][i];
+            }
+            else
+            {
+                myfile << "," << v_map[j][i];
+            }
+            
+        }
+        myfile << "\n";
     }
-    b_m = 4*exp(-V/18);
-    m_inf = a_m/(a_m + b_m);
-    tau_m = 1/(a_m + b_m);
-    //cout << tau_m << endl;
-    vec_tau_m.push_back(tau_m);
-    vec_inf_m.push_back(m_inf);
-    return (0);
 }
 
-double Static_AP(int arbitrary_variable){
-    reset_vecs(0);
+double Diffusion_AP(double z)
+{
+    //cout << "Break Point 1" << endl;
 
-    double V_start = 0;
-    double current;
-    double V_temp;
-    double Na_I_temp, K_I_temp, L_I_temp;
-    int x = 0; 
+    double V_start = 0.4;
+    double N_start = 0;
+    double Space_start = 0.05;
+    double current = 0; 
 
-    vec_V.push_back(V_start);
-    vec_n.push_back(0);
-    vec_m.push_back(0);
-    vec_h.push_back(0);
+    int counter_space = 0;
+    int counter_time = 0;
 
-    for(double i = 0; i <= 10; i += delta_t){
-        if(i <= 4 && i >= 2){
-            current = 20;
+    for (double space = 0; space <= x_range+delta_x; space += delta_x) //THIS COUNTS SPACE!!
+    { 
+        vec_V.push_back(V_start);
+        vec_N.push_back(N_start);
+        vec_Space.push_back(Space_start);
+    }
+    
+    voltage_2d.push_back(vec_V);
+    n_2d.push_back(vec_N);
+    space_2d.push_back(vec_Space);
+
+    //cout << "Break Point 2" << endl;
+
+    for (double i = 0; i <= 1; i += delta_t) //THIS COUNTS TIME!!
+    {
+        counter_space = 0;
+
+        reset_vecs(0);
+
+        for (double space = 0; space <= x_range+delta_x; space += delta_x) //THIS COUNTS SPACE!!
+        { 
+
+        if(space == 0){
+            if((i <= 0.05) || (i <= 0.6 && i >= 0.5)){
+                current = 0.05;
+            }
+            else{
+                current = 0;
+            }
         }
         else{
-            current = 0;
+            current = space_2d[counter_time][counter_space];
+        }
+        
+
+        // if((i <= 0.1) || (i <= 0.6 && i >= 0.5)){
+        //         cout << counter_space << " current = " << current << endl;
+        //     }
+
+        time_d = voltage_2d[counter_time][counter_space] * (voltage_2d[counter_time][counter_space] - v_threshold) * (v_max - voltage_2d[counter_time][counter_space]);
+        //cout << "POSITION " << counter_time << "," << counter_space << " = " << voltage_2d[counter_time][counter_space] << endl; 
+        //cout << "time_d " << time_d << endl;
+        V_dt = current + time_d - n_2d[counter_time][counter_space];
+
+        // if((i <= 0.1) || (i <= 0.6 && i >= 0.5)){
+        //         cout << counter_space << " " << current << endl;
+        //     }
+
+        vec_V.push_back(voltage_2d[counter_time][counter_space] + V_dt);
+        //cout << "V_dt " << V_dt << endl;
+
+        N_dt = e * (voltage_2d[counter_time][counter_space] - (gam * n_2d[counter_time][counter_space]));
+
+        vec_N.push_back(n_2d[counter_time][counter_space] + N_dt);
+
+        // if(counter_time <= 100){
+        // cout << "N_dt " << N_dt << endl;
+        // cout << "POSITION " << counter_time << "," << counter_space << " = " << n_2d[counter_time][counter_space] << endl; 
+        // cout << "POSITION " << counter_space << " = " << vec_N[counter_space] << endl;
+        // }
+        
+        if(counter_space > 0){
+            spatial_d = (voltage_2d[counter_time][counter_space] - (2 * voltage_2d[counter_time][counter_space - 1]) + voltage_2d[counter_time][counter_space - 2]);
+            // cout << "pos1 " << voltage_2d[counter_time][counter_space] << endl;
+            // cout << "pos2 " << 2 * voltage_2d[counter_time][counter_space - 1] << endl;
+            // cout << "pos3 " << voltage_2d[counter_time][counter_space - 2] << endl;
+            vec_Space.push_back(diffusion*vec_Space[counter_space - 1]);
+            //cout << diffusion*vec_Space[counter_space - 1] << endl;
+            //cout << current << endl;
+        }
+        else{
+            vec_Space.push_back(current);
         }
 
-        //cout << "Break point 1" << endl;
+        //cout << vec_Space[2] << endl;
 
-        dynamical_m(vec_V[x]);
-        dynamical_h(vec_V[x]);
-        dynamical_n(vec_V[x]);
+        if(vec_Space[counter_space] >= 0.001){
+        //cout << "position " << counter_space << " " << vec_Space[counter_space] << endl;
+        }
 
-        //cout << "Break point 2" << endl;
+        // cout << counter_space << " position " << vec_Space[counter_space] << endl;
 
-        vec_n.push_back(vec_n[x] + delta_t*((vec_inf_n[x] - vec_n[x])/vec_tau_n[x]));
-        vec_m.push_back(vec_m[x] + delta_t*((vec_inf_m[x] - vec_m[x])/vec_tau_m[x]));
-        vec_h.push_back(vec_h[x] + delta_t*((vec_inf_h[x] - vec_h[x])/vec_tau_h[x]));
+        //cout << counter_space << " spatial_d " << spatial_d << endl;
 
-        //cout << "Break point 3" << endl;
+        counter_space++;
 
-        K_I_temp = (g_k*pow(vec_n[x+1],4)*((vec_V[x]) - E_k));
-        Na_I_temp = (g_Na*pow(vec_m[x+1],3)*pow(vec_h[x+1],1)*((vec_V[x]) - E_Na));
-        L_I_temp = (g_l*((vec_V[x]) - E_l));
+        }
 
-        //cout << V << endl;
+        voltage_2d.push_back(vec_V);
+        n_2d.push_back(vec_N);
+        space_2d.push_back(vec_Space);
 
-        V_dt = (current - K_I_temp - Na_I_temp - L_I_temp)/C_m;
-        vec_V.push_back(vec_V[x] + delta_t*V_dt);
 
-        vec_Na_I.push_back(Na_I_temp);
-        vec_K_I.push_back(K_I_temp);
-        vec_L_I.push_back(L_I_temp);
-        //cout << V << endl;
-        //cout << V_temp << endl;
-        x += 1; 
-        //cout << x << endl;
+    counter_time += 1;
+
+    
+    for (int i = 0; i < vec_V.size(); i++)
+    {
+        //cout << "2d " << voltage_2d[counter_time][i] << endl;
+        //cout << "1d " << vec_V[i] << endl;
     }
-    return(0);
-}
-
-double voltage_update(double x){
-    ofstream create_file(path2);
-    ofstream myfile;
-    myfile.open(path2);
-
-    reset_vecs(0);
-    Static_AP(0);
-
-    myfile << "V, K_I, Na_I,L_I \n";
-    for(int i = 0; i < vec_V.size(); i++){
-        myfile << vec_V[i] << ","; 
-        myfile << vec_K_I[i] << ","; 
-        myfile << vec_Na_I[i] << ","; 
-        myfile << vec_L_I[i] << "\n"; 
-        //cout << vec_V[i] << endl;
+        //cout << "Break Point 3 and: " << counter_time << endl
     }
-    myfile.close();
-    return(x);
-}
+    output_file(voltage_2d);
 
-int main(void) {
-/*
-Program workflow is main -calls-> ouput_file -calls-> Porportion_open for Sodium and Potassium individually
-Proportion_open -calls-> the dynamical variables, which stores the values in vectors, and also calculates
-the actual proportion open. 
-Output_file then writes then info to TestingDynamicVars.csv
-*/
-  cout << "Begin" << endl;
-  voltage_update(0);
-  cout << "End" << endl;
+    return (0);
 }
 
 
+int main(void)
+{
+    cout << "Begin" << endl;
+
+    //Reduced_AP(0);
+    Diffusion_AP(0);
+
+    cout << "End" << endl;
+}

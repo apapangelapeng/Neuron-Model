@@ -12,8 +12,8 @@ using namespace std;
 THIS FILE IS JUST FOR ME TO TEST THINGS
 */
 
-const char *path1="../data_files/test_output.csv";
-const char *path2="../data_files/testV_output.csv";
+const char *path1="../data_files/testVcompare_output.csv";
+const char *path2="../data_files/testWT_output.csv";
 const char *path3="../data_files/testHCN_output.csv";
 
 double a_n, b_n, a_h, b_h, a_m, b_m;

@@ -21,10 +21,10 @@ vector<double> vec_V_Zero_dvdt, vec_N_Zero_dvdt, vec_V_Zero_dndt, vec_N_Zero_dnd
 
 vector<double> vec_Vdt, vec_Ndt, vec_x_Vdt, vec_y_Ndt;
 
-vector<vector<double>> v_map_2d;
-vector<vector<double>> voltage_2d;
-vector<vector<double>> space_2d;
-vector<vector<double>> n_2d;
+vector<vector<double> > v_map_2d;
+vector<vector<double> > voltage_2d;
+vector<vector<double> > space_2d;
+vector<vector<double> > n_2d;
 
 double V_dt, N_dt;
 
@@ -62,7 +62,7 @@ int reset_vecs(int x)
     return (0);
 }
 
-void output_file(vector<vector<double>> v_map){
+void output_file(vector<vector<double> > v_map){
     cout << "I HAVE BEEN SUMMONED " << endl;
     ofstream create_file(path1);
     ofstream myfile;

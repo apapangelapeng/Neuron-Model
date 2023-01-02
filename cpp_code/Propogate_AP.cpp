@@ -44,7 +44,7 @@ double e = 0.005;
 double current_range = 0.5;
 double current_temp;
 
-double diffusion = 0.95;
+double diffusion = 0.97;
 double diffusion_range = 2;
 
 double spatial_d = 0;
@@ -124,7 +124,7 @@ double Diffusion_AP(double z)
         { 
 
         if(space == 0){
-            if((i <= 0.05) || (i <= 0.3 && i >= 0.2)){
+            if((i <= 0.05) || (i <= 0.22 && i >= 0.2)){
                 current = 0.05;
             }
             else{

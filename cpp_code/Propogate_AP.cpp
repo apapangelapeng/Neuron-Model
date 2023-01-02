@@ -124,7 +124,7 @@ double Diffusion_AP(double z)
         { 
 
         if(space == 0){
-            if((i <= 0.05) || (i <= 0.3 && i >= 0.2)){
+            if((i <= 0.05) || (i <= 0.21 && i >= 0.2)){
                 current = 0.05;
             }
             else{

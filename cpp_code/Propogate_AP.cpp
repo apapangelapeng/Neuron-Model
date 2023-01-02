@@ -44,7 +44,7 @@ double e = 0.005;
 double current_range = 0.5;
 double current_temp;
 
-double diffusion = 0.95;
+double diffusion = 0.995;
 double diffusion_range = 2;
 
 double spatial_d = 0;

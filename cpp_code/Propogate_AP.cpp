@@ -44,12 +44,12 @@ double e = 0.005;
 double current_range = 0.5;
 double current_temp;
 
-double diffusion = 0.75;
+double diffusion = 0.95;
 double diffusion_range = 2;
 
 double spatial_d = 0;
 double delta_x = 0.01;
-double x_range = 0.1; 
+double x_range = 1; 
 
 double time_d = 0;
 double delta_t = 0.001;
@@ -114,7 +114,7 @@ double Diffusion_AP(double z)
 
     //cout << "Break Point 2" << endl;
 
-    for (double i = 0; i <= 1; i += delta_t) //THIS COUNTS TIME!!
+    for (double i = 0; i <= 0.5; i += delta_t) //THIS COUNTS TIME!!
     {
         counter_space = 0;
 
@@ -124,7 +124,7 @@ double Diffusion_AP(double z)
         { 
 
         if(space == 0){
-            if((i <= 0.05) || (i <= 0.6 && i >= 0.5)){
+            if((i <= 0.05) || (i <= 0.3 && i >= 0.2)){
                 current = 0.05;
             }
             else{

@@ -7,13 +7,15 @@
 #include <map>
 #include <algorithm>
 
+#include <cmath>
+
 using namespace std;
 
 /*
 THIS FILE IS JUST FOR ME TO TEST THINGS
 */
 
-const char *path1 = "../data_files/reduced2dV_output.csv";
+string path1;
 
 vector<double> vec_V, vec_N, vec_Space,vec_tiny_N,vec_N_Zerodt,vec_V_Zerodt;
 
@@ -33,9 +35,11 @@ double v_max = 1;
 double V_start = 0;
 double v_range = 0.5;
 
+double global_current=0.05;
+
 double N_start = 0;
 
-double gam = 3;
+double gam = 1;
 double gam_range = 0;
 
 double e = 0.005;
@@ -54,6 +58,16 @@ double x_range = 1;
 double time_d = 0;
 double delta_t = 0.001;
 
+template <typename T>
+std::string to_string_with_precision(const T a_value, const int n = 6)
+{
+    std::ostringstream out;
+    out.precision(n);
+    out << std::fixed << a_value;
+    return out.str();
+}
+
+
 int reset_vecs(int x)
 {
     vec_N.clear();
@@ -63,7 +77,6 @@ int reset_vecs(int x)
 }
 
 void output_file(vector<vector<double> > v_map){
-    cout << "I HAVE BEEN SUMMONED " << endl;
     ofstream create_file(path1);
     ofstream myfile;
     myfile.open(path1);
@@ -71,11 +84,11 @@ void output_file(vector<vector<double> > v_map){
     int col_num = x_range/delta_x;
 
     //myfile << "V" << V_start << "\n";
-    for (int j = 0; j < v_map.size(); j++)
+    for (int j = 200; j <250; j++)
     {
         for (int i = 0; i < col_num; i++)
         {
-            if (i == 0)
+            if (i == 200)
             {
                 myfile << v_map[j][i];
             }
@@ -125,7 +138,7 @@ double Diffusion_AP(double z)
 
         if(space == 0){
             if((i <= 0.05) || (i <= 0.21 && i >= 0.2)){
-                current = 0.05;
+                current = global_current;
             }
             else{
                 current = 0;
@@ -210,12 +223,36 @@ double Diffusion_AP(double z)
 }
 
 
-int main(void)
-{
-    cout << "Begin" << endl;
+int main(int argc, char *argv[])
+{   
 
-    //Reduced_AP(0);
-    Diffusion_AP(0);
+    cout << "Begin" << endl;
+    
+    for (double i =0; i<=0.1; i+=0.02)
+    {
+        for (double g=0; g<=3; g+=0.5 )
+        {
+            double diff = 0.8;
+            for (double  d=1; d<=5; d+=1 )
+            {
+                global_current = i;
+                gam = g;
+              
+                diffusion=diff;
+                
+                string gcs = to_string_with_precision(global_current,4)+string("_");
+                string gs = to_string_with_precision(gam,4)+string("_");
+                string ds = to_string_with_precision(diffusion,4);
+                path1 = string("../data_files/reduced2dV_output")+ gcs + gs+ ds + string(".csv");
+                cout<<gcs + gs + ds <<endl;
+                Diffusion_AP(0);
+                diff += 0.2/pow(2,d);
+            }
+        }
+    }
+    
+
+
 
     cout << "End" << endl;
 }

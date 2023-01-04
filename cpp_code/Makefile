@@ -33,6 +33,10 @@ reduced_ap: reduced_ap.o
 	$(CC) $(CFLAGS) -o reduced_ap reduced_ap.o
 
 
+propogate_ap_single: propogate_ap_single.o
+	$(CC) $(CFLAGS) -o propogate_ap_single propogate_ap_single.o
+
+
 # The main.o target can be written more simply
  
 neuronmodel.o: NeuronModel.cpp 
@@ -45,6 +49,10 @@ propogate_ap.o: Propogate_AP.cpp
 
 reduced_ap.o: Reduced_AP.cpp
 	$(CC) $(CFLAGS) Reduced_AP.cpp -c -o reduced_ap.o
+
+
+propogate_ap_single.o: Propogate_AP_Single.cpp 
+	$(CC) $(CFLAGS) propogate_ap_single.cpp -c -o propogate_ap_single.o
 
 
 

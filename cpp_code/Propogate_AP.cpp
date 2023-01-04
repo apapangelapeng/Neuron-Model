@@ -142,7 +142,7 @@ double Diffusion_AP(double z)
         for (double space = 0; space <= x_range+delta_x; space += delta_x) //THIS COUNTS SPACE!!
         { 
 
-        if(space <= 9){
+        if(space ==0){
             if((i <= 0.05) || (i <= 0.21 && i >= 0.2)){
                 current = global_current;
             }

@@ -1,4 +1,7 @@
-#include <cmath>
+
+
+
+
 #include <cmath>
 #include <fstream>
 #include <iostream>
@@ -28,7 +31,7 @@ vector<vector<double> > space_2d;
 vector<vector<double> > n_2d;
 
 double V_dt, N_dt;
-double global_current = 0.2;
+
 double v_threshold = 0.2;
 double v_max = 1;
 double V_start = 0;
@@ -42,6 +45,7 @@ double gam_range = 0;
 double e = 0.005;
 
 //double current = 0;
+double global_current;
 double current_range = 0.5;
 double current_temp;
 
@@ -54,7 +58,6 @@ double x_range = 1;
 
 double time_d = 0;
 double delta_t = 0.001;
-
 
 template <typename T>
 std::string to_string_with_precision(const T a_value, const int n = 6)
@@ -81,8 +84,6 @@ std::string to_string_with_precision(const T a_value, const int n = 6)
    my_str.erase(num+1, my_str.size()-1); //erase characters from 0 to i index
     return my_str;
 }
-
-
 int reset_vecs(int x)
 {
     vec_N.clear();
@@ -91,16 +92,8 @@ int reset_vecs(int x)
     return (0);
 }
 
-void reset_2d_vecs(int x)
-{
-    v_map_2d.clear();;
-    voltage_2d.clear();
-    space_2d.clear();
-    n_2d.clear();
-}
-
 void output_file(vector<vector<double> > v_map){
-
+    cout << "I HAVE BEEN SUMMONED " << endl;
     ofstream create_file(path1);
     ofstream myfile;
     myfile.open(path1);
@@ -108,7 +101,7 @@ void output_file(vector<vector<double> > v_map){
     int col_num = x_range/delta_x;
 
     //myfile << "V" << V_start << "\n";
-    for (int j = 0; j <v_map.size(); j++)
+    for (int j = 0; j < v_map.size(); j++)
     {
         for (int i = 0; i < col_num; i++)
         {
@@ -118,8 +111,6 @@ void output_file(vector<vector<double> > v_map){
             }
             else
             {
-                
-            
                 myfile << "," << v_map[j][i];
             }
             
@@ -162,7 +153,7 @@ double Diffusion_AP(double z)
         for (double space = 0; space <= x_range+delta_x; space += delta_x) //THIS COUNTS SPACE!!
         { 
 
-        if(space == 0){
+        if(space <= 1){
             if((i <= 0.05) || (i <= 0.21 && i >= 0.2)){
                 current = global_current;
             }
@@ -203,9 +194,9 @@ double Diffusion_AP(double z)
         
         if(counter_space > 0){
             spatial_d = (voltage_2d[counter_time][counter_space] - (2 * voltage_2d[counter_time][counter_space - 1]) + voltage_2d[counter_time][counter_space - 2]);
-            // cout << "pos1 " << voltage_2d[counter_time][counter_space] << endl;
-            // cout << "pos2 " << 2 * voltage_2d[counter_time][counter_space - 1] << endl;
-            // cout << "pos3 " << voltage_2d[counter_time][counter_space - 2] << endl;
+            cout << "pos1 " << voltage_2d[counter_time][counter_space] << endl;
+            cout << "pos2 " << 2 * voltage_2d[counter_time][counter_space - 1] << endl;
+            cout << "pos3 " << voltage_2d[counter_time][counter_space - 2] << endl;
             vec_Space.push_back(diffusion*vec_Space[counter_space - 1]);
             //cout << diffusion*vec_Space[counter_space - 1] << endl;
             //cout << current << endl;

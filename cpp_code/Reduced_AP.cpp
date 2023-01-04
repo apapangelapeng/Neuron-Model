@@ -21,7 +21,7 @@ vector<double> vec_V, vec_N, vec_Space,vec_tiny_N,vec_N_Zerodt,vec_V_Zerodt;
 
 vector<double> vec_V_Zero_dvdt, vec_N_Zero_dvdt, vec_V_Zero_dndt, vec_N_Zero_dndt;
 
-vector<double> vec_Vdt, vec_Ndt, vec_x_Vdt, vec_y_Ndt;
+vector<double> vec_Vdt, vec_Ndt, vec_x_Vdt, vec_y_Ndt, vec_V_equal_n, vec_N_equal_v;
 
 vector<vector<double> > v_map_2d;
 
@@ -133,7 +133,7 @@ double nullcline_generation(double x)
         vec_V.push_back(vec_V[y] + V_dt);
         y++;
     }
-    for (double v_temp = local_v_start; v_temp <= 1.1; v_temp += 0.01)
+    for (double v_temp = -0.22; v_temp <= 1.1; v_temp += 0.01)
     {
         for (double n_temp = local_n_start; n_temp <= 0.20; n_temp += 0.005)
         {
@@ -159,20 +159,23 @@ double nullcline_generation(double x)
         }
     }
     
-    for (double v_temp = local_v_start; v_temp <= 1.1; v_temp += 0.05)
+    for (double v_temp = -0.2; v_temp <= 1.1; v_temp += 0.05)
     {
         for (double n_temp = local_n_start; n_temp <= 0.15; n_temp += 0.01)
         {
-            N_dt = (v_temp - (gam * n_temp));
+            N_dt = e*(v_temp - (gam * n_temp));
             time_d = v_temp * (v_temp - v_threshold) * (v_max - v_temp);
             V_dt = current + time_d - n_temp;
             vec_Ndt.push_back(N_dt);
             vec_Vdt.push_back(V_dt);
             vec_y_Ndt.push_back(n_temp);
             vec_x_Vdt.push_back(v_temp);
+            if((N_dt <= (V_dt+0.01)) && (N_dt >= (V_dt-0.01))){
+                vec_V_equal_n.push_back(n_temp);
+                vec_N_equal_v.push_back(v_temp);
+            }
         }
     }
-
     return (0);
 }
 
@@ -225,7 +228,6 @@ double output__nullcline_file(double x)
 
     nullcline_generation(0);
 
-   
     vector<int> sizes;
     /*cout<<vec_V.size()<<endl;
     cout<<vec_N.size()<<endl;
@@ -240,6 +242,8 @@ double output__nullcline_file(double x)
     sizes.insert(sizes.begin(),vec_Vdt.size());
     sizes.insert(sizes.begin(),vec_y_Ndt.size());
     sizes.insert(sizes.begin(),vec_x_Vdt.size());
+    sizes.insert(sizes.begin(),vec_V_equal_n.size());
+    sizes.insert(sizes.begin(),vec_N_equal_v.size());
     sort(sizes.begin(), sizes.end());
     int max_size = sizes.back();
     
@@ -254,8 +258,10 @@ double output__nullcline_file(double x)
     bool Vdt;
     bool N_y_dt;
     bool V_x_dt;
+    bool Vequal;
+    bool Nequal;
     
-    myfile << "N,V,N_dv_0,V_dv_0,N_dn_0,V_dn_0,Ndt,Vdt,N_y_dt,V_x_dt\n";
+    myfile << "N,V,N_dv_0,V_dv_0,N_dn_0,V_dn_0,Ndt,Vdt,N_y_dt,V_x_dt,Nequal,Vequal\n";
     for (int i = 0; i < max_size; i++)
     {
         N = (vec_N.size()> i) ? true  : false;
@@ -268,6 +274,8 @@ double output__nullcline_file(double x)
         Vdt = (vec_Vdt.size()> i) ? true  : false;
         N_y_dt = (vec_Ndt.size()> i) ? true  : false;
         V_x_dt = (vec_Vdt.size()> i) ? true  : false;
+        Nequal = (vec_V_equal_n.size()> i) ? true  : false;
+        Vequal = (vec_N_equal_v.size()> i) ? true  : false;
         if(N) myfile << vec_N[i] << "," ;
         if(!N) myfile << "," ;
         if(V) myfile << vec_V[i]<<"," ;
@@ -286,9 +294,15 @@ double output__nullcline_file(double x)
         if(!Vdt) myfile <<",";
         if(N_y_dt) myfile << vec_y_Ndt[i] << ",";
         if(!N_y_dt) myfile <<",";
-        if(V_x_dt) myfile << vec_x_Vdt[i];
+        if(V_x_dt) myfile << vec_x_Vdt[i] << ",";
+        if(!N_y_dt) myfile <<",";
+        if(Nequal) myfile << vec_N_equal_v[i] << ",";
+        if(!Nequal) myfile <<",";
+        if(Vequal) myfile << vec_V_equal_n[i];
         //if(!dn_V_0) myfile << vec_tiny_N[i];
         myfile<<"\n";
+
+        //cout << "break";
     }
     myfile.close();
     return (x);

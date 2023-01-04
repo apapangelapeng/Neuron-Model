@@ -45,8 +45,8 @@ double e = 0.005;
 double current_range = 0.5;
 double current_temp;
 
-double diffusion = 0.995;
-double diffusion_range = 2;
+double resistance = 0.995;
+double resistance_range = 2;
 
 double spatial_d = 0;
 double delta_x = 0.01;
@@ -91,8 +91,7 @@ void output_file(vector<vector<double> > v_map){
     int col_num = x_range/delta_x;
 
     //myfile << "V" << V_start << "\n";
-    for (int j = 0; j <v_map.size(); j++)
-    {
+    for (int j = 0; j < v_map.size(); j++){
         for (int i = 0; i < col_num; i++)
         {
             if (i == 0)
@@ -101,8 +100,6 @@ void output_file(vector<vector<double> > v_map){
             }
             else
             {
-                
-            
                 myfile << "," << v_map[j][i];
             }
             
@@ -145,7 +142,7 @@ double Diffusion_AP(double z)
         for (double space = 0; space <= x_range+delta_x; space += delta_x) //THIS COUNTS SPACE!!
         { 
 
-        if(space == 0){
+        if(space <= 9){
             if((i <= 0.05) || (i <= 0.21 && i >= 0.2)){
                 current = global_current;
             }
@@ -184,13 +181,13 @@ double Diffusion_AP(double z)
         // cout << "POSITION " << counter_space << " = " << vec_N[counter_space] << endl;
         // }
         
-        if(counter_space > 0){
+        if(counter_space >= 2){
             spatial_d = (voltage_2d[counter_time][counter_space] - (2 * voltage_2d[counter_time][counter_space - 1]) + voltage_2d[counter_time][counter_space - 2]);
             // cout << "pos1 " << voltage_2d[counter_time][counter_space] << endl;
             // cout << "pos2 " << 2 * voltage_2d[counter_time][counter_space - 1] << endl;
             // cout << "pos3 " << voltage_2d[counter_time][counter_space - 2] << endl;
-            vec_Space.push_back(diffusion*vec_Space[counter_space - 1]);
-            //cout << diffusion*vec_Space[counter_space - 1] << endl;
+            vec_Space.push_back(spatial_d);
+            //cout << resistance*vec_Space[counter_space - 1] << endl;
             //cout << current << endl;
         }
         else{
@@ -218,14 +215,16 @@ double Diffusion_AP(double z)
 
     counter_time += 1;
 
-    
+    /*
     for (int i = 0; i < vec_V.size(); i++)
     {
         //cout << "2d " << voltage_2d[counter_time][i] << endl;
         //cout << "1d " << vec_V[i] << endl;
     }
         //cout << "Break Point 3 and: " << counter_time << endl
+    */
     }
+    
     output_file(voltage_2d);
 
     return (0);
@@ -248,11 +247,11 @@ double Diffusion_AP(double z)
                 global_current = i;
                 gam = g;
               
-                diffusion=diff;
+                resistance=diff;
                 
                 string gcs = to_string_with_precision(global_current,4)+string("_");
                 string gs = to_string_with_precision(gam,4)+string("_");
-                string ds = to_string_with_precision(diffusion,4);
+                string ds = to_string_with_precision(resistance,4);
                 path1 = string("../data_files/reduced2dV_output")+ gcs + gs+ ds + string(".csv");
                 cout<<gcs + gs + ds <<endl;
                 Diffusion_AP(0);
@@ -268,16 +267,14 @@ double Diffusion_AP(double z)
     cout << "End" << endl;
 }*/
 
-int main(void)
-{ 
-   
+int main(void){ 
     cout << "Begin" << endl;
     global_current = 0.1000;
     gam = 0.5;
-    diffusion=0.99;
+    resistance=2;
     string gcs = to_string_with_precision(global_current,4)+string("_");
     string gs = to_string_with_precision(gam,4)+string("_");
-    string ds = to_string_with_precision(diffusion,4);
+    string ds = to_string_with_precision(resistance,4);
     path1 = string("../data_files/reduced2dV_output")+ gcs + gs+ ds + string(".csv");
     cout<<gcs + gs + ds <<endl;
     Diffusion_AP(0);

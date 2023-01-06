@@ -45,7 +45,7 @@ double e = 0.005;
 double current_range = 0.5;
 double current_temp;
 
-double resistance = 0.995;
+double resistance = 10;
 double resistance_range = 2;
 
 double spatial_d = 0;
@@ -142,18 +142,19 @@ double Diffusion_AP(double z)
         for (double space = 0; space <= x_range+delta_x; space += delta_x) //THIS COUNTS SPACE!!
         { 
 
-        if(space ==0){
-            if((i <= 0.05) || (i <= 0.21 && i >= 0.2)){
-                current = global_current;
+        if(space <= 0.09){
+            if((i <= 0.12 && i >= 0.1)){
+                current = 0.1;
             }
             else{
-                current = 0;
+                current = space_2d[counter_time][counter_space];
             }
         }
         else{
-            current = space_2d[counter_time][counter_space];
+            current = 0;
         }
         
+        //cout << current << endl;
 
         // if((i <= 0.1) || (i <= 0.6 && i >= 0.5)){
         //         cout << counter_space << " current = " << current << endl;
@@ -175,6 +176,8 @@ double Diffusion_AP(double z)
 
         vec_N.push_back(n_2d[counter_time][counter_space] + N_dt);
 
+        //cout << voltage_2d[counter_time][counter_space] << endl;
+
         // if(counter_time <= 100){
         // cout << "N_dt " << N_dt << endl;
         // cout << "POSITION " << counter_time << "," << counter_space << " = " << n_2d[counter_time][counter_space] << endl; 
@@ -186,7 +189,7 @@ double Diffusion_AP(double z)
             // cout << "pos1 " << voltage_2d[counter_time][counter_space] << endl;
             // cout << "pos2 " << 2 * voltage_2d[counter_time][counter_space - 1] << endl;
             // cout << "pos3 " << voltage_2d[counter_time][counter_space - 2] << endl;
-            vec_Space.push_back(spatial_d);
+            vec_Space.push_back((1/resistance)*spatial_d);
             //cout << resistance*vec_Space[counter_space - 1] << endl;
             //cout << current << endl;
         }
@@ -196,9 +199,9 @@ double Diffusion_AP(double z)
 
         //cout << vec_Space[2] << endl;
 
-        if(vec_Space[counter_space] >= 0.001){
+        
         //cout << "position " << counter_space << " " << vec_Space[counter_space] << endl;
-        }
+        
 
         // cout << counter_space << " position " << vec_Space[counter_space] << endl;
 
@@ -271,11 +274,13 @@ int main(void){
     cout << "Begin" << endl;
     global_current = 0.1000;
     gam = 0.5;
-    resistance=2;
+    resistance=50;
     string gcs = to_string_with_precision(global_current,4)+string("_");
     string gs = to_string_with_precision(gam,4)+string("_");
     string ds = to_string_with_precision(resistance,4);
-    path1 = string("../data_files/reduced2dV_output")+ gcs + gs+ ds + string(".csv");
+    path1 = string("../data_files/reduced2dV_output.csv");
+    //UNCOMMENT THE ONE BELOW ANGELA!!!!
+    //path1 = string("../data_files/reduced2dV_output")+ gcs + gs+ ds + string(".csv");
     cout<<gcs + gs + ds <<endl;
     Diffusion_AP(0);
 

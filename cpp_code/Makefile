@@ -33,10 +33,12 @@ reduced_ap: reduced_ap.o
 	$(CC) $(CFLAGS) -o reduced_ap reduced_ap.o
 
 
+reduced_ap_stochastic: reduced_ap_stochastic.o
+	$(CC) $(CFLAGS) -o reduced_ap_stochastic reduced_ap_stochastic.o
+
+
 # The main.o target can be written more simply
  
-neuronmodel.o: NeuronModel.cpp 
-	$(CC) $(CFLAGS) NeuronModel.cpp -c -o neuronmodel.o
 
 
 
@@ -48,10 +50,15 @@ reduced_ap.o: Reduced_AP.cpp
 
 
 
+reduced_ap_stochastic.o: Reduced_AP_Stochastic.cpp
+	$(CC) $(CFLAGS) Reduced_AP_Stochastic.cpp -c -o reduced_ap_stochastic.o
+
+
+
 
 .PHONY : clean
 clean :
-	rm -rf neuronmodel static_ap
+	rm -rf neuronmodel static_ap reduced_ap reduced_ap_stochastic Reduced_AP_Stochastic
 	rm -rf *.ll *.exe *.s *.o testall.log
 	
 .PHONY : clean_img

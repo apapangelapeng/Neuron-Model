@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include<algorithm>
+#include <random>
 
 using namespace std;
 
@@ -82,8 +83,10 @@ double nullcline_generation_a(double x)
     }
 
     y = 0;
+
     for (double n_temp = local_n_start; n_temp <= 0.15; n_temp += 0.0001)
     {
+        
         time_d = vec_V[y] * (vec_V[y] - v_threshold) * (v_max - vec_V[y]);
         V_dt = current + time_d - n_temp;
         vec_V.push_back(vec_V[y] + V_dt);
@@ -334,6 +337,8 @@ double Reduced_AP(double z)
 
     vec_V.push_back(V_start);
     vec_N.push_back(N_start);
+    default_random_engine generator;
+    normal_distribution<double> distribution(1,0.1);
 
     for (double i = 0; i <= 50; i += delta_t)
     {
@@ -348,9 +353,10 @@ double Reduced_AP(double z)
         cout << current_temp << endl; 
 
         // cout << "Break Point 4" << endl;
-
+        double noise_d = distribution(generator);
+        double noise_N = distribution(generator);
         time_d = vec_V[x] * (vec_V[x] - v_threshold) * (v_max - vec_V[x]);
-        V_dt = current_temp + time_d - vec_N[x];
+        V_dt = current_temp + time_d*noise_d - vec_N[x]*noise_N;
 
         cout << "V_DT " << V_dt << endl;
         vec_V.push_back(vec_V[x] + V_dt);
@@ -498,8 +504,8 @@ int main(void)
 {
     cout << "Begin" << endl;
 
-    //Reduced_AP(0);
-    output__nullcline_file(0);
+    Reduced_AP(0);
+    //output__nullcline_file(0);
     //Diffusion_AP(0);
 
     cout << "End" << endl;

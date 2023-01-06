@@ -15,11 +15,11 @@ neuronmodel: neuronmodel.o
 static_ap: static_ap.o
 	$(CC) $(CFLAGS) -o static_ap static_ap.o
 
+nullcline:nullcline.o
+	$(CC) $(CFLAGS) -o nullcline nullcline.o
+
 
 # The main.o target can be written more simply
- 
-neuronmodel.o: NeuronModel.cpp 
-	$(CC) $(CFLAGS) NeuronModel.cpp -c -o neuronmodel.o
 
 static_ap.o: Static_AP.cpp 
 	$(CC) $(CFLAGS) Static_AP.cpp -c -o static_ap.o
@@ -47,11 +47,15 @@ reduced_ap.o: Reduced_AP.cpp
 	$(CC) $(CFLAGS) Reduced_AP.cpp -c -o reduced_ap.o
 
 
+nullcline.o: nullcline.cpp
+	$(CC) $(CFLAGS) nullcline.cpp -c -o nullcline.o
+
+
 
 
 .PHONY : clean
 clean :
-	rm -rf neuronmodel static_ap
+	-rm *.o $(objects) mp1
 	rm -rf *.ll *.exe *.s *.o testall.log
 	
 .PHONY : clean_img

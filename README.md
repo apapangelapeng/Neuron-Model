@@ -50,9 +50,9 @@ This file illustrate
 
 ## DynamicFunc.h
 This header file stores the Hodgkin-Huxley model
-=
+=$C\dot{V} &= I-\overbrace{\bar{g}_k n^4(V-E_k)}^{I_k}-\overbrace{\bar{g}_{Na}m^3h(V-E_{Na})}^{I_{Na}}-\overbrace{g_L(V-E_L)}^{I_L}$
 $$\begin{align*}
-    C\dot{V} &= I-\overbrace{\bar{g}_k n^4(V-E_k)}^{I_k}-\overbrace{\bar{g}_{Na}m^3h(V-E_{Na})}^{I_{Na}}-\overbrace{g_L(V-E_L)}^{I_L}\\
+    
     \dot{n} &= \alpha_n(V)(10n)-\beta_n(V)n\\
     \dot{m} &= \alpha_m(V)(1-m)-\beta_m(V)m\\
     \dot{h} &= \alpha_h(V)(1-h)-\beta_h(V)h

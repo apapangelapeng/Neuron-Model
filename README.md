@@ -50,22 +50,21 @@ This file illustrate
 
 ## DynamicFunc.h
 This header file stores the Hodgkin-Huxley model
-```math 
+=
 $$\begin{align*}
     C\dot{V} &= I-\overbrace{\bar{g}_k n^4(V-E_k)}^{I_k}-\overbrace{\bar{g}_{Na}m^3h(V-E_{Na})}^{I_{Na}}-\overbrace{g_L(V-E_L)}^{I_L}
     \dot{n} &= \alpha_n(V)(10n)-\beta_n(V)n
     \dot{m} &= \alpha_m(V)(1-m)-\beta_m(V)m
     \dot{h} &= \alpha_h(V)(1-h)-\beta_h(V)h
-\end{align*}$$``` 
+\end{align*}$$
 s.t
-.
-```math
+
 $$\begin{align*}
     \alpha_n(V) &= 0.01 \frac{10-V}{exp(\frac{10-p}{10})-1}\\
     \beta_n(V &= 0.125 \exp(\frac{-V}{80})\\
     \alpha_m (V) &= 0.1\quad \frac{25-V}{\exp(\frac{25-V}{10})-1}\\
     \beta_m(V) &= 4exp(\frac{-V}{18})
-\end{align*}$$ ```
+\end{align*}$$
 
 
 This header file also stores the for loop that updates the output voltage with regard to the value of injected current $I$.

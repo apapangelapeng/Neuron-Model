@@ -10,6 +10,8 @@ To just compile one executable run `make <exectuable_name>` here are the availab
 - static_ap_hcn 
 - static_vcompare 
 - static_hcn_ap
+
+## Clean Up
 To remove all the executables and `.o` files, run `make clean`
 To remove all the `.csv` files run `make clean_csv`
 

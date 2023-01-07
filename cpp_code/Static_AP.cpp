@@ -307,6 +307,6 @@ int main(int argc, char *argv[])
 
     cout << "Begin" << endl;
     output_file(0);
-    Run_time(0);
+    //Run_time(0);
     cout << "End" << endl;
 }

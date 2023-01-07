@@ -537,7 +537,6 @@ double voltage_output(double x)
         if(!HCN_I2) myfile << "," ;
         if(HCN_I3) myfile << vec_HCN_I3[i];
 
-
         //if(!dn_V_0) myfile << vec_tiny_N[i];
 
         myfile << "\n";
@@ -549,9 +548,11 @@ double voltage_output(double x)
 
 int main(void) {
   cout << "Begin" << endl;
-  output_file(0);
-  output_HCN_Static_AP(0);
-  output_WT_Static_AP(0);
+  //output_file(0);
+  //output_HCN_Static_AP(0);
+  cout << "break point 1" << endl;
+  //output_WT_Static_AP(0);
+  cout << "break point 2" << endl;
   voltage_output(0);
   cout << "End" << endl;
 }

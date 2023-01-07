@@ -5,6 +5,7 @@
 #include <string.h>
 #include <vector>
 #include <algorithm>
+#include <random>
 
 using namespace std;
 
@@ -33,8 +34,10 @@ double C_m = 1;
 double g_k = 36; 
 double g_Na = 120;
 double g_l = 0.3; 
-double g_HCN = 1; 
-double g_Cl = 10; //https://link.springer.com/article/10.1007/s11538-017-0289-y
+double g_HCN = 0.1; 
+double g_Cl; //https://link.springer.com/article/10.1007/s11538-017-0289-y
+
+double g_cl_max = 0; 
 
 double E_k = -12; 
 double E_Na = 120; 
@@ -49,19 +52,12 @@ double t_Cl = 0.02;
 
 double delta_t = 0.001;
 
-double global_current = -5;
+double global_current = 5;
 
-/*
-n is a kinetic equation built to track ONE kind of POTASSIUM channel's opening
-it will be a proportion of channels open, and or the activation of the channel
-potassium current can be generalized as: g*n^4*(V - E)
-Where V is resting voltage, E is membrane potential, and g is conductance
+default_random_engine generator;
 
-m is the same, but for Na 
-h represents INACTIVATION of Na channels, so h and m compete
+normal_distribution<double> error(1,0.025);
 
-The formulas are taken from page 37 of the Electrophysiology textbook
-*/
 int reset_vecs(int x){
     vec_V.clear();
     vec_n.clear();
@@ -176,6 +172,7 @@ int output_file(int x){
 }
 
 double Static_HCN_AP(int HCN_num){
+    
 
     double V_start = 0;
     double current;
@@ -190,15 +187,25 @@ double Static_HCN_AP(int HCN_num){
 
     vec_Cl_I.push_back(0);
 
-    for(double i = 0; i <= 50; i += delta_t){
+    for(double i = 0; i <= 100; i += delta_t){
         //||  10 <= i <= 12 || 20 <= i <= 22 || 30 <= i <= 32 || 40 <= i <= 42
-        if((i <= 25 && i >= 23) || (i <= 28 && i >= 26) || (i <= 31 && i >= 29) || (i <= 34 && i >= 32)){
+        if(i <= 50 && i >= 45){
             current = global_current;
             //cout << x << endl; 
         }
         else{
             current = 0;
         }
+
+        if(i <= 55 && i >= 45){
+            g_Cl = g_cl_max;
+        }
+        else{
+            g_Cl = g_cl_max;
+        }
+
+
+        double error_applied = error(generator);
 
         //cout << "Break point 1" << endl;
 
@@ -214,27 +221,27 @@ double Static_HCN_AP(int HCN_num){
 
         //cout << "Break point 3" << endl;
 
-        K_I_temp = (g_k*pow(vec_n[x+1],4)*((vec_V[x]) - E_k));
-        Na_I_temp = (g_Na*pow(vec_m[x+1],3)*pow(vec_h[x+1],1)*((vec_V[x]) - E_Na));
-        L_I_temp = (g_l*((vec_V[x]) - E_l));
+        K_I_temp = (error_applied)*(g_k*pow(vec_n[x+1],4)*((vec_V[x]) - E_k));
+        Na_I_temp = (error_applied)*(g_Na*pow(vec_m[x+1],3)*pow(vec_h[x+1],1)*((vec_V[x]) - E_Na));
+        L_I_temp = (error_applied)*(g_l*((vec_V[x]) - E_l));
 
-        //Cl_I_temp = t_Cl*((g_Cl*pow(2.71828,(vec_V[x]-E_Cl)/b_Cl))*(vec_V[x] - E_Cl) - vec_Cl_I[x]);
+        Cl_I_temp = (error_applied)*t_Cl*((g_Cl*pow(2.71828,(vec_V[x]-E_Cl)/b_Cl))*(vec_V[x] - E_Cl) - vec_Cl_I[x]);
 
         //cout << "Break point 4" << endl;
         if(HCN_num == 0){
-            HCN_I_temp = (g_HCN*pow(vec_h[x+1],1)*(vec_V[x] - E_HCN1));
+            HCN_I_temp = (error_applied)*(g_HCN*pow(vec_h[x+1],1)*(vec_V[x] - E_HCN1));
         }
         if(HCN_num == 1){
-            HCN_I_temp = (g_HCN*pow(vec_h[x+1],1)*(vec_V[x] - E_HCN2));
+            HCN_I_temp = (error_applied)*(g_HCN*pow(vec_h[x+1],1)*(vec_V[x] - E_HCN2));
         }
         if(HCN_num == 2){
-            HCN_I_temp = (g_HCN*pow(vec_h[x+1],1)*(vec_V[x] - E_HCN3));
+            HCN_I_temp = (error_applied)*(g_HCN*pow(vec_h[x+1],1)*(vec_V[x] - E_HCN3));
         }
 
 
         //cout << V << endl;
 
-        V_dt = (current - K_I_temp - Na_I_temp - L_I_temp - HCN_I_temp)/C_m;
+        V_dt = (current - K_I_temp - Na_I_temp - L_I_temp - HCN_I_temp - Cl_I_temp)/C_m;
         vec_V.push_back(vec_V[x] + delta_t*V_dt);
 
         if(HCN_num == 0){
@@ -254,7 +261,7 @@ double Static_HCN_AP(int HCN_num){
         vec_Na_I.push_back(Na_I_temp);
         vec_K_I.push_back(K_I_temp);
         vec_L_I.push_back(L_I_temp);
-        //vec_Cl_I.push_back(Cl_I_temp);
+        vec_Cl_I.push_back(Cl_I_temp);
 
         vec_HCN_I.push_back(HCN_I_temp);
 
@@ -270,7 +277,6 @@ double Static_HCN_AP(int HCN_num){
 
 
 double Static_WT_AP(int arbitrary_variable){
-
     double V_start = 0;
     double current;
     double V_temp;
@@ -282,17 +288,26 @@ double Static_WT_AP(int arbitrary_variable){
     vec_m.push_back(0);
     vec_h.push_back(0);
 
-    //vec_Cl_I.push_back(0);
+    vec_Cl_I.push_back(0);
 
-    for(double i = 0; i <= 50; i += delta_t){
+    for(double i = 0; i <= 100; i += delta_t){
         //||  10 <= i <= 12 || 20 <= i <= 22 || 30 <= i <= 32 || 40 <= i <= 42
-        if((i <= 25 && i >= 23) || (i <= 28 && i >= 26) || (i <= 31 && i >= 29) || (i <= 34 && i >= 32)){
+        if(i <= 55 && i >= 45){
             current = global_current;
             //cout << x << endl; 
         }
         else{
             current = 0;
         }
+    
+        if(i <= 55 && i >= 45){
+            g_Cl = g_cl_max;
+        }
+        else{
+            g_Cl = g_cl_max;
+        }
+
+        double error_applied = error(generator);
 
         //cout << "Break point 1" << endl;
 
@@ -308,17 +323,17 @@ double Static_WT_AP(int arbitrary_variable){
 
         //cout << "Break point 3" << endl;
 
-        K_I_temp = (g_k*pow(vec_n[x+1],4)*((vec_V[x]) - E_k));
-        Na_I_temp = (g_Na*pow(vec_m[x+1],3)*pow(vec_h[x+1],1)*((vec_V[x]) - E_Na));
-        L_I_temp = (g_l*((vec_V[x]) - E_l));
+        K_I_temp = (error_applied)*(g_k*pow(vec_n[x+1],4)*((vec_V[x]) - E_k));
+        Na_I_temp = (error_applied)*(g_Na*pow(vec_m[x+1],3)*pow(vec_h[x+1],1)*((vec_V[x]) - E_Na));
+        L_I_temp = (error_applied)*(g_l*((vec_V[x]) - E_l));
 
-        //Cl_I_temp = t_Cl*((g_Cl*pow(2.71828,(vec_V[x]-E_Cl)/b_Cl))*(vec_V[x] - E_Cl) - vec_Cl_I[x]);
+        Cl_I_temp = (error_applied)*t_Cl*((g_Cl*pow(2.71828,(vec_V[x]-E_Cl)/b_Cl))*(vec_V[x] - E_Cl) - vec_Cl_I[x]);
 
         //cout << "Break point 4" << endl;
 
         //cout << V << endl;
 
-        V_dt = (current - K_I_temp - Na_I_temp - L_I_temp)/C_m;
+        V_dt = (current - K_I_temp - Na_I_temp - L_I_temp - Cl_I_temp)/C_m;
         vec_V.push_back(vec_V[x] + delta_t*V_dt);
 
         vec_VWT.push_back(vec_V[x] + delta_t*V_dt);

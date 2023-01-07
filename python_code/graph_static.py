@@ -11,7 +11,7 @@ class GraphStatic:
         else:
             column_name =list(data_frame.columns )[begin_index:]
         fig, ax = plt.subplots()
-        x = np.arange(0, len(data_frame)/1000, step=1/1000)
+        x = np.arange(200, len(data_frame)/1000, step=1/1000)
 
         for i in range(len(column_name)):
             label = column_name[i]

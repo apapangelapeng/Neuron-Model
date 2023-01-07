@@ -4,23 +4,14 @@
 #include <sstream>
 #include <string.h>
 #include <vector>
+#include "StaticConst.h"
+#include "StringPercision.h"
+#include "DynamicFunc.h"
 
 using namespace std;
 
-/*
-THIS FILE IS JUST FOR ME TO TEST THINGS
-*/
 
-#include <sstream>
 
-template <typename T>
-std::string to_string_with_precision(const T a_value, const int n = 6)
-{
-    std::ostringstream out;
-    out.precision(n);
-    out << std::fixed << a_value;
-    return out.str();
-}
 
 const char *path1 = "../data_files/static_output.csv";
 string path2;
@@ -30,23 +21,12 @@ double n_dynamic, m_dynamic, h_dynamic, n_inf, m_inf, h_inf;
 vector<double> vec_n, vec_m, vec_h;
 vector<double> vec_inf_n, vec_inf_m, vec_inf_h;
 vector<double> vec_Nap, vec_Kp;
-vector<double> vec_tau_n, vec_tau_m, vec_tau_h;
+
 double tau_n, tau_m, tau_h;
 
 double V_dt;
 vector<double> vec_V, vec_Na_I, vec_K_I, vec_L_I;
 
-double C_m = 1;
-
-double g_k = 36;
-double g_Na = 120;
-double g_l = 0.3;
-
-double E_k = -12;
-double E_Na = 120;
-double E_l = 10.6;
-
-double delta_t = 0.1;
 double current;
 
 /*
@@ -66,78 +46,12 @@ int reset_vecs(int x)
     vec_n.clear();
     vec_m.clear();
     vec_h.clear();
-    vec_tau_m.clear();
+  
     vec_inf_m.clear();
-    vec_tau_h.clear();
+  
     vec_inf_h.clear();
-    vec_tau_n.clear();
+   
     vec_inf_n.clear();
-    return (0);
-}
-
-double dynamical_h(double V)
-{
-    // for some reason I decided to add in double h, so that we can store this value local to the method
-    // and, h_dynamic can be shared to main. I forget why I did this lol, I probably had something in mind
-    a_h = 0.07 * exp(-V / 20);
-    b_h = ((1) / (exp((30 - V) / 10) + 1));
-    h_inf = a_h / (a_h + b_h);
-    tau_h = 1 / (a_h + b_h);
-    // the if statements are added to expunge NaN from the data
-    // storing the values in vectors so that they can be easily written to a csv file
-    vec_tau_h.push_back(tau_h);
-    vec_inf_h.push_back(h_inf);
-    return (0);
-}
-
-double dynamical_n(double V)
-{
-    a_n = 0.01 * ((10 - V) / (exp((10 - V) / 10) - 1));
-    if (V == 10)
-    {
-        a_n = 0.1; // This is the Taylor approx value for when divide by 0
-    }
-    b_n = 0.125 * exp(-V / 80);
-    n_inf = a_n / (a_n + b_n);
-    tau_n = 1 / (a_n + b_n);
-    // cout << tau_n << endl;
-    vec_tau_n.push_back(tau_n);
-    vec_inf_n.push_back(n_inf);
-    // cout << V << endl;
-    return (0);
-}
-
-double dynamical_m(double V)
-{
-    a_m = 0.1 * ((25 - V) / (exp((25 - V) / 10) - 1));
-    if (V == 25)
-    {
-        a_m = 1; // This is the Taylor approx value for when divide by 0
-    }
-    b_m = 4 * exp(-V / 18);
-    m_inf = a_m / (a_m + b_m);
-    tau_m = 1 / (a_m + b_m);
-    // cout << tau_m << endl;
-    vec_tau_m.push_back(tau_m);
-    vec_inf_m.push_back(m_inf);
-    return (0);
-}
-
-double Proportion_open_test(int x)
-{
-    // This scales between membrane voltages of -40 to 100, which is near the typical operating range of neurons
-    for (double i = -40; i <= 100; i++)
-    {
-        double V_temp = i;
-
-        // cout << V_temp << endl;
-        // inputs a, b, and c are dependent on the type of channel
-        // Sodium channels will only utilize a and b
-        // Potassium channels will only use c
-        dynamical_m(V_temp);
-        dynamical_h(V_temp);
-        dynamical_n(V_temp);
-    }
     return (0);
 }
 
@@ -147,46 +61,28 @@ int output_file(int x)
     ofstream myfile;
     myfile.open(path1);
 
-    Proportion_open_test(0);
+    
+    vector< vector <double> > v_map = Proportion_open_test(0);
 
-    myfile << "Tau_n, ";
-    for (int i = 0; i < vec_tau_n.size(); i++)
+    myfile << "Tau_N,Tau_M, Tau_H,  Inf_n,Inf_M,  Inf_H \n";
+
+        for (int i = 0; i < v_map[0].size(); i++)
     {
-        myfile << vec_tau_n[i] << ",";
+        for (int j = 0; j < v_map.size(); j++)
+        {
+            string end = (j == v_map.size() - 1) ? "\n" : ",";
+            myfile << v_map[j][i] << end;
+        }
     }
-    myfile << "\n Tau_M, ";
-    for (int i = 0; i < vec_tau_m.size(); i++)
-    {
-        myfile << vec_tau_m[i] << ",";
-        // cout << vec_tau_m[i] << endl;
-    }
-    myfile << "\n Tau_H, ";
-    for (int i = 0; i < vec_tau_h.size(); i++)
-    {
-        myfile << vec_tau_h[i] << ",";
-    }
-    myfile << "\n Inf_n, ";
-    for (int i = 0; i < vec_inf_n.size(); i++)
-    {
-        myfile << vec_inf_n[i] << ",";
-    }
-    myfile << "\n Inf_M, ";
-    for (int i = 0; i < vec_inf_m.size(); i++)
-    {
-        myfile << vec_inf_m[i] << ",";
-    }
-    myfile << "\n Inf_H, ";
-    for (int i = 0; i < vec_inf_h.size(); i++)
-    {
-        myfile << vec_inf_h[i] << ",";
-    }
+   
     return (0);
 }
 
 double Static_AP(int arbitrary_variable)
 {
     reset_vecs(0);
-
+    vector<double> vec_tau_n, vec_tau_m, vec_tau_h;
+    vector<double> vec_inf_n, vec_inf_m, vec_inf_h;
     double V_start = 0;
 
     double Na_I_temp, K_I_temp, L_I_temp;
@@ -210,10 +106,10 @@ double Static_AP(int arbitrary_variable)
         }
 
         // cout << "Break point 1" << endl;
+        dynamical_m(vec_V[x],vec_tau_m,vec_inf_m);
+        dynamical_h(vec_V[x],vec_tau_h,vec_inf_h);
+        dynamical_n(vec_V[x],vec_tau_n,vec_inf_n);
 
-        dynamical_m(vec_V[x]);
-        dynamical_h(vec_V[x]);
-        dynamical_n(vec_V[x]);
 
         // cout << "Break point 2" << endl;
 

@@ -6,56 +6,12 @@
 #include <vector>
 #include <map>
 #include<algorithm>
+#include"ReduceConst.h"
 
 using namespace std;
 
 
 const char *path1 = "../data_files/reduced_V_output.csv";
-
-
-vector<double> vec_V, vec_N, vec_Space,vec_tiny_N,vec_N_Zerodt,vec_V_Zerodt;
-
-vector<double> vec_V_Zero_dvdt, vec_N_Zero_dvdt, vec_V_Zero_dndt, vec_N_Zero_dndt;
-
-vector<double> vec_Vdt, vec_Ndt, vec_x_Vdt, vec_y_Ndt, vec_V_equal_n, vec_N_equal_v;
-
-vector<vector<double> > v_map_2d;
-
-double V_dt, N_dt;
-
-double v_threshold = 0.2;
-double v_max = 1;
-double V_start = 0;
-double v_range = 0.5;
-
-double N_start = 0;
-
-double gam = 3;
-double gam_range = 0;
-
-double e = 0.005;
-
-//double current = 0;
-double current_range = 0.5;
-double current_temp;
-
-double diffusion = 0.5;
-double diffusion_range = 2;
-
-double spatial_d = 0;
-double delta_x = 0.1;
-double x_range = 1;
-
-double time_d = 0;
-double delta_t = 0.1;
-
-int reset_vecs(int x)
-{
-    vec_N.clear();
-    vec_V.clear();
-    return (0);
-}
-
 
 void write_Reduced_AP(vector<vector<double> > & v_map){
     cout << "I HAVE BEEN SUMMONED " << endl;
@@ -63,40 +19,36 @@ void write_Reduced_AP(vector<vector<double> > & v_map){
     ofstream myfile;
     myfile.open(path1);
 
-    /*
-    for (V_start = -0.5; V_start <= v_range; V_start += 0.3)
-    {
-
-        string end = (V_start >= v_range - 0.3) ? "\n" : ",";
-        myfile << "V" << V_start << end;
-    }
-    */
-
     myfile << "V" << V_start << "\n";
-    for (int i = 0; i < vec_V.size(); i++)
+    for (int i = 0; i < v_map[0].size(); i++)
     {
         for (int j = 0; j < v_map.size(); j++)
         {
             string end = (j == v_map.size() - 1) ? "\n" : ",";
             myfile << v_map[j][i] << end;
         }
-
-        // cout << vec_V[i] << endl;
     }
 
     myfile << "\n";
 
 }
 
-double Reduced_AP(double z)
+vector<vector<double> > Reduced_AP(double z)
 {
-    reset_vecs(0);
+    vector<double> vec_V, vec_N;
+
+vector<double> vec_Vdt, vec_Ndt, vec_x_Vdt, vec_y_Ndt, vec_V_equal_n, vec_N_equal_v;
+
+
+
+double V_dt, N_dt;
     int x = 0;
 
     V_start = 0;
 
     vec_V.push_back(V_start);
     vec_N.push_back(N_start);
+    vector<vector<double> > v_map_2d;
 
     for (double i = 0; i <= 50; i += delta_t)
     {
@@ -110,7 +62,6 @@ double Reduced_AP(double z)
         
         cout << current_temp << endl; 
 
-        // cout << "Break Point 4" << endl;
 
         time_d = vec_V[x] * (vec_V[x] - v_threshold) * (v_max - vec_V[x]);
         V_dt = current_temp + time_d - vec_N[x];
@@ -120,20 +71,16 @@ double Reduced_AP(double z)
         N_dt = e * (vec_V[x] - (gam * vec_N[x]));
         vec_N.push_back(vec_N[x] + N_dt);
 
-        // cout << "Break Point 5" << endl;
-
-        // cout << "x = " << x << endl;
-
         x += 1;
         }
 
     vector<double> vec_V_deep = vec_V;
     v_map_2d.push_back(vec_V_deep); 
-
+   
     cout << "V_start: " << V_start << endl;
 
-    write_Reduced_AP(v_map_2d);
-    return (0);
+   
+   return v_map_2d;
 }
 
 
@@ -141,8 +88,8 @@ int main(void)
 {
     cout << "Reduced Action potential Running. Outputfile location: " << endl;
     cout<<path1<<endl;
-    Reduced_AP(0);
-
+    vector<vector<double> >  v_map_2d = Reduced_AP(0);
+    write_Reduced_AP(v_map_2d);
 
     cout << "End" << endl;
 }

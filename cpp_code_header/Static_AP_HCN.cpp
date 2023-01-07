@@ -5,6 +5,7 @@
 #include <string.h>
 #include <vector>
 #include <algorithm>
+#include"StaticConst.h"
 
 using namespace std;
 

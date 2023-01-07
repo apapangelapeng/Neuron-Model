@@ -5,15 +5,15 @@
 #include <string.h>
 #include <vector>
 #include <algorithm>
-
+#include "DynamicFunc.h"
+#include "StaticOutput.h"
 using namespace std;
 
 /*
 THIS FILE IS JUST FOR ME TO TEST THINGS
 */
 
-const char *path1="../data_files/testVcompare_output.csv";
-const char *path2="../data_files/testWT_output.csv";
+
 const char *path3="../data_files/static_hcn_output.csv";
 
 double a_n, b_n, a_h, b_h, a_m, b_m;
@@ -82,52 +82,9 @@ int reset_vecs(int x){
     return(0);
 }
 
-double dynamical_h(double V){
-    //for some reason I decided to add in double h, so that we can store this value local to the method
-    //and, h_dynamic can be shared to main. I forget why I did this lol, I probably had something in mind
-    a_h = 0.07*exp(-V/20);
-    b_h = ((1)/(exp((30-V)/10) + 1));
-    h_inf = a_h/(a_h + b_h);
-    tau_h = 1/(a_h + b_h);
-    //the if statements are added to expunge NaN from the data
-    //storing the values in vectors so that they can be easily written to a csv file
-    vec_tau_h.push_back(tau_h);
-    vec_inf_h.push_back(h_inf);
-    return(0);
-}
-
-double dynamical_n(double V){
-    a_n = 0.01*((10-V)/(exp((10-V)/10) - 1));
-    if(V == 10){
-        a_n = 0.1; // This is the Taylor approx value for when divide by 0
-    }
-    b_n = 0.125*exp(-V/80);
-    n_inf = a_n/(a_n + b_n);
-    tau_n = 1/(a_n + b_n);
-    //cout << tau_n << endl;
-    vec_tau_n.push_back(tau_n);
-    vec_inf_n.push_back(n_inf);
-    //cout << V << endl;
-    return (0);
-}
-
-double dynamical_m(double V){
-    a_m = 0.1*((25 - V)/(exp((25-V)/10) - 1));
-    if (V == 25){
-        a_m = 1; // This is the Taylor approx value for when divide by 0
-    }
-    b_m = 4*exp(-V/18);
-    m_inf = a_m/(a_m + b_m);
-    tau_m = 1/(a_m + b_m);
-    //cout << tau_m << endl;
-    vec_tau_m.push_back(tau_m);
-    vec_inf_m.push_back(m_inf);
-    return (0);
-}
-
-
 double Static_HCN_AP(int HCN_num){
-
+    vector<double> vec_tau_n, vec_tau_m, vec_tau_h;
+    vector<double> vec_inf_n, vec_inf_m, vec_inf_h;
     double V_start = 0;
     double current;
     double V_temp;
@@ -153,9 +110,9 @@ double Static_HCN_AP(int HCN_num){
 
         //cout << "Break point 1" << endl;
 
-        dynamical_m(vec_V[x]);
-        dynamical_h(vec_V[x]);
-        dynamical_n(vec_V[x]);
+          dynamical_m(vec_V[x],vec_tau_m,vec_inf_m);
+        dynamical_h(vec_V[x],vec_tau_h,vec_inf_h);
+        dynamical_n(vec_V[x],vec_tau_n,vec_inf_n);
 
         //cout << "Break point 2" << endl;
 
@@ -216,81 +173,16 @@ double Static_HCN_AP(int HCN_num){
         //cout << x << endl;
     }
     vec_Cl_I.erase(vec_Cl_I.begin());
+    output_data(path3,vec_V,vec_K_I,vec_Na_I,vec_L_I,vec_Cl_I,vec_HCN_I,"HCN_I");
     return(0);
 }
 
-double output_HCN_Static_AP(double x)
-{
-    reset_vecs(0);
-    ofstream create_file(path3);
-    ofstream myfile;
-    myfile.open(path3);
-
-    Static_HCN_AP(0);
-
-    vector<int> sizes;
-    /*cout<<vec_V.size()<<endl;
-    cout<<vec_N.size()<<endl;
-    cout<<vec_tiny_N.size()<<endl;*/
-    sizes.insert(sizes.begin(),vec_V.size());
-    sizes.insert(sizes.begin(),vec_K_I.size());
-    sizes.insert(sizes.begin(),vec_Na_I.size());
-    sizes.insert(sizes.begin(),vec_L_I.size());
-    sizes.insert(sizes.begin(),vec_Cl_I.size());
-    sizes.insert(sizes.begin(),vec_HCN_I.size());
-    sort(sizes.begin(), sizes.end());
-    int max_size = sizes.back();
-    
-    cout << max_size << endl;
-
-    bool V; 
-    bool K_I; 
-    bool Na_I; 
-    bool L_I; 
-    bool Cl_I;
-    bool HCN_I;
-    
-    //cout << "Break point 4" << endl;
-
-    myfile << "V,K_I,Na_I,L_I,Cl_I,HCN_I\n";
-    for (int i = 0; i < max_size; i++)
-    {
-        //cout << "Break point 5" << endl;
-        V = (vec_V.size() > i) ? true : false;
-        K_I = (vec_V.size() > i) ? true : false;
-        Na_I = (vec_V.size() > i) ? true : false;
-        L_I = (vec_V.size() > i) ? true : false;
-        HCN_I = (vec_V.size() > i) ? true : false;
-
-        //cout << "Break point 6" << endl;
-
-        if(V) myfile << vec_V[i] <<"," ;
-        if(!V) myfile <<"," ;
-        if(K_I) myfile << vec_K_I[i] << ",";
-        if(!K_I) myfile << ",";
-        if(Na_I) myfile << vec_Na_I[i] << ",";
-        if(!Na_I) myfile <<",";
-        if(L_I) myfile << vec_L_I[i] << ",";
-        if(!L_I) myfile <<",";
-        if(Cl_I) myfile << vec_Cl_I[i] << ",";
-        if(!Cl_I) myfile <<",";
-        if(HCN_I) myfile << vec_HCN_I[i];
-
-        //if(!dn_V_0) myfile << vec_tiny_N[i];
-
-        myfile << "\n";
-        //cout << "Break point 6" << endl;
-
-    }
-    myfile.close();
-    return (x);
-}
 
 
 int main(void) {
   cout << "Begin" << endl;
 
-  output_HCN_Static_AP(0);
+  Static_HCN_AP(0);
 
   cout << "End" << endl;
 }

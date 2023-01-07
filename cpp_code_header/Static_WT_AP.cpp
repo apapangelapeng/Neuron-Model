@@ -6,6 +6,8 @@
 #include <vector>
 #include <algorithm>
 #include "StaticConst.h"
+#include "DynamicFunc.h"
+#include "StaticOutput.h"
 
 using namespace std;
 
@@ -18,8 +20,7 @@ const char *output_path="../data_files/static_wt_output.csv";
 double a_n, b_n, a_h, b_h, a_m, b_m;
 double n_dynamic, m_dynamic, h_dynamic, n_inf, m_inf, h_inf;
 vector<double> vec_n, vec_m, vec_h;
-vector<double> vec_inf_n, vec_inf_m, vec_inf_h;
-vector<double> vec_tau_n, vec_tau_m, vec_tau_h;
+
 double tau_n, tau_m, tau_h;
 
 double V_dt; 
@@ -41,52 +42,10 @@ h represents INACTIVATION of Na channels, so h and m compete
 The formulas are taken from page 37 of the Electrophysiology textbook
 */
 
-double dynamical_h(double V){
-    //for some reason I decided to add in double h, so that we can store this value local to the method
-    //and, h_dynamic can be shared to main. I forget why I did this lol, I probably had something in mind
-    a_h = 0.07*exp(-V/20);
-    b_h = ((1)/(exp((30-V)/10) + 1));
-    h_inf = a_h/(a_h + b_h);
-    tau_h = 1/(a_h + b_h);
-    //the if statements are added to expunge NaN from the data
-    //storing the values in vectors so that they can be easily written to a csv file
-    vec_tau_h.push_back(tau_h);
-    vec_inf_h.push_back(h_inf);
-    return(0);
-}
-
-double dynamical_n(double V){
-    a_n = 0.01*((10-V)/(exp((10-V)/10) - 1));
-    if(V == 10){
-        a_n = 0.1; // This is the Taylor approx value for when divide by 0
-    }
-    b_n = 0.125*exp(-V/80);
-    n_inf = a_n/(a_n + b_n);
-    tau_n = 1/(a_n + b_n);
-    //cout << tau_n << endl;
-    vec_tau_n.push_back(tau_n);
-    vec_inf_n.push_back(n_inf);
-    //cout << V << endl;
-    return (0);
-}
-
-double dynamical_m(double V){
-    a_m = 0.1*((25 - V)/(exp((25-V)/10) - 1));
-    if (V == 25){
-        a_m = 1; // This is the Taylor approx value for when divide by 0
-    }
-    b_m = 4*exp(-V/18);
-    m_inf = a_m/(a_m + b_m);
-    tau_m = 1/(a_m + b_m);
-    //cout << tau_m << endl;
-    vec_tau_m.push_back(tau_m);
-    vec_inf_m.push_back(m_inf);
-    return (0);
-}
-
 
 double Static_WT_AP(int arbitrary_variable){
-
+    vector<double> vec_tau_n, vec_tau_m, vec_tau_h;
+    vector<double> vec_inf_n, vec_inf_m, vec_inf_h;
     double V_start = 0;
     double current;
     double V_temp;
@@ -112,9 +71,9 @@ double Static_WT_AP(int arbitrary_variable){
 
         //cout << "Break point 1" << endl;
 
-        dynamical_m(vec_V[x]);
-        dynamical_h(vec_V[x]);
-        dynamical_n(vec_V[x]);
+        dynamical_m(vec_V[x],vec_tau_m,vec_inf_m);
+        dynamical_h(vec_V[x],vec_tau_h,vec_inf_h);
+        dynamical_n(vec_V[x],vec_tau_n,vec_inf_n);
 
         //cout << "Break point 2" << endl;
 
@@ -151,9 +110,10 @@ double Static_WT_AP(int arbitrary_variable){
         //cout << x << endl;
     }
     vec_Cl_I.erase(vec_Cl_I.begin());
+    output_data(output_path,vec_V,vec_K_I,vec_Na_I,vec_L_I,vec_Cl_I,vec_HCN_I,"None");
     return(0);
 }
-
+/*
 double output_WT_Static_AP(double x)
 {
     ofstream create_file(output_path);
@@ -163,9 +123,9 @@ double output_WT_Static_AP(double x)
     Static_WT_AP(0);
 
     vector<int> sizes;
-    /*cout<<vec_V.size()<<endl;
+    cout<<vec_V.size()<<endl;
     cout<<vec_N.size()<<endl;
-    cout<<vec_tiny_N.size()<<endl;*/
+    cout<<vec_tiny_N.size()<<endl;
     sizes.insert(sizes.begin(),vec_V.size());
     sizes.insert(sizes.begin(),vec_K_I.size());
     sizes.insert(sizes.begin(),vec_Na_I.size());
@@ -213,14 +173,12 @@ double output_WT_Static_AP(double x)
     }
     myfile.close();
     return (x);
-}
+}*/
 
 
 int main(void) {
   cout << "Begin" << endl;
-  //output_file(0);
-  //output_HCN_Static_AP(0);
-  output_WT_Static_AP(0);
+Static_WT_AP(0);
 
   cout << "End" << endl;
 }

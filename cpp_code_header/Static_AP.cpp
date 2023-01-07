@@ -7,6 +7,7 @@
 #include "StaticConst.h"
 #include "StringPercision.h"
 #include "DynamicFunc.h"
+#include"DynamicOutput.h"
 
 using namespace std;
 
@@ -55,28 +56,7 @@ int reset_vecs(int x)
     return (0);
 }
 
-int output_file(int x)
-{
-    ofstream create_file(path1);
-    ofstream myfile;
-    myfile.open(path1);
 
-    
-    vector< vector <double> > v_map = Proportion_open_test(0);
-
-    myfile << "Tau_N,Tau_M, Tau_H,  Inf_n,Inf_M,  Inf_H \n";
-
-        for (int i = 0; i < v_map[0].size(); i++)
-    {
-        for (int j = 0; j < v_map.size(); j++)
-        {
-            string end = (j == v_map.size() - 1) ? "\n" : ",";
-            myfile << v_map[j][i] << end;
-        }
-    }
-   
-    return (0);
-}
 
 double Static_AP(int arbitrary_variable)
 {
@@ -202,7 +182,7 @@ int main(int argc, char *argv[])
     }
 
     cout << "Begin" << endl;
-    output_file(0);
+    output_file(path1);
     Run_time(0);
     cout << "End" << endl;
 }

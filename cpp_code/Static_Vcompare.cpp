@@ -32,7 +32,7 @@ vector<double> vec_HCN_I1, vec_HCN_I2, vec_HCN_I3;
 double C_m = 1; 
 
 double g_k = 36; 
-double g_Na = 120;
+double g_Na = 0;
 double g_l = 0.3; 
 double g_HCN = 0.1; 
 double g_Cl; //https://link.springer.com/article/10.1007/s11538-017-0289-y
@@ -52,7 +52,7 @@ double t_Cl = 0.02;
 
 double delta_t = 0.001;
 
-double global_current = 5;
+double global_current = 0;
 
 default_random_engine generator;
 

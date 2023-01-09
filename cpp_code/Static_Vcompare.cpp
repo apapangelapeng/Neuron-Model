@@ -29,15 +29,17 @@ vector<double> vec_Nap, vec_Kp, vec_HCNp;
 vector<double> vec_VWT, vec_VHCN1, vec_VHCN2, vec_VHCN3; 
 vector<double> vec_HCN_I1, vec_HCN_I2, vec_HCN_I3; 
 
+vector<double> vec_anode_break; 
+
 double C_m = 1; 
 
 double g_k = 36; 
-double g_Na = 0;
+double g_Na = 120;
 double g_l = 0.3; 
 double g_HCN = 0.1; 
 double g_Cl; //https://link.springer.com/article/10.1007/s11538-017-0289-y
 
-double g_cl_max = 0; 
+double g_cl_max = 20; 
 
 double E_k = -12; 
 double E_Na = 120; 
@@ -201,7 +203,7 @@ double Static_HCN_AP(int HCN_num){
             g_Cl = g_cl_max;
         }
         else{
-            g_Cl = g_cl_max;
+            g_Cl = 0;
         }
 
 
@@ -304,7 +306,7 @@ double Static_WT_AP(int arbitrary_variable){
             g_Cl = g_cl_max;
         }
         else{
-            g_Cl = g_cl_max;
+            g_Cl = 0;
         }
 
         double error_applied = error(generator);
@@ -326,6 +328,11 @@ double Static_WT_AP(int arbitrary_variable){
         K_I_temp = (error_applied)*(g_k*pow(vec_n[x+1],4)*((vec_V[x]) - E_k));
         Na_I_temp = (error_applied)*(g_Na*pow(vec_m[x+1],3)*pow(vec_h[x+1],1)*((vec_V[x]) - E_Na));
         L_I_temp = (error_applied)*(g_l*((vec_V[x]) - E_l));
+
+        if (i <= 60 && i >= 53){
+            double na_activation_temp = pow(vec_m[x+1],3)*pow(vec_h[x+1],1);
+            vec_anode_break.push_back(na_activation_temp);
+        }
 
         Cl_I_temp = (error_applied)*t_Cl*((g_Cl*pow(2.71828,(vec_V[x]-E_Cl)/b_Cl))*(vec_V[x] - E_Cl) - vec_Cl_I[x]);
 
@@ -394,10 +401,11 @@ double voltage_output(double x)
     bool HCN_I1; 
     bool HCN_I2; 
     bool HCN_I3; 
-    
+    bool anode_break;
+
     //cout << "Break point 4" << endl;
 
-    myfile << "V_WT,V_HCN1,V_HCN2,V_HCN3,HCN_I1,HCN_I2,HCN_I3\n";
+    myfile << "V_WT,V_HCN1,V_HCN2,V_HCN3,HCN_I1,HCN_I2,HCN_I3,Anode_Break\n";
     for (int i = 0; i < max_size; i++)
     {
         //cout << "Break point 5" << endl;
@@ -408,6 +416,7 @@ double voltage_output(double x)
         HCN_I1 = (vec_VHCN1.size() > i) ? true : false;
         HCN_I2 = (vec_VHCN2.size() > i) ? true : false;
         HCN_I3 = (vec_VHCN3.size() > i) ? true : false;
+        anode_break = (vec_anode_break.size() > i) ? true : false;
 
         //cout << "Break point 6" << endl;
 
@@ -423,8 +432,9 @@ double voltage_output(double x)
         if(!HCN_I1) myfile <<"," ;
         if(HCN_I2) myfile << vec_HCN_I2[i] << ",";
         if(!HCN_I2) myfile << "," ;
-        if(HCN_I3) myfile << vec_HCN_I3[i];
-
+        if(HCN_I3) myfile << vec_HCN_I3[i] << ",";
+        if(!HCN_I3) myfile << "," ;
+        if(anode_break) myfile << vec_anode_break[i];
 
         //if(!dn_V_0) myfile << vec_tiny_N[i];
 

@@ -2,7 +2,7 @@
 
 
 
-# Compilatin of Executables
+# Compilation of Executables
 To compile all the executable run `make all`.
 To just compile one executable run `make <exectuable_name>` here are the available names
 - static_ap 

@@ -5,6 +5,7 @@
 #include <string.h>
 #include <vector>
 #include <algorithm>
+#include "StaticConst.h"
 
 using namespace std;
 
@@ -12,9 +13,8 @@ using namespace std;
 THIS FILE IS JUST FOR ME TO TEST THINGS
 */
 
-const char *path1="../data_files/testVcompare_output.csv";
-const char *path2="../data_files/testWT_output.csv";
-const char *path3="../data_files/testHCN_output.csv";
+const char *path1="../data_files/static_vcompare_output.csv";
+
 
 double a_n, b_n, a_h, b_h, a_m, b_m;
 double n_dynamic, m_dynamic, h_dynamic, n_inf, m_inf, h_inf;
@@ -29,28 +29,6 @@ vector<double> vec_Nap, vec_Kp, vec_HCNp;
 vector<double> vec_VWT, vec_VHCN1, vec_VHCN2, vec_VHCN3; 
 vector<double> vec_HCN_I1, vec_HCN_I2, vec_HCN_I3; 
 
-double C_m = 1; 
-
-double g_k = 36; 
-double g_Na = 120;
-double g_l = 0.3; 
-double g_HCN = 1; 
-double g_Cl = 10; //https://link.springer.com/article/10.1007/s11538-017-0289-y
-
-double E_k = -12; 
-double E_Na = 120; 
-double E_l = 10.6; 
-double E_HCN3 = -43; 
-double E_HCN1 = -1; 
-double E_HCN2 = -21; 
-double E_Cl = -10; 
-
-double b_Cl = 50; 
-double t_Cl = 0.02; 
-
-double delta_t = 0.001;
-
-double global_current = -5;
 
 /*
 n is a kinetic equation built to track ONE kind of POTASSIUM channel's opening
@@ -269,72 +247,6 @@ double Static_HCN_AP(int HCN_num){
     return(0);
 }
 
-double output_HCN_Static_AP(double x)
-{
-    reset_vecs(0);
-    ofstream create_file(path3);
-    ofstream myfile;
-    myfile.open(path3);
-
-    Static_HCN_AP(0);
-
-    vector<int> sizes;
-    /*cout<<vec_V.size()<<endl;
-    cout<<vec_N.size()<<endl;
-    cout<<vec_tiny_N.size()<<endl;*/
-    sizes.insert(sizes.begin(),vec_V.size());
-    sizes.insert(sizes.begin(),vec_K_I.size());
-    sizes.insert(sizes.begin(),vec_Na_I.size());
-    sizes.insert(sizes.begin(),vec_L_I.size());
-    sizes.insert(sizes.begin(),vec_Cl_I.size());
-    sizes.insert(sizes.begin(),vec_HCN_I.size());
-    sort(sizes.begin(), sizes.end());
-    int max_size = sizes.back();
-    
-    cout << max_size << endl;
-
-    bool V; 
-    bool K_I; 
-    bool Na_I; 
-    bool L_I; 
-    bool Cl_I;
-    bool HCN_I;
-    
-    //cout << "Break point 4" << endl;
-
-    myfile << "V,K_I,Na_I,L_I,Cl_I,HCN_I\n";
-    for (int i = 0; i < max_size; i++)
-    {
-        //cout << "Break point 5" << endl;
-        V = (vec_V.size() > i) ? true : false;
-        K_I = (vec_V.size() > i) ? true : false;
-        Na_I = (vec_V.size() > i) ? true : false;
-        L_I = (vec_V.size() > i) ? true : false;
-        HCN_I = (vec_V.size() > i) ? true : false;
-
-        //cout << "Break point 6" << endl;
-
-        if(V) myfile << vec_V[i] <<"," ;
-        if(!V) myfile <<"," ;
-        if(K_I) myfile << vec_K_I[i] << ",";
-        if(!K_I) myfile << ",";
-        if(Na_I) myfile << vec_Na_I[i] << ",";
-        if(!Na_I) myfile <<",";
-        if(L_I) myfile << vec_L_I[i] << ",";
-        if(!L_I) myfile <<",";
-        if(Cl_I) myfile << vec_Cl_I[i] << ",";
-        if(!Cl_I) myfile <<",";
-        if(HCN_I) myfile << vec_HCN_I[i];
-
-        //if(!dn_V_0) myfile << vec_tiny_N[i];
-
-        myfile << "\n";
-        //cout << "Break point 6" << endl;
-
-    }
-    myfile.close();
-    return (x);
-}
 
 double Static_WT_AP(int arbitrary_variable){
 
@@ -405,66 +317,6 @@ double Static_WT_AP(int arbitrary_variable){
     return(0);
 }
 
-double output_WT_Static_AP(double x)
-{
-    reset_vecs(0);
-    ofstream create_file(path2);
-    ofstream myfile;
-    myfile.open(path2);
-
-    Static_WT_AP(0);
-
-    vector<int> sizes;
-    /*cout<<vec_V.size()<<endl;
-    cout<<vec_N.size()<<endl;
-    cout<<vec_tiny_N.size()<<endl;*/
-    sizes.insert(sizes.begin(),vec_V.size());
-    sizes.insert(sizes.begin(),vec_K_I.size());
-    sizes.insert(sizes.begin(),vec_Na_I.size());
-    sizes.insert(sizes.begin(),vec_L_I.size());
-    sizes.insert(sizes.begin(),vec_Cl_I.size());
-    sort(sizes.begin(), sizes.end());
-    int max_size = sizes.back();
-    
-    cout << max_size << endl;
-
-    bool V; 
-    bool K_I; 
-    bool Na_I; 
-    bool L_I; 
-    bool Cl_I;
-    
-    //cout << "Break point 4" << endl;
-
-    myfile << "V,K_I,Na_I,L_I,Cl_I\n";
-    for (int i = 0; i < max_size; i++)
-    {
-        //cout << "Break point 5" << endl;
-        V = (vec_V.size() > i) ? true : false;
-        K_I = (vec_V.size() > i) ? true : false;
-        Na_I = (vec_V.size() > i) ? true : false;
-        L_I = (vec_V.size() > i) ? true : false;
-
-        //cout << "Break point 6" << endl;
-
-        if(V) myfile << vec_V[i] <<"," ;
-        if(!V) myfile <<"," ;
-        if(K_I) myfile << vec_K_I[i] << ",";
-        if(!K_I) myfile << ",";
-        if(Na_I) myfile << vec_Na_I[i] << ",";
-        if(!Na_I) myfile <<",";
-        if(L_I) myfile << vec_L_I[i] << ",";
-        if(!L_I) myfile <<",";
-        if(Cl_I) myfile << vec_Cl_I[i];
-
-        //if(!dn_V_0) myfile << vec_tiny_N[i];
-
-        myfile << "\n";
-        //cout << "Break point 6" << endl;
-    }
-    myfile.close();
-    return (x);
-}
 
 double voltage_output(double x)
 {
@@ -537,6 +389,7 @@ double voltage_output(double x)
         if(!HCN_I2) myfile << "," ;
         if(HCN_I3) myfile << vec_HCN_I3[i];
 
+
         //if(!dn_V_0) myfile << vec_tiny_N[i];
 
         myfile << "\n";
@@ -548,11 +401,6 @@ double voltage_output(double x)
 
 int main(void) {
   cout << "Begin" << endl;
-  //output_file(0);
-  //output_HCN_Static_AP(0);
-  cout << "break point 1" << endl;
-  //output_WT_Static_AP(0);
-  cout << "break point 2" << endl;
   voltage_output(0);
   cout << "End" << endl;
 }

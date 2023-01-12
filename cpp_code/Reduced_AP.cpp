@@ -17,7 +17,7 @@ vector<double> vec_V, vec_N, vec_Space,vec_tiny_N,vec_N_Zerodt,vec_V_Zerodt;
 
 vector<double> vec_V_Zero_dvdt, vec_N_Zero_dvdt, vec_V_Zero_dndt, vec_N_Zero_dndt;
 
-vector<double> vec_Vdt, vec_Ndt, vec_x_Vdt, vec_y_Ndt, vec_V_equal_n, vec_N_equal_v;
+vector<double> vec_Vdt, vec_Ndt, vec_x_Vdt, vec_y_Ndt;
 
 vector<vector<double> > v_map_2d;
 
@@ -55,7 +55,6 @@ int reset_vecs(int x)
     vec_V.clear();
     return (0);
 }
-
 
 void write_Reduced_AP(vector<vector<double> > & v_map){
     cout << "I HAVE BEEN SUMMONED " << endl;

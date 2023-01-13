@@ -162,7 +162,7 @@ double Diffusion_AP(double z)
         // cout << "POSITION " << counter_space << " = " << vec_N[counter_space] << endl;
         // }
         
-        if(counter_space > 0){
+        if(counter_space > 1){
             spatial_d = (voltage_2d[counter_time][counter_space] - (2 * voltage_2d[counter_time][counter_space - 1]) + voltage_2d[counter_time][counter_space - 2]);
             // cout << "pos1 " << voltage_2d[counter_time][counter_space] << endl;
             // cout << "pos2 " << 2 * voltage_2d[counter_time][counter_space - 1] << endl;

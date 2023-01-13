@@ -48,11 +48,15 @@ double E_Na = 120;
 double E_l = 10.6; 
 
 double delta_t = 0.01;
-double delta_x = 0.01;
-
-double current = 0;
 
 double x_range = 1;
+double delta_x = 0.01;
+
+double current_applied = 0;
+double current_input = 0;
+
+double R = 20; 
+
 
 int reset_vecs(int x){
     vec_V.clear();
@@ -77,20 +81,22 @@ void output_file(vector<vector<double> > v_map){
     ofstream myfile;
     myfile.open(path1);
 
+    cout << v_map.size() << endl;
+
     int col_num = x_range/delta_x;
 
     //myfile << "V" << V_start << "\n";
-    for (int j = 0; j < v_map.size(); j++)
+    for (int counter_time = 2000; counter_time < 4000; counter_time+= 10)
     {
-        for (int i = 0; i < col_num; i++)
+        for (int counter_space = 0; counter_space < col_num; counter_space++)
         {
-            if (i == 0)
+            if (counter_space == 0)
             {
-                myfile << v_map[j][i];
+                myfile << v_map[counter_time][counter_space];
             }
             else
             {
-                myfile << "," << v_map[j][i];
+                myfile << "," << v_map[counter_time][counter_space];
             }
             
         }
@@ -124,6 +130,15 @@ double dynamical_n(double V){
     vec_tau_n.push_back(tau_n);
     vec_inf_n.push_back(n_inf);
     //cout << V << endl;
+
+    // if((t >= 435) && (t <= 438) && (x == 1)){
+    //     cout << "v = " << V << endl;
+    //     cout << "a_n = " << a_n << endl;
+    //     cout << "b_n = " << b_n << endl;
+    //     cout << "n_inf = " << n_inf << endl;
+    //     cout << "tau_n = " << tau_n << endl;
+    //  }
+
     return (0);
 }
 
@@ -160,11 +175,18 @@ double Static_WT_AP(int arbitrary_variable){
     m_2d.push_back(vec_m);
     h_2d.push_back(vec_h);
 
-    for(double t = 0; t <= 10; t += delta_t){
+    for(double t = 0; t <= 50; t += delta_t){
         counter_space = 0;
         reset_vecs(0);
+
         for(double x = 0; x <= x_range; x += delta_x){
-        //||  10 <= i <= 12 || 20 <= i <= 22 || 30 <= i <= 32 || 40 <= i <= 42
+
+        if(((counter_time > 2500) && (counter_time < 2600)) && (counter_space < 10)){
+            current_applied = 10;
+        }
+        else{
+            current_applied = 0; 
+        }
 
         //cout << "Break point 1" << endl;
 
@@ -180,30 +202,40 @@ double Static_WT_AP(int arbitrary_variable){
 
         //cout << "Break point 3" << endl;
 
-        K_I_temp = (g_k*pow(vec_n[counter_time+1],4)*((vec_V[counter_time]) - E_k));
-        Na_I_temp = (g_Na*pow(vec_m[counter_time+1],3)*pow(vec_h[counter_time+1],1)*((vec_V[counter_time]) - E_Na));
-        L_I_temp = (g_l*((vec_V[counter_time]) - E_l));
-
+        K_I_temp = (g_k*pow(vec_n[counter_space+1],4)*((vec_V[counter_space]) - E_k));
+        Na_I_temp = (g_Na*pow(vec_m[counter_space+1],3)*pow(vec_h[counter_space+1],1)*((vec_V[counter_space]) - E_Na));
+        L_I_temp = (g_l*((vec_V[counter_space]) - E_l));
 
         //cout << "Break point 4" << endl;
 
-        //cout << V << endl;
+        if(counter_space >= 2){
+            current_input = (1/R)*(v_WT_2d[counter_time][counter_space] - (2 * v_WT_2d[counter_time][counter_space - 1]) + v_WT_2d[counter_time][counter_space - 2]);
+        }
+        else{
+            current_input = 0;
+        }
+        //cout << "Break point 4" << endl;
 
-        V_dt = (current - K_I_temp - Na_I_temp - L_I_temp)/C_m;
+        V_dt = (current_applied - K_I_temp - Na_I_temp - L_I_temp + current_input)/C_m;
         vec_V.push_back(v_WT_2d[counter_time][counter_space] + delta_t*V_dt);
 
         vec_Na_I.push_back(Na_I_temp);
         vec_K_I.push_back(K_I_temp);
         vec_L_I.push_back(L_I_temp);
 
+        // if((counter_space ==1)){
+        //     cout << "na_k" << counter_time << "  " << K_I_temp << endl;
+        //     cout << "vec_N = " << (n_2d[counter_time][counter_space] + delta_t*((vec_inf_n[counter_space] - n_2d[counter_time][counter_space])/vec_tau_n[counter_space])) << " " << vec_n[counter_space+1] << endl;
+        // }
+
         //cout << V << endl;
         //cout << V_temp << endl;
         counter_space += 1;
 
-        if(counter_space == 1){
-            //cout << "K_I_temp " << K_I_temp << endl;
-            cout << "vec_n " << vec_n[counter_space] << endl;
-        }
+        // if(counter_space == 8){
+        //     cout << "time" << counter_time << "  " << vec_V[counter_space] << endl;
+        //     cout << "pos" << counter_time << "  " << vec_tau_n[counter_space] << endl;
+        // }
 
         }
 

@@ -86,7 +86,7 @@ void output_file(vector<vector<double> > v_map){
     int col_num = x_range/delta_x;
 
     //myfile << "V" << V_start << "\n";
-    for (int counter_time = 2500; counter_time < 3800; counter_time+= 1)
+    for (int counter_time = 2500; counter_time < 5000; counter_time+= 5)
     {
         for (int counter_space = 0; counter_space < col_num; counter_space++)
         {
@@ -217,7 +217,15 @@ double Static_WT_AP(int arbitrary_variable){
         //cout << "Break point 4" << endl;
 
         V_dt = (current_applied - K_I_temp - Na_I_temp - L_I_temp + current_input)/C_m;
+
+        int temp_equal = x_range / delta_x;
+        
+        if(counter_space == (temp_equal)){
+            vec_V.push_back(0);
+        }
+        else{
         vec_V.push_back(v_WT_2d[counter_time][counter_space] + delta_t*V_dt);
+        }
 
         vec_Na_I.push_back(Na_I_temp);
         vec_K_I.push_back(K_I_temp);
@@ -230,7 +238,7 @@ double Static_WT_AP(int arbitrary_variable){
 
         //cout << V << endl;
         //cout << V_temp << endl;
-        
+
         counter_space += 1;
 
         // if(counter_space == 120){

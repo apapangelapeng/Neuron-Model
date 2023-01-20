@@ -55,7 +55,7 @@ double delta_x = 0.01;
 double current_applied = 0;
 double current_input = 0;
 
-double R = 20; 
+double R = 2; 
 
 
 int reset_vecs(int x){
@@ -86,7 +86,7 @@ void output_file(vector<vector<double> > v_map){
     int col_num = x_range/delta_x;
 
     //myfile << "V" << V_start << "\n";
-    for (int counter_time = 2000; counter_time < 4000; counter_time+= 10)
+    for (int counter_time = 2400; counter_time < 4000; counter_time+= 5)
     {
         for (int counter_space = 0; counter_space < col_num; counter_space++)
         {
@@ -208,7 +208,7 @@ double Static_WT_AP(int arbitrary_variable){
 
         //cout << "Break point 4" << endl;
 
-        if(counter_space >= 2){
+        if((counter_space >= 2) || (counter_space <= (x_range - 3))){
             current_input = (1/R)*(v_WT_2d[counter_time][counter_space] - (2 * v_WT_2d[counter_time][counter_space - 1]) + v_WT_2d[counter_time][counter_space - 2]);
         }
         else{

@@ -43,8 +43,9 @@ double e = 0.005;
 //double current = 0;
 double current_range = 0.5;
 double current_temp;
+double current_input;
 
-double diffusion = 0.995;
+double diffusion = 0.2;
 double diffusion_range = 2;
 
 double spatial_d = 0;
@@ -58,7 +59,7 @@ int reset_vecs(int x)
 {
     vec_N.clear();
     vec_V.clear();
-    vec_Space.clear();
+    //vec_Space.clear();
     return (0);
 }
 
@@ -71,7 +72,7 @@ void output_file(vector<vector<double> > v_map){
     int col_num = x_range/delta_x;
 
     //myfile << "V" << V_start << "\n";
-    for (int j = 0; j < v_map.size(); j++)
+    for (int j = 0.19/delta_t; j < 0.4/delta_t; j+=1)
     {
         for (int i = 0; i < col_num; i++)
         {
@@ -95,7 +96,7 @@ double Diffusion_AP(double z)
 
     double V_start = 0.4;
     double N_start = 0;
-    double Space_start = 0.05;
+    //double Space_start = 0.05;
     double current = 0; 
 
     int counter_space = 0;
@@ -105,12 +106,11 @@ double Diffusion_AP(double z)
     { 
         vec_V.push_back(V_start);
         vec_N.push_back(N_start);
-        vec_Space.push_back(Space_start);
     }
     
     voltage_2d.push_back(vec_V);
     n_2d.push_back(vec_N);
-    space_2d.push_back(vec_Space);
+    //space_2d.push_back(vec_Space);
 
     //cout << "Break Point 2" << endl;
 
@@ -123,8 +123,8 @@ double Diffusion_AP(double z)
         for (double space = 0; space <= x_range+delta_x; space += delta_x) //THIS COUNTS SPACE!!
         { 
 
-        if(space == 0){
-            if((i <= 0.05) || (i <= 0.21 && i >= 0.2)){
+        if(space <= 0.1){
+            if((i <= 0.21 && i >= 0.2)){
                 current = 0.05;
             }
             else{
@@ -132,7 +132,7 @@ double Diffusion_AP(double z)
             }
         }
         else{
-            current = space_2d[counter_time][counter_space];
+            current = 0;
         }
         
 
@@ -140,10 +140,23 @@ double Diffusion_AP(double z)
         //         cout << counter_space << " current = " << current << endl;
         //     }
 
+        if((counter_space >= 1) && (counter_space <= 99)){
+            spatial_d = diffusion*(voltage_2d[counter_time][counter_space + 1] - (2 * voltage_2d[counter_time][counter_space]) + voltage_2d[counter_time][counter_space - 1]);
+            // cout << "pos1 " << voltage_2d[counter_time][counter_space] << endl;
+            // cout << "pos2 " << 2 * voltage_2d[counter_time][counter_space - 1] << endl;
+            // cout << "pos3 " << voltage_2d[counter_time][counter_space - 2] << endl;
+            //cout << diffusion*vec_Space[counter_space - 1] << endl;
+            //cout << current << endl;
+            current_input = spatial_d;
+        }
+        else{
+            current_input = 0;
+        }
+
         time_d = voltage_2d[counter_time][counter_space] * (voltage_2d[counter_time][counter_space] - v_threshold) * (v_max - voltage_2d[counter_time][counter_space]);
         //cout << "POSITION " << counter_time << "," << counter_space << " = " << voltage_2d[counter_time][counter_space] << endl; 
         //cout << "time_d " << time_d << endl;
-        V_dt = current + time_d - n_2d[counter_time][counter_space];
+        V_dt = current + current_input + time_d - n_2d[counter_time][counter_space];
 
         // if((i <= 0.1) || (i <= 0.6 && i >= 0.5)){
         //         cout << counter_space << " " << current << endl;
@@ -161,25 +174,8 @@ double Diffusion_AP(double z)
         // cout << "POSITION " << counter_time << "," << counter_space << " = " << n_2d[counter_time][counter_space] << endl; 
         // cout << "POSITION " << counter_space << " = " << vec_N[counter_space] << endl;
         // }
-        
-        if(counter_space > 1){
-            spatial_d = (voltage_2d[counter_time][counter_space] - (2 * voltage_2d[counter_time][counter_space - 1]) + voltage_2d[counter_time][counter_space - 2]);
-            // cout << "pos1 " << voltage_2d[counter_time][counter_space] << endl;
-            // cout << "pos2 " << 2 * voltage_2d[counter_time][counter_space - 1] << endl;
-            // cout << "pos3 " << voltage_2d[counter_time][counter_space - 2] << endl;
-            vec_Space.push_back(diffusion*vec_Space[counter_space - 1]);
-            //cout << diffusion*vec_Space[counter_space - 1] << endl;
-            //cout << current << endl;
-        }
-        else{
-            vec_Space.push_back(current);
-        }
 
         //cout << vec_Space[2] << endl;
-
-        if(vec_Space[counter_space] >= 0.001){
-        //cout << "position " << counter_space << " " << vec_Space[counter_space] << endl;
-        }
 
         // cout << counter_space << " position " << vec_Space[counter_space] << endl;
 
@@ -191,8 +187,6 @@ double Diffusion_AP(double z)
 
         voltage_2d.push_back(vec_V);
         n_2d.push_back(vec_N);
-        space_2d.push_back(vec_Space);
-
 
     counter_time += 1;
 

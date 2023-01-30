@@ -55,7 +55,7 @@ double delta_x = 0.005;
 double current_applied = 0;
 double current_input = 0;
 
-double R = 2.2; 
+double R = 0.1; 
 
 
 int reset_vecs(int x){
@@ -86,7 +86,7 @@ void output_file(vector<vector<double> > v_map){
     int col_num = x_range/delta_x;
 
     //myfile << "V" << V_start << "\n";
-    for (int counter_time = 2500; counter_time < 5000; counter_time+= 5)
+    for (int counter_time = 2500; counter_time < 5000; counter_time+= 10)
     {
         for (int counter_space = 0; counter_space < col_num; counter_space++)
         {
@@ -166,9 +166,9 @@ double Static_WT_AP(int arbitrary_variable){
     for (double space = 0; space <= x_range+delta_x; space += delta_x) //THIS COUNTS SPACE!!
     { 
         vec_V.push_back(V_start);
-        vec_n.push_back(0);
-        vec_m.push_back(0);
-        vec_h.push_back(0);
+        vec_n.push_back(dynamical_n(0));
+        vec_m.push_back(dynamical_m(0));
+        vec_h.push_back(dynamical_h(0));
     }
     v_WT_2d.push_back(vec_V);
     n_2d.push_back(vec_n);
@@ -181,8 +181,8 @@ double Static_WT_AP(int arbitrary_variable){
 
         for(double x = 0; x <= x_range; x += delta_x){
 
-        if(((counter_time > 2500) && (counter_time < 2600)) && (counter_space < 10)){
-            current_applied = 10;
+        if(((counter_time > 2500) && (counter_time < 2800)) && (counter_space < 10)){
+            current_applied = 15;
         }
         else{
             current_applied = 0; 
@@ -208,8 +208,8 @@ double Static_WT_AP(int arbitrary_variable){
 
         //cout << "Break point 4" << endl;
 
-        if((counter_space >= 2) || (counter_space <= (x_range - 3))){
-            current_input = (1/R)*(v_WT_2d[counter_time][counter_space] - (2 * v_WT_2d[counter_time][counter_space - 1]) + v_WT_2d[counter_time][counter_space - 2]);
+        if((counter_space >= 1) || (counter_space <= (x_range - 1))){
+            current_input = (1/R)*(v_WT_2d[counter_time][counter_space + 1] - (2 * v_WT_2d[counter_time][counter_space]) + v_WT_2d[counter_time][counter_space - 1]);
         }
         else{
             current_input = 0;
@@ -231,10 +231,11 @@ double Static_WT_AP(int arbitrary_variable){
         vec_K_I.push_back(K_I_temp);
         vec_L_I.push_back(L_I_temp);
 
-        // if((counter_space ==1)){
-        //     cout << "na_k" << counter_time << "  " << K_I_temp << endl;
-        //     cout << "vec_N = " << (n_2d[counter_time][counter_space] + delta_t*((vec_inf_n[counter_space] - n_2d[counter_time][counter_space])/vec_tau_n[counter_space])) << " " << vec_n[counter_space+1] << endl;
-        // }
+        if((counter_space == 50)){
+             // cout << "na_k" << counter_time << "  " << K_I_temp << endl;
+             // cout << "vec_N = " << (n_2d[counter_time][counter_space] + delta_t*((vec_inf_n[counter_space] - n_2d[counter_time][counter_space])/vec_tau_n[counter_space])) << " " << vec_n[counter_space+1] << endl;
+             cout << "2nd deriv : " << current_input << endl;
+        }
 
         //cout << V << endl;
         //cout << V_temp << endl;

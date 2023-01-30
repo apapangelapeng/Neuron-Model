@@ -498,8 +498,8 @@ int main(void)
 {
     cout << "Begin" << endl;
 
-    //Reduced_AP(0);
-    output__nullcline_file(0);
+    Reduced_AP(0);
+    //output__nullcline_file(0);
     //Diffusion_AP(0);
 
     cout << "End" << endl;

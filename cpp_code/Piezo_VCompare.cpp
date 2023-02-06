@@ -13,7 +13,7 @@ using namespace std;
 THIS FILE IS JUST FOR ME TO TEST THINGS
 */
 
-const char *path1="../data_files/HH_propagate_output.csv";
+const char *path1="../data_files/Piezo_propagate_output.csv";
 
 
 double a_n, b_n, a_h, b_h, a_m, b_m;

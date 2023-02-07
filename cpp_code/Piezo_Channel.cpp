@@ -51,9 +51,9 @@ double G_Piezo = 0.000000000030;
 
 
 // Overall Definitions %%%%%%%%%%%%%%%%%%%%%
-double Ca_diff_dT; //derivative of diffusion of calcium per time
-double D_c; //coefficient of diffusion
-double Ca_diff_dT_dT; //2nd derivative of Ca diffusion per unit time
+double Ca_c_dT; //derivative of concentration of calcium per time
+double D_diff; //coefficient of diffusion
+double Ca_c_dT_dT; //2nd derivative of Ca concentration per unit time
 double J_ipr; //IPR is the IP3 receptor, and is supposedly the biggest calcium leaker
 // Note: it does not seem that Piezo upregulating PLC/IP3 has been shown
 double cone_circumference; //circumference of the growth cone
@@ -61,21 +61,31 @@ double cone_cross_area; //cross sectional area of the growth cone
 double J_in; //flux of Ca2+ into the cell 
 double J_pm; //flux pumped out of the cell
 double J_ryr; //flux from RyR receptor
-double J_serca; //flux from serca pump
-double J_on; //function of binding of Ca2+ to buffers
+double J_serca; //flux from serca pump, maybe includes good SERCA model: https://link.springer.com/article/10.1140/epjp/s13360-023-03691-1
+double J_on; //function of binding of Ca2+ to buffers, Page 309 of mathematical physiology seems good
 double J_off; //function of unbinding of Ca2+ from buffers
 
 // Ca_diff_dT = D_c*Ca_diff_dT_dT + J_ipr + (cone_circumference/cone_cross_area)*(J_in - J_pm) + J_ryr - J_serca - J_on + J_off; 
 
 // RyR Definitions %%%%%%%%%%%%%%%%%%%%%%%%
-// Very good reference: https://www.frontiersin.org/articles/10.3389/fphys.2012.00114/full#F1
+// Very good reference for calcium dynamics: https://www.frontiersin.org/articles/10.3389/fphys.2012.00114/full#F1
 double vol_D; //dyadic space volume
 double vol_ER; //ER volume
 double g_ryr; //RyR channel conductance
 double c_j; //concentration inside the ER 
 double c_d; //concentration in the cytoplasm
-double N_r; //stochastic RyR opening
-J_ryr = N_r*(g_ryr/vol_D)*(c_j - c_d);
+double N_ryr; //stochastic number of RyR channels
+
+// J_ryr = N_ryr*(g_ryr/vol_D)*(c_j - c_d); //This kind of decribes the local movement due to gradient
+
+// Buffering Definitions %%%%%%%%%%%%%%%%%
+// Reference includes a list of models published by year: https://www.frontiersin.org/articles/10.3389/fncom.2018.00014/full
+double buff_unbound; //concentration of unbound buffer
+double buff_bound; //concentration of bound buffer
+double k_buff_bind; //binding affinity/Kon of buffer
+double k_buff_unbind; //unbinding affinity/Koff of buffer
+double buff_c_dT; //derivative of concentration of buffer with respect to time
+double buff_c_dT_dT; //second derivative of concentration of buffer with respect to time
 
 
 vector<double> temp_vec;

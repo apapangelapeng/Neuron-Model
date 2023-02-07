@@ -93,10 +93,10 @@ $$\begin{align*}
 s.t
 
 $$\begin{align*}
-    \alpha_n(V) &= 0.01 \frac{10-V}{exp(\frac{10-p}{10})-1}\\
-    \beta_n(V) &= 0.125 \exp(\frac{-V}{80}\\
+    \alpha_n(V) &= 0.01 \frac{10-V}{exp(\frac{10-V}{10})-1}\\
+    \beta_n(V) &= 0.125 \exp(\frac{-V}{80})\\
     \alpha_m (V) &= 0.1\quad \frac{25-V}{\exp(\frac{25-V}{10})-1}\\
-    \beta_m(V) &= 4exp(\frac{-V}{18})
+    \beta_m(V) &= 4\exp(\frac{-V}{18})
 \end{align*}$$
 
 

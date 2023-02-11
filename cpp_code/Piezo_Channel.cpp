@@ -23,7 +23,10 @@ double F = 96845;
 double body_temp = 310.15;
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-double temp;
+//General use %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+double delta_T;
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 // calcium concentration: 2.4mM insid, 100nM outside https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3553253/#:~:text=Extracellular%20calcium%2C%20and%20particularly%20the,calcium%20of%201.1%E2%80%931.4%20mM
 double Ca_in, Ca_out;
@@ -31,7 +34,8 @@ double E_Ca = 131.373; // this is for humans, i.e., body temp of 310K etc. Unsur
 
 
 // Piezo Kinetics %%%%%%%%%%%%%%%%%%%%%%%%%
-double G_Piezo = 0.000000000030; 
+double G_Piezo_single = 0.000000000030; 
+double G_Piezo_total;
 // Piezo1 = 29pS https://www.sciencedirect.com/science/article/pii/S0968000416301505
 // The decay rate, according to this paper, is 1ms
 // 25-30pS https://anatomypubs.onlinelibrary.wiley.com/doi/full/10.1002/dvdy.401
@@ -41,7 +45,7 @@ double G_Piezo = 0.000000000030;
 // Force gating for Piezo1 is about –30 mmHg or 1.4 mN/m https://www.sciencedirect.com/science/article/pii/S0968000421000220#bb0270
 // Piezo1 half-maximal activation T50 = 2.7 ± 0.1 mN/m https://elifesciences.org/articles/12088
 // Piezo1 P50 of –28.1 ± 2.8 and –31.2 ± 3.5 mmHg https://www.science.org/doi/full/10.1126/science.1193270?casa_token=gKZRiU1R_vAAAAAA%3AAuhBFZP-QjXckn7G9aBL6A_ZJfCjsRrUIqoXCbBA1887i29wPWtzlMBfdwShr45kBM7Pj-N4NYVlfEQ
-
+double T_Piezo = 0.0062;
 
 // Piezo dimensions %%%%%%%%%%%%%%%%%%%%%%%
 // Blade = 200A https://www.nature.com/articles/nature25453
@@ -109,7 +113,23 @@ int reset_vecs(int x){
     return(0);
 }
 
-int Piezo_Channel(int x){
+int Piezo_Channel(int N){
+    double arbitrary_time;
+    int N_Piezo_channels = N;
+    double p_open = 1; 
+    double p_closed = 0;
+    double Piezo_G_total;
+    double Piezo_current;
+
+    for(int t = 0; t < arbitrary_time; t += delta_T){
+      p_open = N*exp(arbitrary_time/T_Piezo);    
+      p_closed = (1 - p_open);
+      G_Piezo_total = p_open*G_Piezo_single;
+    }
+
+    Piezo_current = E_Ca*G_Piezo_total;
+    Ca_in = Piezo_current/2; //dividing by 2 because Ca is 2+ charge (affectinc current by factor of 2)
+
     return(0);
 }
 
@@ -131,9 +151,7 @@ double voltage_output(double x)
     myfile.open(path1);
 
     vector<int> sizes;
-    /*cout<<vec_V.size()<<endl;
-    cout<<vec_N.size()<<endl;
-    cout<<vec_tiny_N.size()<<endl;*/
+
     sizes.insert(sizes.begin(),temp_vec.size());
 
     sort(sizes.begin(), sizes.end());

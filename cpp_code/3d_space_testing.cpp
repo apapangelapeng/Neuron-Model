@@ -19,6 +19,8 @@ vector<vector<vector<vector<double> > > > vec_time;
 
 // build a sphere via enterring radius, populate via finding area of sphere and dividing by 1000 or so
 
+int**** a = new int***[5];
+
 int reset_vecs(int x){
     vec_x.clear();
     vec_y.clear();

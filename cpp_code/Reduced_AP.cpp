@@ -100,21 +100,21 @@ double Reduced_AP(double z)
     for (double i = 0; i <= 50; i += delta_t)
     {
         
-        if(i >= 5 && i <= 10){
+        if(i >= 0 && i <= 5){
             current_temp = 0.05;
         }
         else{
             current_temp = 0;
         }
         
-        cout << current_temp << endl; 
+        //cout << current_temp << endl; 
 
         // cout << "Break Point 4" << endl;
 
         time_d = vec_V[x] * (vec_V[x] - v_threshold) * (v_max - vec_V[x]);
         V_dt = current_temp + time_d - vec_N[x];
 
-        cout << "V_DT " << V_dt << endl;
+        cout << vec_V[x] << endl;
         vec_V.push_back(vec_V[x] + V_dt);
         N_dt = e * (vec_V[x] - (gam * vec_N[x]));
         vec_N.push_back(vec_N[x] + N_dt);

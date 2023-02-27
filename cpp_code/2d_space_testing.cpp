@@ -36,8 +36,8 @@ int display_vectors(int x){
 int fill_vectors(int temp){
     int start_i = 0;
     int start_z = 0;
-    int z_max = 10;
-    int i_max = 10;
+    int z_max = 100;
+    int i_max = 100;
     for (int i = start_i; i <= i_max; i ++){
         for(int z = 0; z <= z_max; z ++){
             if(i == start_i){

@@ -18,8 +18,8 @@ vector<vector<vector<double> > > vec_z;
 vector<vector<vector<vector<double> > > > vec_time; 
 
 // build a sphere via enterring radius, populate via finding area of sphere and dividing by 1000 or so
-
-int**** a = new int***[5];
+// MAYBE THIS IS GENIUS
+// USE A HUGE SQUARE. CHANGE THE BOUNDARIES FROM SOME VALUE TO SIMULATE A GROWING OR RETRACTING FILIPODIA
 
 int reset_vecs(int x){
     vec_x.clear();

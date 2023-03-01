@@ -13,6 +13,7 @@ const char *path1="../data_files/3dtest_output.csv";
 
 
 vector<double> vec_xyz; 
+vector<double> vec_temp; 
 vector<vector<double> > vec_time;
 
 // build a sphere via enterring radius, populate via finding area of sphere and dividing by 1000 or so
@@ -30,13 +31,32 @@ int display_vectors(int x){
         }
         cout << endl;
     }
+    for(int time = 0; time <= 4; time ++){
+        for(int i = 0; i <= 9; i ++){
+            for(int j = 0; j <= 9; j ++){
+                for(int k = 0; k <= 9; k ++){
+                    vec_temp = vec_time[time];
+                }
+            }
+        }
+    }
     return(0);
 }
 
+double access_coordinates(double x, double y, double z){
+    double temp;
+    for(int counter = 0; counter <= vec_xyz.size(); counter ++){
+        if((vec_xyz[counter] == x) && (vec_xyz[counter + 1] == y) && (vec_xyz[counter + 2] == z)){
+            temp = vec_xyz[counter + 3];
+        }
+    }
+    return(temp);
+}
+
 int fill_vectors(int temp){
-    int x_max = 10;
-    int y_max = 10;
-    int z_max = 10;
+    int x_max = 9;
+    int y_max = 9;
+    int z_max = 9;
     int time_max = 4;
 
     for(int time_temp = 0; time_temp <= time_max; time_temp++){
@@ -47,6 +67,12 @@ int fill_vectors(int temp){
                 vec_xyz.push_back(i);
                 vec_xyz.push_back(j);
                 vec_xyz.push_back(k);
+                if((i >= 3 && i <= 6) && (j >= 3 && j <= 6) && (k >= 3 && k <= 6)){
+                    vec_xyz.push_back(1);
+                }
+                else{
+                    vec_xyz.push_back(0);
+                }
             }
         }
     }

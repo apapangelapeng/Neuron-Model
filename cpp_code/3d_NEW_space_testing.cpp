@@ -41,7 +41,9 @@ double access_coordinates(double x, double y, double z){
                 bool_x = (vec_time[0][i] == x) ? true : false;
                 bool_y = (vec_time[1][j] == y) ? true : false;
                 bool_z = (vec_time[2][k] == z) ? true : false;
-
+                if(bool_x){
+                    cout << "hi " << endl;
+                }
                 if(bool_x && bool_y && bool_z){
                     cout << "found coordinates: " << x << y << z << endl;
                 }
@@ -59,23 +61,26 @@ int display_vectors(int x){
     //     }
     //     cout << endl;
     // }
+    cout << "test test " << vec_time[1][0] << endl;
+
     temp = access_coordinates(3,3,3);
     cout << temp << endl;
     return(0);
 }
 
 int fill_vectors(int temp){
-    int x_max = 9;
-    int y_max = 9;
-    int z_max = 9;
-    int time_max = 4;
+    double x_max = 9;
+    double y_max = 9;
+    double z_max = 9;
+    double time_max = 4;
 
     //for(int time_temp = 0; time_temp <= time_max; time_temp++){
 
-    for(int i = 0; i <= x_max; i ++){
-        for(int j = 0; j <= y_max; j ++){
-            for(int k = 0; k <= z_max; k ++){
+    for(double i = 0; i <= x_max; i++){
+        for(double j = 0; j <= y_max; j++){
+            for(double k = 0; k <= z_max; k++){
                 vec_x.push_back(i);
+                cout << i << vec_x[i] << endl;
                 vec_y.push_back(j);
                 vec_z.push_back(k);
                 if((i >= 3 && i <= 6) && (j >= 3 && j <= 6) && (k >= 3 && k <= 6)){

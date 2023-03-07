@@ -396,4 +396,45 @@ But, we still want voltage to be affected by an injected current, so we can simp
 
 $D$ is our spatial dependence, which represents the diffusion of charge around the neuron membrane. And that's it, for now! 
 
+\section{Piezo: A Theory}
+
+\subsection{A Good Model} The rule of a good model is to, before writing any code whatsoever, determine some testable hypotheses. Models make predictions about the world, and if done well, reveal which values are most measurable to validate or invalidate the predictions. As Snyed once said, if someone asks you why you didn't test \textit{this} or \textit{that}, you can safely ignore their comments, as they do not understand the purpose of modeling. So on that note, what are some hypotheses we have regarding Piezo?:\newline
+
+On $Ca^{2+}$ release: 
+\begin{enumerate}
+    \item Hypothesis 1: Piezo alone
+
+    Firstly, it is possible that Piezo alone is the primary driving force for $Ca^{2+}$ change within the growth cone. This possibility likely manifest itself in very small concentration changes in calcium as a result of Piezo opening. 
+    
+    \item Hypothesis 2: Piezo with help
+
+    Another possibility, one which I lean toward at this moment, is the release of $Ca^{2+}$ through RyR channels of the ER that are in the growth cone. This would likely result in larger swings in $Ca^{2+}$ concentration. Experimentally, this is easily testable. 
+\end{enumerate}
+
+\bigskip
+
+ There is a question of why $Ca^{2+}$ influx does not trigger action potentials which propogate down the axon in C3da., So, on membrane potential: 
+\begin{enumerate}
+    \item Hypothesis 1: Negligible
+
+   One possibility is that the calcium influx is so low that it does not cause a meaningful change in membrane voltage. I would say that this is unlikely, as was shown in the section \textbf{(Changes are small and local)}. 
+    
+    \item Hypothesis 2: Clamped
+
+    More plausible, to me, is that the membrane voltage is being clamped via some kind of outward rectifying potassium channels, namely KCa3.1. Experimentally, this is easily testable. 
+\end{enumerate}
+
+\bigskip
+
+On Piezo activation: 
+\begin{enumerate}
+    \item Hypothesis 1: Growth cone
+
+   The physical movement of the growth cone as it attempts to grow is a possible Piezo activator. As exocytosis occurs, but the volume of the cell stays the same, it will cause the membrane to become more rigid and therefore modulates Piezo.  
+    
+    \item Hypothesis 2: Glia
+
+    It has been shown that ECM environment grabs onto outgrowths of dendrites and activate mechanosensitive ion channels in \textit{C. elegans}\footnote{\url{https://www.cell.com/developmental-cell/pdf/S1534-5807(22)00376-8.pdf}}. It is plausible too then that the same thing occurs via glia-Piezo interactions. 
+\end{enumerate}
+
 \end{document}

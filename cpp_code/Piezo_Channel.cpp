@@ -19,7 +19,7 @@ const char *path1="../data_files/Piezo_Channel.csv";
 //CONSTANTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 double log_convert = 2.303; // to convert from ln to log10
 double R_constant = 8.1345;
-double F = 96845;
+double F = 96485.3321;
 double body_temp = 310.15;
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -30,7 +30,7 @@ double delta_T;
 
 // calcium concentration: 2.4mM outside, 100nM inside https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3553253/#:~:text=Extracellular%20calcium%2C%20and%20particularly%20the,calcium%20of%201.1%E2%80%931.4%20mM
 double Ca_in, Ca_out;
-double E_Ca = 131.373; // this is for humans, i.e., body temp of 310K etc. Unsure what it is for Drosophila
+double E_Ca; // 131.373 --> this is for humans, i.e., body temp of 310K etc. Unsure what it is for Drosophila
 
 
 // Piezo Kinetics %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -126,6 +126,8 @@ double buff_c_dT_dT; //second derivative of concentration of buffer with respect
 
 
 vector<double> temp_vec;
+vector<double> vec_channel_number;
+vector<double> vec_time;
 
 default_random_engine generator;
 normal_distribution<double> error(1,0.025);
@@ -142,8 +144,29 @@ double PotentialE(double out, double in, int Z) {
 
 
 
-int reset_vecs(int x){
-    return(0);
+// int reset_vecs(int x){
+//     return(0);
+// }
+
+double Piezo_screen(double channel_number, double time_max){
+  E_Ca = PotentialE(0.0024, 0.0000001, 2); //taking it to be 100nM inside, 2.4mM outside, also this outputs in millivolts
+  double Conc_temp = 0;
+  double Conc_temp_dt = 0;
+  for(double x = 0; x <= channel_number; x += 1){
+    for(double y = 0; y <= time_max; y += 0.001){ // time is in milliseconds, so step with 1/1000 of ms seems good
+      Conc_temp_dt = x*(E_Ca/1000)*G_Piezo_single*0.001;
+      Conc_temp += Conc_temp_dt;
+      // C = C + C_dt
+      if((Conc_temp >= 0.0000000022) && (Conc_temp <= 0.0000000023)){
+        vec_time.push_back(y);
+        vec_channel_number.push_back(x);
+        //cout << "occured" << endl;
+      }
+    }
+    Conc_temp = 0; 
+    Conc_temp_dt = 0;
+  }
+  return(0);
 }
 
 int Piezo_Channel(int N){
@@ -169,15 +192,15 @@ int Piezo_Channel(int N){
 
 double voltage_output(double x)
 {
-    Piezo_Channel(0);
-    reset_vecs(0);
+    //reset_vecs(0);
+    Piezo_screen(1000, 5);
 
-    for (int i = 0; i < 3; i++)
-    {
-        cout << i << endl; 
-        Piezo_Channel(i);
-        reset_vecs(0);
-    }
+    // for (int i = 0; i < 3; i++)
+    // {
+    //     cout << i << endl; 
+    //     Piezo_Channel(i);
+    //     reset_vecs(0);
+    // }
 
     ofstream create_file(path1);
     ofstream myfile;
@@ -185,26 +208,31 @@ double voltage_output(double x)
 
     vector<int> sizes;
 
-    sizes.insert(sizes.begin(),temp_vec.size());
+    sizes.insert(sizes.begin(),vec_time.size());
+    sizes.insert(sizes.begin(),vec_channel_number.size());
 
     sort(sizes.begin(), sizes.end());
     int max_size = sizes.back();
     
     cout << max_size << endl;
 
-    bool temp_bool;
+    bool time_bool;
+    bool channel_number_bool;
 
     //cout << "Break point 4" << endl;
 
-    myfile << "Temp\n";
+    myfile << "Time,Channel_number\n";
     for (int i = 0; i < max_size; i++)
     {
         //cout << "Break point 5" << endl;
-        temp_bool = (temp_vec.size() > i) ? true : false;
+        time_bool = (vec_time.size() > i) ? true : false;
+        channel_number_bool = (vec_channel_number.size() > i) ? true : false;
 
         //cout << "Break point 6" << endl;
 
-        if(temp_bool) myfile << temp_vec[i];
+        if(time_bool) myfile << vec_time[i] << ",";
+        if(!time_bool) myfile << ",";
+        if(channel_number_bool) myfile << vec_channel_number[i] << ",";
 
         //if(!dn_V_0) myfile << vec_tiny_N[i];
 
@@ -219,6 +247,6 @@ double voltage_output(double x)
 
 int main(void) {
   cout << "Begin" << endl;
-  PotentialE(0.0024, 0.0000001, 2);
+  voltage_output(0);
   cout << "End" << endl;
 }

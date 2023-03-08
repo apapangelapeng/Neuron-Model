@@ -28,7 +28,7 @@ double delta_T;
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-// calcium concentration: 2.4mM insid, 100nM outside https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3553253/#:~:text=Extracellular%20calcium%2C%20and%20particularly%20the,calcium%20of%201.1%E2%80%931.4%20mM
+// calcium concentration: 2.4mM outside, 100nM inside https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3553253/#:~:text=Extracellular%20calcium%2C%20and%20particularly%20the,calcium%20of%201.1%E2%80%931.4%20mM
 double Ca_in, Ca_out;
 double E_Ca = 131.373; // this is for humans, i.e., body temp of 310K etc. Unsure what it is for Drosophila
 
@@ -55,7 +55,7 @@ double T_Piezo = 0.0062;
 
 
 // Overall Definitions %%%%%%%%%%%%%%%%%%%%%
-double Ca_c_dT; //derivative of concentration of calcium per time
+double Ca_c_dT; //derivative of concentration of calcium per time in the cytoplasm
 double D_diff; //coefficient of diffusion
 double Ca_c_dT_dT; //2nd derivative of Ca concentration per unit time
 double J_ipr; //IPR is the IP3 receptor, and is supposedly the biggest calcium leaker
@@ -68,28 +68,61 @@ double J_ryr; //flux from RyR receptor
 double J_serca; //flux from serca pump, maybe includes good SERCA model: https://link.springer.com/article/10.1140/epjp/s13360-023-03691-1
 double J_on; //function of binding of Ca2+ to buffers, Page 309 of mathematical physiology seems good
 double J_off; //function of unbinding of Ca2+ from buffers
-
 // Ca_diff_dT = D_c*Ca_diff_dT_dT + J_ipr + (cone_circumference/cone_cross_area)*(J_in - J_pm) + J_ryr - J_serca - J_on + J_off; 
 
 // RyR Definitions %%%%%%%%%%%%%%%%%%%%%%%%
+// Model 1
 // Very good reference for calcium dynamics: https://www.frontiersin.org/articles/10.3389/fphys.2012.00114/full#F1
 double vol_D; //dyadic space volume
 double vol_ER; //ER volume
 double g_ryr; //RyR channel conductance
-double c_j; //concentration inside the ER 
-double c_d; //concentration in the cytoplasm
+double C_er; //concentration inside the ER 
+double C_cyt; //concentration in the cytoplasm
 double N_ryr; //stochastic number of RyR channels
+// J_ryr = N_ryr*(g_ryr/vol_D)*(C_er - C_cyt); //This kind of decribes the local movement due to gradient
 
-// J_ryr = N_ryr*(g_ryr/vol_D)*(c_j - c_d); //This kind of decribes the local movement due to gradient
+// RyR Definitions %%%%%%%%%%%%%%%%%%%%%%%%
+// Model 2
+// From this paper: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4648987/pdf/10827_2015_Article_579.pdf
+double v_rel = 0.005; // no clue what this is, just some constant, units of ms^-1
+double v_leak = 0.00012; // still, no clue, just some constant, units of ms^-1
+// c_cyt and c_er are still used 
+double P_open; // probability/proportion that channels are open
+double w; // dynamical variable -- I don't want to talk about it
+double w_inf; // infinite version of w
+double w_dt; // w derivative with respect to time
+double tau_w; // time constant of w
+double K_a = 0.0192; // kinetics a, units of muM^4
+double K_b = 0.2573; // kinetics b, units of muM^3
+double K_c = 0.0571; // kinetics c, unitless
+double K_d = 0.0001; // kinetics d, units of ms^-1
+// J_ryr = (v_rel*P_open + v_leak)(C_er - C_cyt);
+// P_open = (w*((1 + C_cyt^3)/K_b))/((K_a/C_Cyt^4) + 1 + (C_cyt^3/K_b));
+// w_inf = ((K_a/C_Cyt^4) + 1 + (C_cyt^3/K_b))/((1/K_c) + (K_a/C_Cyt^4) + 1 + (C_cyt^3/K_b));
+// w_dt = (w_inf - w)/tau_w; 
+// tau_w = w_inf/K_d;
+// w = w + w_dt;
+
+// SERCA Definitions %%%%%%%%%%%%%%%%%%%%%%%%
+// Most SERCA models seem to simply be the Hill function
+double v_serca = 0.12; // some constant, units of muM / ms
+double K_p; // kinetics p
+// J_serca = v_serca*((C_cyt^2)/(C_cyt^2 + K_p^2));
+
 
 // Buffering Definitions %%%%%%%%%%%%%%%%%
 // Reference includes a list of models published by year: https://www.frontiersin.org/articles/10.3389/fncom.2018.00014/full
-double buff_unbound; //concentration of unbound buffer
+double buff_unbound; //concentration of unbound buffer, which we are taking to be b_total
 double buff_bound; //concentration of bound buffer
 double k_buff_bind; //binding affinity/Kon of buffer
 double k_buff_unbind; //unbinding affinity/Koff of buffer
 double buff_c_dT; //derivative of concentration of buffer with respect to time
-double buff_c_dT_dT; //second derivative of concentration of buffer with respect to time
+double buff_c_dT_dT; //second derivative of concentration of buffer with respect to time, we do not really ned this unless we are measuring the diffusion of the buffer
+// J_on = k_buff_bind*C_cyt*buff_unbound;
+// J_off = k_buff_unbind*buff_bound; 
+// buff_c_dT = k_buff_bind*C_cyt*buff_unbound - k_buff_unbind*buff_bound;
+// buff_bound = buff_bound + buff_c_dT;
+
 
 
 vector<double> temp_vec;

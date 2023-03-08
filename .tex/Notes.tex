@@ -325,7 +325,7 @@ As mentioned, $m$, $h$, and $n$ have their own time constants $\tau_{m,h,n}$. Th
 
 However, let's say you want to attempt a propagating action potential. Many people would model this on an infinitely long neuron/wire, but for the sake of this thought experiment let's say you're just interested in a $1cm$ neuron/wire for $10ms$. To account for this spatial consideration, you'll need to add in another term besides $I$ which receives  current input from the previous segment of the neuron. So this brings us up to at least 8,000 calculations.\newline
 
-You'd probably want to divide up the neuron into segments on the order of $1\mu m$. This multiplies our 8,000 calculations by an additional 100,000, giving us 800,000,000 to worry about. Still, this is not horrendous. But, this considers a 1D wire. Neurons are 3D dimensional. We are already considering a system that is $4^{th}$ dimensional with respect to time, and now we desire to consider $3^{rd}$ dimensional with respect to space. And, we are still only considering two ion channels. Neurons have dozens and dozens of channels all with different gating kinetics. It does not consider things like lateral inhibition, birufcation, dendritic input, etc. I'll not bother telling you how many calculations we need to perform beyond this point---but it would be large. 
+You'd probably want to divide up the neuron into segments on the order of $1\mu m$. This multiplies our 8,000 calculations by an additional 100,000, giving us 800,000,000 to worry about. Still, this is not horrendous. But, this considers a 1D wire. Neurons are 3D dimensional. We are already considering a system that is $4^{th}$ dimensional with respect to time, and now we desire to consider $3^{rd}$ dimensional with respect to space. Imagine trying to calculate the flux through a $1000 \times 1000 \times 1000$ resolution box (i.e., perhaps $\mu m^3$ with good resolution). The surface area of this box is thus $6\times 10^6$. Now extend this surface area to include the length of the wire and the area of the soma and dendrites, giving you thousands of millions of points to calculate per time iteration. And, we are still only considering two ion channels. Neurons have dozens and dozens of channels all with different gating kinetics. It does not consider things like lateral inhibition, birufcation, dendritic input, etc. I'll not bother telling you how many calculations we need to perform beyond this point---but it would be large. 
 
 \subsection{What do we do about it?} What do we know about the time constants mentioned in the previous section? Roughly speaking, some are fast and some are slow. The upswing of an action potential is on a fast time constant, and the repolarization is on a slow time constant. We also know that the upswing portion is roughly a positive feedback loop, so as voltage increases, so should the derivative of voltage.\newline
 
@@ -466,19 +466,43 @@ To briefly go over this, we are solving for the chance in $Ca$ concentration. $D
 
 Where $k_+$ is the binding rate constant, $c$ is the concentration, $b_t$ is the total concentration of buffer, $k_-$ is the unbinding rate constant, and $b$ is the concentration of bound buffer. Not so bad! You could also include the concentration of buffer as changing via diffusion under the  equation: $D_b(\partial^2 b / \partial t^2)$. In this instance, I think it is fair to simply assume that the buffer is saturating the growth cone, and therefore it is not relevant to include its flow rate. 
 
-\subsection{RyR Flux} RyR flux can be written in a number of says, such as the following: 
+\subsection{RyR Flux} RyR flux can be written in a number of says, such as the following\footnote{\url{https://www.frontiersin.org/articles/10.3389/fphys.2012.00114/full\#F1}}: 
 
 \bigskip
 
 \begin{center}
 
-    $J_{ryr} = N_{ryr}(g_{ryr}/v_D)(c_j - c_d)$
+    $J_{ryr} = N_{ryr}(g_{ryr}/v_D)(C_{er} - C_{cyt})$
     
 \end{center}
 
 \bigskip
 
-Where $v_D$ is the dyadic space volume, $g_{ryr}$ is the RyR channel conductance, $c_j$ is the concentration inside the ER, $c_d$ is the concentration in the cytoplasm, and $N_{ryr}$ is he stochastic number of RyR channels. This is not sufficient, yet, as it describes the movement of calcium only in response to a gradient and not using RyR channel kinetics or, most importantly, calcium activation. 
+Where $v_D$ is the dyadic space volume, $g_{ryr}$ is the RyR channel conductance, $C_{er}$ is the concentration inside the ER, $C_{cyt}$ is the concentration in the cytoplasm, and $N_{ryr}$ is he stochastic number of RyR channels. This is not sufficient, yet, as it describes the movement of calcium only in response to a gradient and not using RyR channel kinetics or, most importantly, calcium activation. You'll notice there is no reference to the opening and closing kinetics, and is more similar to something like the $g_L$ which you would se in the Hogdkin-Huxley model.\newline
 
+This covers things like leak. To include calcium activation, we will want to use something like this: 
+
+\bigskip
+\begin{center}
+
+    $J_{ryr} = (v_{rel}P_{open} + v_{leak})(C_{er} - C_{cyt})$\\
+    \smallskip
+    $P_{open} = \frac{w(1 + C^3_{cyt} / K_b)}{K_a / C^4_{cyt} + 1 + C_{cyt}^3/ K_b}$\\
+    \smallskip
+    $\dot{w} = \frac{w_{\infty} - w}{\tau_w}; w_{\infty} = \frac{K_a / C^4_{cyt} + 1 + C_{cyt}^3/ K_b}{1/K_c + K_a / C^4_{cyt} + 1 + C_{cyt}^3/ K_b}; \tau_w = w_{\infty}/K_d$
+    
+\end{center}
+
+And for $J_{ser}$:
+
+\begin{center}
+
+    $J_{ser} = v_{ser}\frac{C^2_{cyt}}{C^2_{cyt} + K^2_P}$\\
+    
+\end{center}
+
+\bigskip
+
+ $J_{ser}$ is the Hill function, where $v_{ser}$ is the max velocity and $K_P$ is the half max velocity. The values are measured in prior papers\footnote{\url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1233835/?page=1}}. 
 
 \end{document}

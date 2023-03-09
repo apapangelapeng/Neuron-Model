@@ -62,20 +62,19 @@ int reset_vecs(int x)
 
 void output_metadata(double local_v_start,double local_v_end,double v_step,double local_n_start,double local_n_end,double n_step)
 {
-    ofstream create_file(path2);
+    ofstream create_file(path1);
     ofstream myfile;
-    myfile.open(path2);
-    myfile<<"local_v_start,local_v_end,v_step,local_n_start,local_n_end,n_step \n";
+    myfile.open(path1);
+    myfile<<"local_v_start,local_v_end,v_step,local_n_start,local_n_end,n_step, \n";
     myfile<<local_v_start<<",";
     myfile<<local_v_end<<",";
     myfile<<v_step<<",";
     myfile<<local_n_start<<",";
     myfile<<local_n_end<<",";
-    myfile<<n_step;
+    myfile<<n_step<<",";
     myfile.close();
-
-
 }
+
 double nullcline_generation(double x)
 {
     int y;

@@ -56,7 +56,7 @@ double T_Piezo = 0.0062;
 
 // Overall Definitions %%%%%%%%%%%%%%%%%%%%%
 double Ca_c_dT; //derivative of concentration of calcium per time in the cytoplasm
-double D_diff; //coefficient of diffusion
+double D_diff_Ca; //coefficient of diffusion
 double Ca_c_dT_dT; //2nd derivative of Ca concentration per unit time
 double J_ipr; //IPR is the IP3 receptor, and is supposedly the biggest calcium leaker
 // Note: it does not seem that Piezo upregulating PLC/IP3 has been shown
@@ -68,7 +68,7 @@ double J_ryr; //flux from RyR receptor
 double J_serca; //flux from serca pump, maybe includes good SERCA model: https://link.springer.com/article/10.1140/epjp/s13360-023-03691-1
 double J_on; //function of binding of Ca2+ to buffers, Page 309 of mathematical physiology seems good
 double J_off; //function of unbinding of Ca2+ from buffers
-// Ca_diff_dT = D_c*Ca_diff_dT_dT + J_ipr + (cone_circumference/cone_cross_area)*(J_in - J_pm) + J_ryr - J_serca - J_on + J_off; 
+// Ca_c_dT = D_c*Ca_c_dT_dT + J_ipr + (cone_circumference/cone_cross_area)*(J_in - J_pm) + J_ryr - J_serca - J_on + J_off; 
 
 // RyR Definitions %%%%%%%%%%%%%%%%%%%%%%%%
 // Model 1
@@ -76,7 +76,7 @@ double J_off; //function of unbinding of Ca2+ from buffers
 double vol_D; //dyadic space volume
 double vol_ER; //ER volume
 double g_ryr; //RyR channel conductance
-double C_er; //concentration inside the ER 
+double C_er = 0.0005; //concentration inside the ER; units of M; in this case, we are assuming that C_er is relatively constant
 double C_cyt; //concentration in the cytoplasm
 double N_ryr; //stochastic number of RyR channels
 // J_ryr = N_ryr*(g_ryr/vol_D)*(C_er - C_cyt); //This kind of decribes the local movement due to gradient
@@ -89,13 +89,14 @@ double v_leak = 0.00012; // still, no clue, just some constant, units of ms^-1
 // c_cyt and c_er are still used 
 double P_open; // probability/proportion that channels are open
 double w; // dynamical variable -- I don't want to talk about it
-double w_inf; // infinite version of w
+double w_inf; // infinite version of w; w_inf is a state-function and does not need a vector
 double w_dt; // w derivative with respect to time
 double tau_w; // time constant of w
-double K_a = 0.0192; // kinetics a, units of muM^4
-double K_b = 0.2573; // kinetics b, units of muM^3
+double K_a = 0.0192; // kinetics a, units of uM^4
+double K_b = 0.2573; // kinetics b, units of uM^3
 double K_c = 0.0571; // kinetics c, unitless
 double K_d = 0.0001; // kinetics d, units of ms^-1
+int w_counter;
 // J_ryr = (v_rel*P_open + v_leak)(C_er - C_cyt);
 // P_open = (w*((1 + C_cyt^3)/K_b))/((K_a/C_Cyt^4) + 1 + (C_cyt^3/K_b));
 // w_inf = ((K_a/C_Cyt^4) + 1 + (C_cyt^3/K_b))/((1/K_c) + (K_a/C_Cyt^4) + 1 + (C_cyt^3/K_b));
@@ -106,7 +107,7 @@ double K_d = 0.0001; // kinetics d, units of ms^-1
 // SERCA Definitions %%%%%%%%%%%%%%%%%%%%%%%%
 // Most SERCA models seem to simply be the Hill function
 double v_serca = 0.12; // some constant, units of muM / ms
-double K_p; // kinetics p
+double K_p = 0.3; // kinetics p, units of uM
 // J_serca = v_serca*((C_cyt^2)/(C_cyt^2 + K_p^2));
 
 
@@ -127,6 +128,7 @@ double buff_c_dT_dT; //second derivative of concentration of buffer with respect
 vector<double> temp_vec;
 vector<double> vec_channel_number;
 vector<double> vec_time;
+vector<double> vec_w;
 
 default_random_engine generator;
 normal_distribution<double> error(1,0.025);
@@ -142,6 +144,23 @@ double PotentialE(double out, double in, int Z) {
 }
 
 
+
+
+double Compute_J_serca(double C_cyt){
+  J_serca = v_serca*(pow(C_cyt,2)/(pow(C_cyt,2) + pow(K_p,2)));
+  return(J_serca);
+}
+
+double Compute_J_ryr(double C_Cyt){
+  w_inf = ((K_a/pow(C_Cyt,4)) + 1 + (pow(C_cyt,3)/K_b))/((1/K_c) + (K_a/pow(C_Cyt,4)) + 1 + (pow(C_cyt,3)/K_b)); 
+  w_dt = (w_inf - vec_w[w_counter])/tau_w;
+  tau_w = w_inf/K_d;
+  vec_w.push_back(vec_w[w_counter] + w_dt);
+  P_open = (w*((1 + pow(C_cyt,3))/K_b))/((K_a/pow(C_Cyt,4)) + 1 + (pow(C_cyt,3)/K_b));
+  J_ryr = (v_rel*P_open + v_leak)*(C_er - C_cyt);
+  w_counter++;
+  return(J_ryr);
+}
 
 // int reset_vecs(int x){
 //     return(0);
@@ -197,6 +216,11 @@ int Piezo_Channel(int N){
     return(0);
 }
 
+double Calcium_concentration(int arbitrary_var){
+
+  Ca_c_dT = D_diff_Ca*Ca_c_dT_dT + J_ipr + (cone_circumference/cone_cross_area)*(J_in - J_pm) + Compute_J_ryr(0) - Compute_J_serca(0) - J_on + J_off;
+
+}
 
 double voltage_output(double x)
 {

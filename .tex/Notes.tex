@@ -85,6 +85,12 @@
        \end{center}
 
 
+\begin{center}
+
+    ``Once you know the way broadly, you can see it in all things." - Musashi Miyamoto
+    
+\end{center}
+
 \end{titlepage}
 
 \pagebreak
@@ -228,7 +234,7 @@ Where $k$ is the total number of different ions considered in your system. In ef
 
 \begin{center}
 
-    $q = 1.3 \times 10^{-10}C$
+    $q = 1.3 \times 10^{-12}C$
 
 \end{center}
 
@@ -236,13 +242,42 @@ Where $k$ is the total number of different ions considered in your system. In ef
 
 \begin{center}
 
-    $\Delta c = \frac{m}{4\pi r^3 /3} \rightarrow 3.1 \times 10^{-4} mM$
+    $\Delta C = \frac{m}{4\pi r^3 /3} \rightarrow 3.2 \times 10^{-7} mM$
     
 \end{center}
 
 \bigskip
 
-If the concentration of potassium is around $150mM$, this $3.1 \times 10^{-4} mM$ is representative of a negligible change in concentration. 
+If the concentration of potassium is around $150mM$, this $3.1 \times 10^{-7} mM$ is representative of a negligible change in concentration. 
+
+\subsection{Change in concentration at the growth cone} In order that we may apply this to the growth cone we get an r value of approximately $1.75 \mu m$, and I am interested in finding the change in concentration that is capable of increasing the voltage by approximately $15mV$, indicative of reaching the threshold: 
+
+\bigskip
+
+\begin{center}
+
+    $C_{total} = 10^{-6} F/cm^2 \times 4\pi (0.000175cm)^2$
+
+    $m = q/F = (3.8 \times 10^{-13}F \times 0.015V) / 96500 C/mol$
+
+\end{center}
+
+\bigskip
+
+    Thus, we get:
+
+    \bigskip
+    
+\begin{center}
+
+    $\Delta C = \frac{5.99\times10^{-20}}{4\pi (0.000175cm)^3 /3} \rightarrow 2.7 \times10^{-9} M$
+    
+\end{center}
+
+\bigskip
+
+In other words, the change in concentration required for a growth cone to rise by $15mV$ is $\approx$ 2-3$nM$.  
+
 
 
 \subsection{Sodium}
@@ -451,7 +486,7 @@ Here she is:
 
 \bigskip
 
-To briefly go over this, we are solving for the chance in $Ca$ concentration. $D_c$ is a diffusion coefficient term multiplied against the second derivative of the calcium concentration with respect to time. $G_{circ} / G_{CSA}$ is the circumference of the growth cone over the growth cone's cross sectional area. This is multiplied by $J_in$ minus $J_{pm}$, which are the flux of calcium into and out of the cell respectively. Naturally, $J_{in}$ will be contributed to by Piezo. $J_{RyR}$ is the flux of calcium out of the ER, and $J_{ser}$ is the flux into the ER as set by the SERCA pump. $J_{on}$ and $J_{off}$ is the binding and unbinding of calcium to buffers. Gorgeous and simple in this form, but of course, each variable comes with its own model. Let's discuss below: 
+To briefly go over this, we are solving for the chance in $Ca$ concentration. $D_c$ is a diffusion coefficient term multiplied against the second derivative of the calcium concentration with respect to time. $G_{circ} / G_{CSA}$ is the circumference of the growth cone over the growth cone's cross sectional area. This is multiplied by $J_{in}$ minus $J_{pm}$, which are the flux of calcium into and out of the cell respectively. Naturally, $J_{in}$ will be contributed to by Piezo. $J_{RyR}$ is the flux of calcium out of the ER, and $J_{ser}$ is the flux into the ER as set by the SERCA pump. $J_{on}$ and $J_{off}$ is the binding and unbinding of calcium to buffers. Gorgeous and simple in this form, but of course, each variable comes with its own model. Let's discuss below: 
 
 \subsection{Buffers} $J_{on}$ and $J_{off}$ are simplified greatly under a few assumptions. The first being that we can assume the buffer concentration is high and greatly exceeds that of the calcium concentration, therefore calcium binding to the buffer does not change the total buffer concentration in any meaningful way. Secondly, we assume that buffer binding is fast enough to be considered instant (or rather, on a time scale much faster than that which we are differentiating with). In this way:
 

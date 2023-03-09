@@ -240,7 +240,7 @@ double voltage_output(double x)
 
         if(time_bool) myfile << vec_time[i] << ",";
         if(!time_bool) myfile << ",";
-        if(channel_number_bool) myfile << vec_channel_number[i] << ",";
+        if(channel_number_bool) myfile << vec_channel_number[i];
 
         //if(!dn_V_0) myfile << vec_tiny_N[i];
 

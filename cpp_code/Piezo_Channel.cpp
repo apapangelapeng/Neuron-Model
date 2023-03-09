@@ -124,7 +124,6 @@ double buff_c_dT_dT; //second derivative of concentration of buffer with respect
 // buff_bound = buff_bound + buff_c_dT;
 
 
-
 vector<double> temp_vec;
 vector<double> vec_channel_number;
 vector<double> vec_time;
@@ -150,12 +149,20 @@ double PotentialE(double out, double in, int Z) {
 
 double Piezo_screen(double channel_number, double time_max){
   E_Ca = PotentialE(0.0024, 0.0000001, 2); //taking it to be 100nM inside, 2.4mM outside, also this outputs in millivolts
+  double Charge_temp = 0;
+  double Charge_temp_dt = 0;
   double Conc_temp = 0;
-  double Conc_temp_dt = 0;
-  for(double x = 0; x <= channel_number; x += 1){
+  for(double x = 0; x <= channel_number; x += 10){
     for(double y = 0; y <= time_max; y += 0.001){ // time is in milliseconds, so step with 1/1000 of ms seems good
-      Conc_temp_dt = x*(E_Ca/1000)*G_Piezo_single*0.001;
-      Conc_temp += Conc_temp_dt;
+      Charge_temp_dt = x*(E_Ca/1000)*G_Piezo_single*0.000001; // the 0.0000001 was added to convert from seconds to 0.001 ms 
+      Charge_temp += Charge_temp_dt;
+      
+      Conc_temp = (Charge_temp/F)/((4/3)*M_PI*pow(0.00175,3)); //the radius, in this case, is in centimeters. I do not know why, but this seems to work better
+      //cout << x*(E_Ca/1000)*G_Piezo_single*0.001 << endl;
+      //cout << ((4/3)*M_PI*pow(0.00000175,3)) << endl;
+      //cout << Conc_temp << endl;
+      //cout << Charge_temp/F << endl;
+
       // C = C + C_dt
       if((Conc_temp >= 0.0000000022) && (Conc_temp <= 0.0000000023)){
         vec_time.push_back(y);
@@ -163,8 +170,9 @@ double Piezo_screen(double channel_number, double time_max){
         //cout << "occured" << endl;
       }
     }
+    Charge_temp = 0;
     Conc_temp = 0; 
-    Conc_temp_dt = 0;
+    Charge_temp_dt = 0;
   }
   return(0);
 }
@@ -193,7 +201,7 @@ int Piezo_Channel(int N){
 double voltage_output(double x)
 {
     //reset_vecs(0);
-    Piezo_screen(1000, 5);
+    Piezo_screen(1000, 10);
 
     // for (int i = 0; i < 3; i++)
     // {

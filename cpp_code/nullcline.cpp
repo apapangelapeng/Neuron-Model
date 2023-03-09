@@ -62,7 +62,7 @@ int reset_vecs(int x)
 
 void output_metadata(double local_v_start,double local_v_end,double v_step,double local_n_start,double local_n_end,double n_step)
 {
-    ofstream create_file(path1);
+    ofstream create_file(path1); //path 1 is meta path
     ofstream myfile;
     myfile.open(path1);
     myfile<<"local_v_start,local_v_end,v_step,local_n_start,local_n_end,n_step, \n";

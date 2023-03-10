@@ -36,6 +36,14 @@ double E_Ca; // 131.373 --> this is for humans, i.e., body temp of 310K etc. Uns
 // Piezo Kinetics %%%%%%%%%%%%%%%%%%%%%%%%%
 double G_Piezo_single = 0.000000000030; 
 double G_Piezo_total;
+int N_Piezo_channels = 1000;
+double p_open = 0; 
+vector<double> vec_p_open;
+double p_closed = 1;
+vector<double> vec_p_closed;
+double Piezo_current;
+double placeholder_opening_function;
+int open_counter;
 // Piezo1 = 29pS https://www.sciencedirect.com/science/article/pii/S0968000416301505
 // The decay rate, according to this paper, is 1ms
 // 25-30pS https://anatomypubs.onlinelibrary.wiley.com/doi/full/10.1002/dvdy.401
@@ -60,6 +68,7 @@ double D_diff_Ca; //coefficient of diffusion
 double Ca_c_dT_dT; //2nd derivative of Ca concentration per unit time
 double J_ipr; //IPR is the IP3 receptor, and is supposedly the biggest calcium leaker
 // Note: it does not seem that Piezo upregulating PLC/IP3 has been shown
+double cone_radius = 0.000175; //this is in ... centimeters ... for some reason
 double cone_circumference; //circumference of the growth cone
 double cone_cross_area; //cross sectional area of the growth cone
 double J_in; //flux of Ca2+ into the cell 
@@ -108,17 +117,25 @@ int w_counter;
 // Most SERCA models seem to simply be the Hill function
 double v_serca = 0.12; // some constant, units of muM / ms
 double K_p = 0.3; // kinetics p, units of uM
+// TECHNICALLY THiS MODEL IS OUTDATED, CHECK PAGE 284 OF MATHEMATICAL PHYS
 // J_serca = v_serca*((C_cyt^2)/(C_cyt^2 + K_p^2));
+
+// IPR Definitions %%%%%%%%%%%%%%%%%%%%%%%%
+// Taking this mostly from Mathematical Physiology page 293. This is a simplified IPR model
+// It is difficult to know if this will be sufficient 
 
 
 // Buffering Definitions %%%%%%%%%%%%%%%%%
 // Reference includes a list of models published by year: https://www.frontiersin.org/articles/10.3389/fncom.2018.00014/full
 double buff_unbound; //concentration of unbound buffer, which we are taking to be b_total
 double buff_bound; //concentration of bound buffer
+vector<double> vec_buff_bound;
+int buff_counter;
 double k_buff_bind; //binding affinity/Kon of buffer
 double k_buff_unbind; //unbinding affinity/Koff of buffer
 double buff_c_dT; //derivative of concentration of buffer with respect to time
 double buff_c_dT_dT; //second derivative of concentration of buffer with respect to time, we do not really ned this unless we are measuring the diffusion of the buffer
+double buff_diff;
 // J_on = k_buff_bind*C_cyt*buff_unbound;
 // J_off = k_buff_unbind*buff_bound; 
 // buff_c_dT = k_buff_bind*C_cyt*buff_unbound - k_buff_unbind*buff_bound;
@@ -143,8 +160,15 @@ double PotentialE(double out, double in, int Z) {
   return (E);
 }
 
-
-
+double Compute_J_on(double C_cyt){
+  J_on = k_buff_bind*C_cyt*buff_unbound;
+  J_off = k_buff_unbind*buff_bound; 
+  buff_c_dT = k_buff_bind*C_cyt*buff_unbound - k_buff_unbind*buff_bound;
+  vec_buff_bound.push_back(vec_buff_bound[buff_counter] + buff_c_dT);
+  buff_counter++;
+  buff_diff = J_off - J_on;
+  return(buff_diff);
+}
 
 double Compute_J_serca(double C_cyt){
   J_serca = v_serca*(pow(C_cyt,2)/(pow(C_cyt,2) + pow(K_p,2)));
@@ -196,29 +220,26 @@ double Piezo_screen(double channel_number, double time_max){
   return(0);
 }
 
-int Piezo_Channel(int N){
-    double arbitrary_time;
-    int N_Piezo_channels = N;
-    double p_open = 1; 
-    double p_closed = 0;
-    double Piezo_G_total;
-    double Piezo_current;
+int Piezo_Channel(int x){
+  double open_temp;
+  open_temp = (vec_p_open[open_counter]*exp(delta_T/T_Piezo) + vec_p_closed[open_counter]*placeholder_opening_function);
+  
+  vec_p_open.push_back(open_temp);  
+  vec_p_closed.push_back(1 - open_temp);
+    
+  G_Piezo_total = N_Piezo_channels*open_temp*G_Piezo_single;
 
-    for(int t = 0; t < arbitrary_time; t += delta_T){
-      p_open = N*exp(arbitrary_time/T_Piezo);    
-      p_closed = (1 - p_open);
-      G_Piezo_total = p_open*G_Piezo_single;
-    }
+  Piezo_current = (E_Ca*G_Piezo_total)/2; //dividing by 2 because Ca is 2+ charge (affecting current by factor of 2)
 
-    Piezo_current = E_Ca*G_Piezo_total;
-    Ca_in = Piezo_current/2; //dividing by 2 because Ca is 2+ charge (affectinc current by factor of 2)
-
-    return(0);
+  open_counter++;
+  return(Piezo_current);
 }
 
 double Calcium_concentration(int arbitrary_var){
+  cone_circumference = 2*M_PI*cone_radius;
+  cone_cross_area = M_PI*pow(cone_radius,2);
 
-  Ca_c_dT = D_diff_Ca*Ca_c_dT_dT + J_ipr + (cone_circumference/cone_cross_area)*(J_in - J_pm) + Compute_J_ryr(0) - Compute_J_serca(0) - J_on + J_off;
+  Ca_c_dT = D_diff_Ca*Ca_c_dT_dT + J_ipr + (cone_circumference/cone_cross_area)*(J_in - J_pm) + Compute_J_ryr(C_cyt) - Compute_J_serca(C_cyt) + Compute_J_on(C_cyt);
 
 }
 

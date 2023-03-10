@@ -42,8 +42,9 @@ vector<double> vec_p_open;
 double p_closed = 1;
 vector<double> vec_p_closed;
 double Piezo_current;
+vector<double> vec_Piezo_current;
 double placeholder_opening_function;
-int open_counter;
+int open_counter = 0;
 // Piezo1 = 29pS https://www.sciencedirect.com/science/article/pii/S0968000416301505
 // The decay rate, according to this paper, is 1ms
 // 25-30pS https://anatomypubs.onlinelibrary.wiley.com/doi/full/10.1002/dvdy.401
@@ -63,6 +64,8 @@ double T_Piezo = 0.0062;
 
 
 // Overall Definitions %%%%%%%%%%%%%%%%%%%%%
+vector<double> vec_Ca_conc; //calcium concentration
+int Ca_counter = 0;
 double Ca_c_dT; //derivative of concentration of calcium per time in the cytoplasm
 double D_diff_Ca; //coefficient of diffusion
 double Ca_c_dT_dT; //2nd derivative of Ca concentration per unit time
@@ -105,7 +108,8 @@ double K_a = 0.0192; // kinetics a, units of uM^4
 double K_b = 0.2573; // kinetics b, units of uM^3
 double K_c = 0.0571; // kinetics c, unitless
 double K_d = 0.0001; // kinetics d, units of ms^-1
-int w_counter;
+int w_counter = 0;
+vector<double> vec_J_ryr;
 // J_ryr = (v_rel*P_open + v_leak)(C_er - C_cyt);
 // P_open = (w*((1 + C_cyt^3)/K_b))/((K_a/C_Cyt^4) + 1 + (C_cyt^3/K_b));
 // w_inf = ((K_a/C_Cyt^4) + 1 + (C_cyt^3/K_b))/((1/K_c) + (K_a/C_Cyt^4) + 1 + (C_cyt^3/K_b));
@@ -117,6 +121,7 @@ int w_counter;
 // Most SERCA models seem to simply be the Hill function
 double v_serca = 0.12; // some constant, units of muM / ms
 double K_p = 0.3; // kinetics p, units of uM
+vector<double> vec_J_serca;
 // TECHNICALLY THiS MODEL IS OUTDATED, CHECK PAGE 284 OF MATHEMATICAL PHYS
 // J_serca = v_serca*((C_cyt^2)/(C_cyt^2 + K_p^2));
 
@@ -130,12 +135,13 @@ double K_p = 0.3; // kinetics p, units of uM
 double buff_unbound; //concentration of unbound buffer, which we are taking to be b_total
 double buff_bound; //concentration of bound buffer
 vector<double> vec_buff_bound;
-int buff_counter;
+int buff_counter = 0;
 double k_buff_bind; //binding affinity/Kon of buffer
 double k_buff_unbind; //unbinding affinity/Koff of buffer
 double buff_c_dT; //derivative of concentration of buffer with respect to time
 double buff_c_dT_dT; //second derivative of concentration of buffer with respect to time, we do not really ned this unless we are measuring the diffusion of the buffer
 double buff_diff;
+vector<double> vec_J_on;
 // J_on = k_buff_bind*C_cyt*buff_unbound;
 // J_off = k_buff_unbind*buff_bound; 
 // buff_c_dT = k_buff_bind*C_cyt*buff_unbound - k_buff_unbind*buff_bound;
@@ -161,28 +167,39 @@ double PotentialE(double out, double in, int Z) {
 }
 
 double Compute_J_on(double C_cyt){
+  //cout << "Compute_J_on active" << endl;
   J_on = k_buff_bind*C_cyt*buff_unbound;
   J_off = k_buff_unbind*buff_bound; 
   buff_c_dT = k_buff_bind*C_cyt*buff_unbound - k_buff_unbind*buff_bound;
   vec_buff_bound.push_back(vec_buff_bound[buff_counter] + buff_c_dT);
   buff_counter++;
   buff_diff = J_off - J_on;
+  vec_J_on.push_back(buff_diff);
   return(buff_diff);
 }
 
 double Compute_J_serca(double C_cyt){
+  //cout << "Compute_J_serca active" << endl;
   J_serca = v_serca*(pow(C_cyt,2)/(pow(C_cyt,2) + pow(K_p,2)));
+  if(J_serca != J_serca){
+    J_serca = 0;
+  }
+  vec_J_serca.push_back(J_serca);
   return(J_serca);
 }
 
 double Compute_J_ryr(double C_Cyt){
+  //cout << "Compute_J_ryr active1" << endl;
   w_inf = ((K_a/pow(C_Cyt,4)) + 1 + (pow(C_cyt,3)/K_b))/((1/K_c) + (K_a/pow(C_Cyt,4)) + 1 + (pow(C_cyt,3)/K_b)); 
+  //cout << "Compute_J_ryr active2" << endl;
   w_dt = (w_inf - vec_w[w_counter])/tau_w;
   tau_w = w_inf/K_d;
+  //cout << "Compute_J_ryr active3" << endl;
   vec_w.push_back(vec_w[w_counter] + w_dt);
   P_open = (w*((1 + pow(C_cyt,3))/K_b))/((K_a/pow(C_Cyt,4)) + 1 + (pow(C_cyt,3)/K_b));
   J_ryr = (v_rel*P_open + v_leak)*(C_er - C_cyt);
   w_counter++;
+  vec_J_ryr.push_back(J_ryr);
   return(J_ryr);
 }
 
@@ -190,37 +207,38 @@ double Compute_J_ryr(double C_Cyt){
 //     return(0);
 // }
 
-double Piezo_screen(double channel_number, double time_max){
-  E_Ca = PotentialE(0.0024, 0.0000001, 2); //taking it to be 100nM inside, 2.4mM outside, also this outputs in millivolts
-  double Charge_temp = 0;
-  double Charge_temp_dt = 0;
-  double Conc_temp = 0;
-  for(double x = 0; x <= channel_number; x += 10){
-    for(double y = 0; y <= time_max; y += 0.001){ // time is in milliseconds, so step with 1/1000 of ms seems good
-      Charge_temp_dt = x*(E_Ca/1000)*G_Piezo_single*0.000001; // the 0.0000001 was added to convert from seconds to 0.001 ms 
-      Charge_temp += Charge_temp_dt;
+// double Piezo_screen(double channel_number, double time_max){
+//   E_Ca = PotentialE(0.0024, 0.0000001, 2); //taking it to be 100nM inside, 2.4mM outside, also this outputs in millivolts
+//   double Charge_temp = 0;
+//   double Charge_temp_dt = 0;
+//   double Conc_temp = 0;
+//   for(double x = 0; x <= channel_number; x += 10){
+//     for(double y = 0; y <= time_max; y += 0.001){ // time is in milliseconds, so step with 1/1000 of ms seems good
+//       Charge_temp_dt = x*(E_Ca/1000)*G_Piezo_single*0.000001; // the 0.0000001 was added to convert from seconds to 0.001 ms 
+//       Charge_temp += Charge_temp_dt;
       
-      Conc_temp = (Charge_temp/F)/((4/3)*M_PI*pow(0.00175,3)); //the radius, in this case, is in centimeters. I do not know why, but this seems to work better
-      //cout << x*(E_Ca/1000)*G_Piezo_single*0.001 << endl;
-      //cout << ((4/3)*M_PI*pow(0.00000175,3)) << endl;
-      //cout << Conc_temp << endl;
-      //cout << Charge_temp/F << endl;
+//       Conc_temp = (Charge_temp/F)/((4/3)*M_PI*pow(0.00175,3)); //the radius, in this case, is in centimeters. I do not know why, but this seems to work better
+//       //cout << x*(E_Ca/1000)*G_Piezo_single*0.001 << endl;
+//       //cout << ((4/3)*M_PI*pow(0.00000175,3)) << endl;
+//       //cout << Conc_temp << endl;
+//       //cout << Charge_temp/F << endl;
 
-      // C = C + C_dt
-      if((Conc_temp >= 0.0000000022) && (Conc_temp <= 0.0000000023)){
-        vec_time.push_back(y);
-        vec_channel_number.push_back(x);
-        //cout << "occured" << endl;
-      }
-    }
-    Charge_temp = 0;
-    Conc_temp = 0; 
-    Charge_temp_dt = 0;
-  }
-  return(0);
-}
+//       // C = C + C_dt
+//       if((Conc_temp >= 0.0000000022) && (Conc_temp <= 0.0000000023)){
+//         vec_time.push_back(y);
+//         vec_channel_number.push_back(x);
+//         //cout << "occured" << endl;
+//       }
+//     }
+//     Charge_temp = 0;
+//     Conc_temp = 0; 
+//     Charge_temp_dt = 0;
+//   }
+//   return(0);
+// }
 
 int Piezo_Channel(int x){
+  //cout << "Piezo_Channel active" << endl;
   double open_temp;
   open_temp = (vec_p_open[open_counter]*exp(delta_T/T_Piezo) + vec_p_closed[open_counter]*placeholder_opening_function);
   
@@ -230,23 +248,38 @@ int Piezo_Channel(int x){
   G_Piezo_total = N_Piezo_channels*open_temp*G_Piezo_single;
 
   Piezo_current = (E_Ca*G_Piezo_total)/2; //dividing by 2 because Ca is 2+ charge (affecting current by factor of 2)
+  vec_Piezo_current.push_back(Piezo_current);
 
   open_counter++;
   return(Piezo_current);
 }
 
-double Calcium_concentration(int arbitrary_var){
-  cone_circumference = 2*M_PI*cone_radius;
-  cone_cross_area = M_PI*pow(cone_radius,2);
+double Calcium_concentration(double time_range, double delta_T){
+  vec_w.push_back(0);
+  vec_p_open.push_back(0);
+  vec_p_closed.push_back(1);
+  vec_buff_bound.push_back(0);
+  vec_Ca_conc.push_back(0); //adding 0 for now because I don't know what units this is in
+  // cone_circumference = 2*M_PI*cone_radius;
+  // cone_cross_area = M_PI*pow(cone_radius,2);
 
-  Ca_c_dT = D_diff_Ca*Ca_c_dT_dT + J_ipr + (cone_circumference/cone_cross_area)*(J_in - J_pm) + Compute_J_ryr(C_cyt) - Compute_J_serca(C_cyt) + Compute_J_on(C_cyt);
+  // Ca_c_dT = D_diff_Ca*Ca_c_dT_dT + J_ipr + (cone_circumference/cone_cross_area)*(J_in - J_pm) + Compute_J_ryr(C_cyt) - Compute_J_serca(C_cyt) + Compute_J_on(C_cyt);
 
+  for(double i = 0; i <= time_range; i += delta_T){
+    C_cyt = vec_Ca_conc[Ca_counter]; 
+    Ca_c_dT = 0.001*(Piezo_Channel(0) + Compute_J_ryr(C_cyt) - Compute_J_serca(C_cyt) + Compute_J_on(C_cyt));
+    vec_Ca_conc.push_back(vec_Ca_conc[Ca_counter] + Ca_c_dT);
+    Ca_counter++;
+  }
+
+  return(0);
 }
 
 double voltage_output(double x)
 {
     //reset_vecs(0);
-    Piezo_screen(1000, 10);
+    //Piezo_screen(1000, 10);
+    Calcium_concentration(5, 0.001);
 
     // for (int i = 0; i < 3; i++)
     // {
@@ -261,31 +294,47 @@ double voltage_output(double x)
 
     vector<int> sizes;
 
-    sizes.insert(sizes.begin(),vec_time.size());
-    sizes.insert(sizes.begin(),vec_channel_number.size());
+    sizes.insert(sizes.begin(),vec_Ca_conc.size());
+    sizes.insert(sizes.begin(),vec_Piezo_current.size());
+    sizes.insert(sizes.begin(),vec_J_on.size());
+    sizes.insert(sizes.begin(),vec_J_ryr.size());
+    sizes.insert(sizes.begin(),vec_J_serca.size());
 
     sort(sizes.begin(), sizes.end());
     int max_size = sizes.back();
     
     cout << max_size << endl;
 
-    bool time_bool;
-    bool channel_number_bool;
+    bool bool_Ca_conc;
+    bool bool_Piezo_current;
+    bool bool_J_on;
+    bool bool_J_ryr;
+    bool bool_J_serca;
 
     //cout << "Break point 4" << endl;
 
-    myfile << "Time,Channel_number\n";
+    myfile << "Ca_concentration,Piezo_current,J_on,J_ryr,J_serca\n";
     for (int i = 0; i < max_size; i++)
     {
         //cout << "Break point 5" << endl;
-        time_bool = (vec_time.size() > i) ? true : false;
-        channel_number_bool = (vec_channel_number.size() > i) ? true : false;
+        bool_Ca_conc = (vec_Ca_conc.size() > i) ? true : false;
+        bool_Piezo_current = (vec_Piezo_current.size() > i) ? true : false;
+        bool_J_on = (vec_J_on.size() > i) ? true : false;
+        bool_J_ryr = (vec_J_ryr.size() > i) ? true : false;
+        bool_J_serca = (vec_J_serca.size() > i) ? true : false;
 
         //cout << "Break point 6" << endl;
 
-        if(time_bool) myfile << vec_time[i] << ",";
-        if(!time_bool) myfile << ",";
-        if(channel_number_bool) myfile << vec_channel_number[i];
+        if(bool_Ca_conc) myfile << vec_Ca_conc[i] << ",";
+        if(!bool_Ca_conc) myfile << ",";
+        if(bool_Piezo_current) myfile << vec_Piezo_current[i] << ",";
+        if(!bool_Piezo_current) myfile << ",";
+        if(bool_J_on) myfile << vec_J_on[i] << ",";
+        if(!bool_J_on) myfile << ",";
+        if(bool_J_ryr) myfile << vec_J_ryr[i] << ",";
+        if(!bool_J_ryr) myfile << ",";
+        if(bool_J_serca) myfile << vec_J_serca[i];
+
 
         //if(!dn_V_0) myfile << vec_tiny_N[i];
 

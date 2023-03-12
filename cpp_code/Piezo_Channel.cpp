@@ -132,8 +132,8 @@ vector<double> vec_J_serca;
 
 // Buffering Definitions %%%%%%%%%%%%%%%%%
 // Reference includes a list of models published by year: https://www.frontiersin.org/articles/10.3389/fncom.2018.00014/full
-double buff_unbound; //concentration of unbound buffer, which we are taking to be b_total
-double buff_bound; //concentration of bound buffer
+double buff_unbound = 1; //concentration of unbound buffer, which we are taking to be b_total
+double buff_bound = 99; //concentration of bound buffer
 vector<double> vec_buff_bound;
 int buff_counter = 0;
 double k_buff_bind; //binding affinity/Kon of buffer
@@ -172,9 +172,11 @@ double Compute_J_on(double C_cyt){
   J_off = k_buff_unbind*buff_bound; 
   buff_c_dT = k_buff_bind*C_cyt*buff_unbound - k_buff_unbind*buff_bound;
   vec_buff_bound.push_back(vec_buff_bound[buff_counter] + buff_c_dT);
-  buff_counter++;
+
   buff_diff = J_off - J_on;
   vec_J_on.push_back(buff_diff);
+
+  buff_counter++;
   return(buff_diff);
 }
 

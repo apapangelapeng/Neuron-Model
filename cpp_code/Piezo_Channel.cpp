@@ -198,16 +198,35 @@ double Compute_J_serca(double C_cyt){
 
 double Compute_J_ryr(double C_Cyt){
   //cout << "Compute_J_ryr active1" << endl;
-  w_inf = ((K_a/pow(C_Cyt,4)) + 1 + (pow(C_cyt,3)/K_b))/((1/K_c) + (K_a/pow(C_Cyt,4)) + 1 + (pow(C_cyt,3)/K_b)); 
+
+  double local_C_cyt = C_Cyt; // this is here in case we want to scale 
+
+  w_inf = ((K_a/pow(local_C_cyt,4)) + 1 + (pow(local_C_cyt,3)/K_b))/((1/K_c) + (K_a/pow(local_C_cyt,4)) + 1 + (pow(local_C_cyt,3)/K_b)); 
+  //cout << (K_a/pow(local_C_cyt,4)) << endl;
+
   //cout << "Compute_J_ryr active2" << endl;
-  w_dt = (w_inf - vec_w[w_counter])/tau_w;
+
   tau_w = w_inf/K_d;
+  w_dt = (w_inf - vec_w[w_counter])/tau_w;
+
   //cout << "Compute_J_ryr active3" << endl;
+
   vec_w.push_back(vec_w[w_counter] + w_dt);
-  P_open = (w*((1 + pow(C_cyt,3))/K_b))/((K_a/pow(C_Cyt,4)) + 1 + (pow(C_cyt,3)/K_b));
-  J_ryr = (v_rel*P_open + v_leak)*(C_er - C_cyt);
+  P_open = (vec_w[w_counter + 1]*((1 + pow(local_C_cyt,3))/K_b))/((K_a/pow(local_C_cyt,4)) + 1 + (pow(local_C_cyt,3)/K_b));
+  J_ryr = (v_rel*P_open + v_leak)*(C_er - local_C_cyt);
+
+  if(J_ryr != J_ryr){
+    J_ryr = 0;
+  }
+
+  // cout << w_inf << endl;
+  // cout << w << endl;
+  // cout << vec_w[w_counter] << endl;
+  // cout << P_open << endl;
+
   w_counter++;
-  vec_J_ryr.push_back(J_ryr);
+
+  vec_J_ryr.push_back(100*J_ryr);
   return(J_ryr);
 }
 
@@ -273,9 +292,9 @@ double Piezo_Channel(double potential){
     open_temp = open_temp*0.9048; //this is the time constant of Piezo, so it is not relevant on a micro s scale 
   }
 
-  if ((open_counter >= 5000) && (open_counter <= 5005)){
-    open_temp = N_Piezo_channels; //this is the time constant of Piezo, so it is not relevant on a micro s scale 
-  }
+  // if ((open_counter >= 5000) && (open_counter <= 5005)){
+  //   open_temp = N_Piezo_channels; //this is the time constant of Piezo, so it is not relevant on a micro s scale 
+  // }
 
 
   //cout << open_temp << endl;
@@ -298,7 +317,7 @@ double Calcium_concentration(double time_range, double delta_T){
   vec_num_open.push_back(0);
   vec_num_closed.push_back(N_Piezo_channels);
   vec_buff_bound.push_back(0);
-  vec_Ca_conc.push_back(0.0012); //supposed to be 
+  vec_Ca_conc.push_back(0.0012); //supposed to be 120nM
   // cone_circumference = 2*M_PI*cone_radius;
   // cone_cross_area = M_PI*pow(cone_radius,2);
 
@@ -308,7 +327,10 @@ double Calcium_concentration(double time_range, double delta_T){
 
   for(double i = 0; i <= time_range; i += delta_T){
     C_cyt = vec_Ca_conc[Ca_counter]; 
-    Ca_c_dT = delta_T*(scaling_factor*Piezo_Channel(E_Ca) + scaling_factor*Compute_J_ryr(C_cyt) - scaling_factor*Compute_J_serca(C_cyt) + Compute_J_on(C_cyt));
+
+    //cout << C_cyt << endl;
+
+    Ca_c_dT = delta_T*(scaling_factor*Piezo_Channel(E_Ca) - scaling_factor*Compute_J_ryr(C_cyt) - scaling_factor*Compute_J_serca(C_cyt) + Compute_J_on(C_cyt));
     vec_Ca_conc.push_back(vec_Ca_conc[Ca_counter] + Ca_c_dT);
     Ca_counter++;
   }
@@ -320,7 +342,7 @@ double voltage_output(double x)
 {
     //reset_vecs(0);
     //Piezo_screen(1000, 10);
-    Calcium_concentration(100, delta_T);
+    Calcium_concentration(1000, delta_T);
 
     // for (int i = 0; i < 3; i++)
     // {
@@ -377,7 +399,7 @@ double voltage_output(double x)
         if(!bool_Piezo_current) myfile << ",";
         if(bool_J_ryr) myfile << 100000*vec_J_ryr[i] << ",";
         if(!bool_J_ryr) myfile << ",";
-        if(bool_J_serca) myfile << 100000*vec_J_serca[i]<< ",";;
+        if(bool_J_serca) myfile << -1*100000*vec_J_serca[i]<< ",";;
         if(!bool_J_serca) myfile << ",";
         if(bool_num_open) myfile << vec_num_open[i];
 

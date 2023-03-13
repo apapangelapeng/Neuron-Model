@@ -226,7 +226,7 @@ double Compute_J_ryr(double C_Cyt){
 
   w_counter++;
 
-  vec_J_ryr.push_back(100*J_ryr);
+  vec_J_ryr.push_back(1000*J_ryr);
   return(J_ryr);
 }
 
@@ -330,7 +330,7 @@ double Calcium_concentration(double time_range, double delta_T){
 
     //cout << C_cyt << endl;
 
-    Ca_c_dT = delta_T*(scaling_factor*Piezo_Channel(E_Ca) - scaling_factor*Compute_J_ryr(C_cyt) - scaling_factor*Compute_J_serca(C_cyt) + Compute_J_on(C_cyt));
+    Ca_c_dT = delta_T*(scaling_factor*Piezo_Channel(E_Ca) + scaling_factor*Compute_J_ryr(C_cyt) - scaling_factor*Compute_J_serca(C_cyt) + Compute_J_on(C_cyt));
     vec_Ca_conc.push_back(vec_Ca_conc[Ca_counter] + Ca_c_dT);
     Ca_counter++;
   }

@@ -200,7 +200,7 @@ double Compute_J_ryr(double C_Cyt){
   double local_C_cyt = C_Cyt; // this is here in case we want to scale 
 
   w_inf = ((K_a/pow(local_C_cyt,4)) + 1 + (pow(local_C_cyt,3)/K_b))/((1/K_c) + (K_a/pow(local_C_cyt,4)) + 1 + (pow(local_C_cyt,3)/K_b)); 
-  cout << ((K_a/pow(local_C_cyt,4)) + 1 + (pow(local_C_cyt,3)/K_b)) << "/" << ((1/K_c) + (K_a/pow(local_C_cyt,4)) + 1 + (pow(local_C_cyt,3)/K_b)) << endl;
+  //cout << (K_a/pow(local_C_cyt,4)) << endl;
 
   //cout << "Compute_J_ryr active2" << endl;
 
@@ -340,7 +340,7 @@ double voltage_output(double x)
 {
     //reset_vecs(0);
     //Piezo_screen(1000, 10);
-    Calcium_concentration(10, delta_T);
+    Calcium_concentration(1000, delta_T);
 
     // for (int i = 0; i < 3; i++)
     // {

@@ -96,18 +96,18 @@ double N_ryr; //stochastic number of RyR channels
 // RyR Definitions %%%%%%%%%%%%%%%%%%%%%%%%
 // Model 2
 // From this paper: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4648987/pdf/10827_2015_Article_579.pdf
-double v_rel = 0.005; // no clue what this is, just some constant, units of ms^-1
-double v_leak = 0.00012; // still, no clue, just some constant, units of ms^-1
+double v_rel = 5; // no clue what this is, just some constant, units of s^-1
+double v_leak = 0.12; // still, no clue, just some constant, units of s^-1
 // c_cyt and c_er are still used 
 double P_open; // probability/proportion that channels are open
 double w; // dynamical variable -- I don't want to talk about it
 double w_inf; // infinite version of w; w_inf is a state-function and does not need a vector
 double w_dt; // w derivative with respect to time
 double tau_w; // time constant of w
-double K_a = 0.0192; // kinetics a, units of uM^4
-double K_b = 0.2573; // kinetics b, units of uM^3
+double K_a = 0.0000000000000000000000000192; // kinetics a, units of M^4
+double K_b = 0.0000000000000000002573; // kinetics b, units of M^3
 double K_c = 0.0571; // kinetics c, unitless
-double K_d = 0.0001; // kinetics d, units of ms^-1
+double K_d = 0.1; // kinetics d, units of s^-1
 int w_counter = 0;
 vector<double> vec_J_ryr;
 // J_ryr = (v_rel*P_open + v_leak)(C_er - C_cyt);
@@ -119,8 +119,8 @@ vector<double> vec_J_ryr;
 
 // SERCA Definitions %%%%%%%%%%%%%%%%%%%%%%%%
 // Most SERCA models seem to simply be the Hill function
-double v_serca = 0.12; // some constant, units of muM / ms
-double K_p = 0.3; // kinetics p, units of uM
+double v_serca = 0.00012; // some constant, units of M / s
+double K_p = 0.0000003; // kinetics p, units of uM
 vector<double> vec_J_serca;
 // TECHNICALLY THiS MODEL IS OUTDATED, CHECK PAGE 284 OF MATHEMATICAL PHYS
 // J_serca = v_serca*((C_cyt^2)/(C_cyt^2 + K_p^2));
@@ -132,12 +132,12 @@ vector<double> vec_J_serca;
 
 // Buffering Definitions %%%%%%%%%%%%%%%%%
 // Reference includes a list of models published by year: https://www.frontiersin.org/articles/10.3389/fncom.2018.00014/full
-double buff_unbound = 1; //concentration of unbound buffer, which we are taking to be b_total
-double buff_bound = 65; //concentration of bound buffer
+double buff_unbound = 0.0000000001; //concentration of unbound buffer, which we are taking to be b_total
+double buff_bound = 0.00000001; //concentration of bound buffer
 vector<double> vec_buff_bound;
 int buff_counter = 0;
-double k_buff_bind; //binding affinity/Kon of buffer
-double k_buff_unbind; //unbinding affinity/Koff of buffer
+double k_buff_bind = 600000000; //binding affinity/Kon of buffer
+double k_buff_unbind = 100; //unbinding affinity/Koff of buffer
 double buff_c_dT; //derivative of concentration of buffer with respect to time
 double buff_c_dT_dT; //second derivative of concentration of buffer with respect to time, we do not really ned this unless we are measuring the diffusion of the buffer
 double buff_diff;
@@ -167,11 +167,9 @@ double PotentialE(double out, double in, int Z) {
 }
 
 double Compute_J_on(double C_cyt){
-  double scaling_factor = 10000; 
+  double scaling_factor = 1; 
   double local_C_cyt = C_cyt*scaling_factor;
-  //cout << "Compute_J_on active" << endl;
-  k_buff_bind = 0.600; //for the buffer BAPTA in mM
-  k_buff_unbind = 0.100;
+  //cout << "Compute_J_on active" << endl
 
   J_on = k_buff_bind*local_C_cyt*buff_unbound;
   J_off = k_buff_unbind*buff_bound; 
@@ -323,7 +321,7 @@ double Calcium_concentration(double time_range, double delta_T){
 
   // Ca_c_dT = D_diff_Ca*Ca_c_dT_dT + J_ipr + (cone_circumference/cone_cross_area)*(J_in - J_pm) + Compute_J_ryr(C_cyt) - Compute_J_serca(C_cyt) + Compute_J_on(C_cyt);
 
-  double scaling_factor = 100;
+  double scaling_factor = 1;
 
   for(double i = 0; i <= time_range; i += delta_T){
     C_cyt = vec_Ca_conc[Ca_counter]; 

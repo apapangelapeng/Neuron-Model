@@ -25,12 +25,11 @@ double body_temp = 310.15;
 
 //General use %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 double delta_T = 0.01;
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
 // calcium concentration: 2.4mM outside, 100nM inside https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3553253/#:~:text=Extracellular%20calcium%2C%20and%20particularly%20the,calcium%20of%201.1%E2%80%931.4%20mM
 double Ca_in, Ca_out;
 double E_Ca; // 131.373 --> this is for humans, i.e., body temp of 310K etc. Unsure what it is for Drosophila
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 
 // Piezo Kinetics %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -128,7 +127,7 @@ vector<double> vec_J_serca;
 // IPR Definitions %%%%%%%%%%%%%%%%%%%%%%%%
 // Taking this mostly from Mathematical Physiology page 293. This is a simplified IPR model
 // It is difficult to know if this will be sufficient 
-
+// I am afraid that the addition of IPR will completely dominate the code, and it is unknown if this is true to the growth cone
 
 // Buffering Definitions %%%%%%%%%%%%%%%%%
 // Reference includes a list of models published by year: https://www.frontiersin.org/articles/10.3389/fncom.2018.00014/full
@@ -416,8 +415,6 @@ double voltage_output(double x)
     myfile.close();
     return (x);
 }
-
-
 
 int main(void) {
   cout << "Begin" << endl;

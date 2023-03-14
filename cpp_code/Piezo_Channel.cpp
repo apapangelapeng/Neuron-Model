@@ -88,7 +88,7 @@ double J_off; //function of unbinding of Ca2+ from buffers
 double vol_D; //dyadic space volume
 double vol_ER; //ER volume
 double g_ryr; //RyR channel conductance
-double C_er = 0.0005; //concentration inside the ER; units of M; in this case, we are assuming that C_er is relatively constant
+double C_er = 0.0001; //concentration inside the ER; units of M; in this case, we are assuming that C_er is relatively constant
 double C_cyt; //concentration in the cytoplasm
 double N_ryr; //stochastic number of RyR channels
 // J_ryr = N_ryr*(g_ryr/vol_D)*(C_er - C_cyt); //This kind of decribes the local movement due to gradient
@@ -132,8 +132,8 @@ vector<double> vec_J_serca;
 
 // Buffering Definitions %%%%%%%%%%%%%%%%%
 // Reference includes a list of models published by year: https://www.frontiersin.org/articles/10.3389/fncom.2018.00014/full
-double buff_unbound = 1; //concentration of unbound buffer, which we are taking to be b_total
-double buff_bound = 65; //concentration of bound buffer
+double buff_unbound = 0.1; //concentration of unbound buffer, which we are taking to be b_total
+double buff_bound = 0.4; //concentration of bound buffer
 vector<double> vec_buff_bound;
 int buff_counter = 0;
 double k_buff_bind; //binding affinity/Kon of buffer
@@ -154,10 +154,10 @@ vector<double> vec_time;
 vector<double> vec_w;
 
 default_random_engine generator;
-normal_distribution<double> stochastic_opening(0,1);
+normal_distribution<double> stochastic_opening(0,0.6);
 
-double PotentialE(double out, double in, int Z) {
-  double E = 1000 * (R_constant * body_temp) / (F * Z) * log(out / in); // log(x) = ln(x) in cpp
+double PotentialE(double out, double in, int Z) { //calculated in VOLTS NOT MILLIVOLTS
+  double E = (R_constant * body_temp) / (F * Z) * log(out / in); // log(x) = ln(x) in cpp
   if ((isinf(E)) || (E != E)) {
     cout << "YOUR E FUNCTION IS FAULTING! Probably, the concentration inside went to 0, or you entered z = 0." << endl;
   }
@@ -167,7 +167,7 @@ double PotentialE(double out, double in, int Z) {
 }
 
 double Compute_J_on(double C_cyt){
-  double scaling_factor = 10000; 
+  double scaling_factor = 100000; 
   double local_C_cyt = C_cyt*scaling_factor;
   //cout << "Compute_J_on active" << endl;
   k_buff_bind = 0.600; //for the buffer BAPTA in mM
@@ -183,23 +183,25 @@ double Compute_J_on(double C_cyt){
   vec_J_on.push_back(buff_diff);
 
   buff_counter++;
-  return(buff_diff);
+  return(buff_diff*0.000001); //*0.000001
 }
 
-double Compute_J_serca(double C_cyt){
+double Compute_J_serca(double serc_local){
   //cout << "Compute_J_serca active" << endl;
-  J_serca = v_serca*(pow(C_cyt,2)/(pow(C_cyt,2) + pow(K_p,2)));
+  double local_C_cyt = 1000*serc_local;
+
+  J_serca = v_serca*(pow(local_C_cyt,2)/(pow(local_C_cyt,2) + pow(K_p,2)));
   if(J_serca != J_serca){
     J_serca = 0;
   }
-  vec_J_serca.push_back(J_serca);
-  return(J_serca);
+  vec_J_serca.push_back(J_serca*0.01);
+  return(J_serca*0.01);
 }
 
-double Compute_J_ryr(double C_Cyt){
+double Compute_J_ryr(double ryr_local){
   //cout << "Compute_J_ryr active1" << endl;
 
-  double local_C_cyt = C_Cyt; // this is here in case we want to scale 
+  double local_C_cyt = 1000*ryr_local; // this is here in case we want to scale 
 
   w_inf = ((K_a/pow(local_C_cyt,4)) + 1 + (pow(local_C_cyt,3)/K_b))/((1/K_c) + (K_a/pow(local_C_cyt,4)) + 1 + (pow(local_C_cyt,3)/K_b)); 
   //cout << (K_a/pow(local_C_cyt,4)) << endl;
@@ -226,8 +228,8 @@ double Compute_J_ryr(double C_Cyt){
 
   w_counter++;
 
-  vec_J_ryr.push_back(100*J_ryr);
-  return(J_ryr);
+  vec_J_ryr.push_back(J_ryr*0.01);
+  return(J_ryr*0.01);
 }
 
 // int reset_vecs(int x){
@@ -292,9 +294,9 @@ double Piezo_Channel(double potential){
     open_temp = open_temp*0.9048; //this is the time constant of Piezo, so it is not relevant on a micro s scale 
   }
 
-  // if ((open_counter >= 5000) && (open_counter <= 5005)){
-  //   open_temp = N_Piezo_channels; //this is the time constant of Piezo, so it is not relevant on a micro s scale 
-  // }
+  //  if ((open_counter >= 5000) && (open_counter <= 5005)){
+  //    open_temp = N_Piezo_channels; //this is the time constant of Piezo, so it is not relevant on a micro s scale 
+  //  }
 
 
   //cout << open_temp << endl;
@@ -317,20 +319,20 @@ double Calcium_concentration(double time_range, double delta_T){
   vec_num_open.push_back(0);
   vec_num_closed.push_back(N_Piezo_channels);
   vec_buff_bound.push_back(0);
-  vec_Ca_conc.push_back(0.0012); //supposed to be 120nM
+  vec_Ca_conc.push_back(0.00000012); //supposed to be 120nM
   // cone_circumference = 2*M_PI*cone_radius;
   // cone_cross_area = M_PI*pow(cone_radius,2);
 
   // Ca_c_dT = D_diff_Ca*Ca_c_dT_dT + J_ipr + (cone_circumference/cone_cross_area)*(J_in - J_pm) + Compute_J_ryr(C_cyt) - Compute_J_serca(C_cyt) + Compute_J_on(C_cyt);
 
-  double scaling_factor = 100;
+  double scaling_factor = 1;
 
   for(double i = 0; i <= time_range; i += delta_T){
     C_cyt = vec_Ca_conc[Ca_counter]; 
 
     //cout << C_cyt << endl;
 
-    Ca_c_dT = delta_T*(scaling_factor*Piezo_Channel(E_Ca) - scaling_factor*Compute_J_ryr(C_cyt) - scaling_factor*Compute_J_serca(C_cyt) + Compute_J_on(C_cyt));
+    Ca_c_dT = delta_T*(scaling_factor*Piezo_Channel(E_Ca) + scaling_factor*Compute_J_ryr(C_cyt) - scaling_factor*Compute_J_serca(C_cyt) + Compute_J_on(C_cyt));
     vec_Ca_conc.push_back(vec_Ca_conc[Ca_counter] + Ca_c_dT);
     Ca_counter++;
   }
@@ -381,6 +383,7 @@ double voltage_output(double x)
     myfile << "Ca_concentration,Buffering,Piezo_current,J_ryr,J_serca,Piezo_open\n";
     for (int i = 0; i < max_size; i++)
     {
+      if(i >= 1000){
         //cout << "Break point 5" << endl;
         bool_Ca_conc = (vec_Ca_conc.size() > i) ? true : false;
         bool_Piezo_current = (vec_Piezo_current.size() > i) ? true : false;
@@ -391,15 +394,15 @@ double voltage_output(double x)
 
         //cout << "Break point 6" << endl;
 
-        if(bool_Ca_conc) myfile << 100000*vec_Ca_conc[i] << ",";
+        if(bool_Ca_conc) myfile << 1000000000*vec_Ca_conc[i] << ",";
         if(!bool_Ca_conc) myfile << ",";
-        if(bool_J_on) myfile << 100000*vec_J_on[i] << ",";
+        if(bool_J_on) myfile << 1*vec_J_on[i] << ",";
         if(!bool_J_on) myfile << ",";
-        if(bool_Piezo_current) myfile << 100000*vec_Piezo_current[i] << ",";
+        if(bool_Piezo_current) myfile << 1*vec_Piezo_current[i] << ",";
         if(!bool_Piezo_current) myfile << ",";
-        if(bool_J_ryr) myfile << 100000*vec_J_ryr[i] << ",";
+        if(bool_J_ryr) myfile << 1*vec_J_ryr[i] << ",";
         if(!bool_J_ryr) myfile << ",";
-        if(bool_J_serca) myfile << -1*100000*vec_J_serca[i]<< ",";;
+        if(bool_J_serca) myfile << -1*1*vec_J_serca[i]<< ",";;
         if(!bool_J_serca) myfile << ",";
         if(bool_num_open) myfile << vec_num_open[i];
 
@@ -408,6 +411,7 @@ double voltage_output(double x)
 
         myfile << "\n";
         //cout << "Break point 6" << endl;
+      }
     }
     myfile.close();
     return (x);

@@ -36,7 +36,7 @@ double E_Ca; // 131.373 --> this is for humans, i.e., body temp of 310K etc. Uns
 // Piezo Kinetics %%%%%%%%%%%%%%%%%%%%%%%%%
 double G_Piezo_single = 0.000000000030; 
 double G_Piezo_total;
-int N_Piezo_channels = 2000;
+int N_Piezo_channels = 5000;
 double p_open = 0; 
 vector<int> vec_num_open;
 double p_closed = 1;
@@ -194,7 +194,7 @@ double Compute_J_serca(double serc_local){
   if(J_serca != J_serca){
     J_serca = 0;
   }
-  vec_J_serca.push_back(J_serca*0.01);
+  vec_J_serca.push_back(J_serca*0.01); //this and ryr are scaled weirdly, I don't know why this works better - otherwise Piezo will dominate
   return(J_serca*0.01);
 }
 
@@ -215,7 +215,7 @@ double Compute_J_ryr(double ryr_local){
 
   vec_w.push_back(vec_w[w_counter] + w_dt);
   P_open = (vec_w[w_counter + 1]*((1 + pow(local_C_cyt,3))/K_b))/((K_a/pow(local_C_cyt,4)) + 1 + (pow(local_C_cyt,3)/K_b));
-  J_ryr = (v_rel*P_open + v_leak)*(C_er - local_C_cyt);
+  J_ryr = (v_rel*P_open + v_leak)*(C_er - local_C_cyt); //I do not like the C_er - local_c_cyt
 
   if(J_ryr != J_ryr){
     J_ryr = 0;
@@ -294,9 +294,9 @@ double Piezo_Channel(double potential){
     open_temp = open_temp*0.9048; //this is the time constant of Piezo, so it is not relevant on a micro s scale 
   }
 
-  //  if ((open_counter >= 5000) && (open_counter <= 5005)){
-  //    open_temp = N_Piezo_channels; //this is the time constant of Piezo, so it is not relevant on a micro s scale 
-  //  }
+   if ((open_counter >= 5000) && (open_counter <= 5005)){
+     open_temp = N_Piezo_channels; //this is the time constant of Piezo, so it is not relevant on a micro s scale 
+   }
 
 
   //cout << open_temp << endl;

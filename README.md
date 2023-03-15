@@ -1,5 +1,7 @@
 
+# Model_Overview.tex
 
+A more in-depth discussion can be found in the .tex file titled Model_Overview. Here you will find some of the mathematical basis of the code, as well as general concepts in neurbiology that are implemented.  
 
 
 # Compilation of Executables

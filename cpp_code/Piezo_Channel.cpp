@@ -202,9 +202,9 @@ double Compute_J_ryr(double ryr_local){
 
   double local_C_cyt = 1000*ryr_local; // this is here in case we want to scale 
 
-  w_inf = ((K_a/pow(local_C_cyt,4)) + 1 + (pow(local_C_cyt,3)/K_b))/((1/K_c) + (K_a/pow(local_C_cyt,4)) + 1 + (pow(local_C_cyt,3)/K_b)); 
-  // cout << ((pow(K_a/local_C_cyt,4)) + 1 + (pow(local_C_cyt/K_b,3))) << endl;
-  // cout << ((1/K_c) + (pow(K_a/local_C_cyt,4)) + 1 + (pow(local_C_cyt/K_b,3))) << endl;
+  w_inf = ((pow(K_a/local_C_cyt,4)) + 1 + (pow(local_C_cyt/K_b,3)))/((1/K_c) + (pow(K_a/local_C_cyt,4)) + 1 + (pow(local_C_cyt/K_b,3))); 
+  cout << ((pow(K_a/local_C_cyt,4)) + 1 + (pow(local_C_cyt/K_b,3))) << endl;
+  cout << ((1/K_c) + (pow(K_a/local_C_cyt,4)) + 1 + (pow(local_C_cyt/K_b,3))) << endl;
 
   //cout << "Compute_J_ryr active2" << endl;
 
@@ -218,7 +218,7 @@ double Compute_J_ryr(double ryr_local){
   //cout << "Compute_J_ryr active3" << endl;
 
   vec_w.push_back(vec_w[w_counter] + w_dt);
-  P_open = (vec_w[w_counter + 1]*((1 + pow(local_C_cyt,3)/K_b)))/(K_a/(pow(local_C_cyt,4)) + 1 + (pow(local_C_cyt,3)/K_b));
+  P_open = (vec_w[w_counter + 1]*((1 + pow(local_C_cyt/K_b,3))))/((pow(K_a/local_C_cyt,4)) + 1 + (pow(local_C_cyt/K_b,3)));
   J_ryr = (v_rel*P_open + v_leak)*(C_er - local_C_cyt); //I do not like the C_er - local_c_cyt
 
   if(J_ryr != J_ryr){

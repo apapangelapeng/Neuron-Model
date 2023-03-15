@@ -181,17 +181,7 @@ vector<double> vec_time;
 vector<double> vec_w;
 
 default_random_engine generator;
-normal_distribution<double> stochastic_opening(0,0.6);
-
-/*
-n is a kinetic equation built to track ONE kind of POTASSIUM channel's opening
-it will be a proportion of channels open, and or the activation of the channel
-potassium current can be generalized as: g*n^4*(V - E)
-Where V is resting voltage, E is membrane potential, and g is conductance
-m is the same, but for Na 
-h represents INACTIVATION of Na channels, so h and m compete
-The formulas are taken from page 37 of the Electrophysiology textbook
-*/
+normal_distribution<double> stochastic_opening(0,4);
 
 double dynamical_h(double V){
     //for some reason I decided to add in double h, so that we can store this value local to the method
@@ -241,7 +231,7 @@ double Static_WT_AP(double Ca_input){
 
     //vec_Cl_I.push_back(0);
     
-        current = 20000000*Ca_input;
+        current = 10000000*Ca_input;
         //cout << x << endl; 
 
         // if(static_ap_counter >= 5000){
@@ -289,9 +279,8 @@ double output_WT_Static_AP(double x)
     myfile.open(path2);
 
     vector<int> sizes;
-    /*cout<<vec_V.size()<<endl;
-    cout<<vec_N.size()<<endl;
-    cout<<vec_tiny_N.size()<<endl;*/
+
+
     sizes.insert(sizes.begin(),vec_V.size());
     sizes.insert(sizes.begin(),vec_K_I.size());
     sizes.insert(sizes.begin(),vec_Na_I.size());
@@ -401,60 +390,17 @@ double Compute_J_ryr(double ryr_local){ // I am almost certain that there is som
     J_ryr = 0;
   }
 
-  // cout << w_inf << endl;
-  // cout << w << endl;
-  // cout << vec_w[w_counter] << endl;
-  // cout << P_open << endl;
-
   w_counter++;
 
   vec_J_ryr.push_back(J_ryr*0.01);
   return(J_ryr*0.01);
 }
 
-// int reset_vecs(int x){
-//     return(0);
-// }
-
-// double Piezo_screen(double channel_number, double time_max){
-//   E_Ca = PotentialE(0.0024, 0.0000001, 2); //taking it to be 100nM inside, 2.4mM outside, also this outputs in millivolts
-//   double Charge_temp = 0;
-//   double Charge_temp_dt = 0;
-//   double Conc_temp = 0;
-//   for(double x = 0; x <= channel_number; x += 10){
-//     for(double y = 0; y <= time_max; y += 0.001){ // time is in milliseconds, so step with 1/1000 of ms seems good
-//       Charge_temp_dt = x*(E_Ca/1000)*G_Piezo_single*0.000001; // the 0.0000001 was added to convert from seconds to 0.001 ms 
-//       Charge_temp += Charge_temp_dt;
-      
-//       Conc_temp = (Charge_temp/F)/((4/3)*M_PI*pow(0.00175,3)); //the radius, in this case, is in centimeters. I do not know why, but this seems to work better
-//       //cout << x*(E_Ca/1000)*G_Piezo_single*0.001 << endl;
-//       //cout << ((4/3)*M_PI*pow(0.00000175,3)) << endl;
-//       //cout << Conc_temp << endl;
-//       //cout << Charge_temp/F << endl;
-
-//       // C = C + C_dt
-//       if((Conc_temp >= 0.0000000022) && (Conc_temp <= 0.0000000023)){
-//         vec_time.push_back(y);
-//         vec_channel_number.push_back(x);
-//         //cout << "occured" << endl;
-//       }
-//     }
-//     Charge_temp = 0;
-//     Conc_temp = 0; 
-//     Charge_temp_dt = 0;
-//   }
-//   return(0);
-// }
-
 double Piezo_Channel(double potential){
   //cout << "Piezo_Channel active" << endl;
   int stochastic = stochastic_opening(generator);
   int open_temp;
   double P_open_temp;
-
-  //P_open_temp = (vec_num_open[open_counter]*(1/exp((delta_T*0.001)/T_Piezo)));
-  
-  //cout << 1/(exp((delta_T*0.001)/T_Piezo)) << endl;
 
   open_temp = vec_num_open[open_counter] + abs(stochastic);
 
@@ -474,7 +420,7 @@ double Piezo_Channel(double potential){
     open_temp = open_temp*0.9048; //this is the time constant of Piezo, so it is not relevant on a micro s scale 
   }
 
-   if ((open_counter >= 5000) && (open_counter <= 5005)){
+   if ((open_counter >= 50000) && (open_counter <= 50010)){
      open_temp = N_Piezo_channels; //this is the time constant of Piezo, so it is not relevant on a micro s scale 
    }
 
@@ -529,17 +475,9 @@ double Calcium_concentration(double time_range, double delta_T){
 
 double voltage_output(double x)
 {
-    //reset_vecs(0);
-    //Piezo_screen(1000, 10);
-    Calcium_concentration(100, delta_T);
-    output_WT_Static_AP(0);
 
-    // for (int i = 0; i < 3; i++)
-    // {
-    //     cout << i << endl; 
-    //     Piezo_Channel(i);
-    //     reset_vecs(0);
-    // }
+    Calcium_concentration(1000, delta_T);
+    output_WT_Static_AP(0);
 
     ofstream create_file(path1);
     ofstream myfile;

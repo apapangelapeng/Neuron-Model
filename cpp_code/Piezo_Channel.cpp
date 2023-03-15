@@ -153,7 +153,7 @@ vector<double> vec_time;
 vector<double> vec_w;
 
 default_random_engine generator;
-normal_distribution<double> stochastic_opening(0,1);
+normal_distribution<double> stochastic_opening(0,0.6);
 
 double PotentialE(double out, double in, int Z) { //calculated in VOLTS NOT MILLIVOLTS
   double E = (R_constant * body_temp) / (F * Z) * log(out / in); // log(x) = ln(x) in cpp
@@ -193,8 +193,8 @@ double Compute_J_serca(double serc_local){
   if(J_serca != J_serca){
     J_serca = 0;
   }
-  vec_J_serca.push_back(J_serca*0.001); //this and ryr are scaled weirdly, I don't know why this works better - otherwise Piezo will dominate
-  return(J_serca*0.001);
+  vec_J_serca.push_back(J_serca*0.01); //this and ryr are scaled weirdly, I don't know why this works better - otherwise Piezo will dominate
+  return(J_serca*0.01);
 }
 
 double Compute_J_ryr(double ryr_local){
@@ -202,23 +202,18 @@ double Compute_J_ryr(double ryr_local){
 
   double local_C_cyt = 1000*ryr_local; // this is here in case we want to scale 
 
-  w_inf = ((pow(K_a/local_C_cyt,4)) + 1 + (pow(local_C_cyt/K_b,3)))/((1/K_c) + (pow(K_a/local_C_cyt,4)) + 1 + (pow(local_C_cyt/K_b,3))); 
-  cout << ((pow(K_a/local_C_cyt,4)) + 1 + (pow(local_C_cyt/K_b,3))) << endl;
-  cout << ((1/K_c) + (pow(K_a/local_C_cyt,4)) + 1 + (pow(local_C_cyt/K_b,3))) << endl;
+  w_inf = ((K_a/pow(local_C_cyt,4)) + 1 + (pow(local_C_cyt,3)/K_b))/((1/K_c) + (K_a/pow(local_C_cyt,4)) + 1 + (pow(local_C_cyt,3)/K_b)); 
+  //cout << (K_a/pow(local_C_cyt,4)) << endl;
 
   //cout << "Compute_J_ryr active2" << endl;
 
   tau_w = w_inf/K_d;
-
-  // cout << ((K_a/pow(local_C_cyt,4)) + 1 + (pow(local_C_cyt,3)/K_b)) << endl;
-  // cout << ((1/K_c) + (K_a/pow(local_C_cyt,4)) + 1 + (pow(local_C_cyt,3)/K_b))  << endl;
-  
   w_dt = (w_inf - vec_w[w_counter])/tau_w;
 
   //cout << "Compute_J_ryr active3" << endl;
 
   vec_w.push_back(vec_w[w_counter] + w_dt);
-  P_open = (vec_w[w_counter + 1]*((1 + pow(local_C_cyt/K_b,3))))/((pow(K_a/local_C_cyt,4)) + 1 + (pow(local_C_cyt/K_b,3)));
+  P_open = (vec_w[w_counter + 1]*((1 + pow(local_C_cyt,3))/K_b))/((K_a/pow(local_C_cyt,4)) + 1 + (pow(local_C_cyt,3)/K_b));
   J_ryr = (v_rel*P_open + v_leak)*(C_er - local_C_cyt); //I do not like the C_er - local_c_cyt
 
   if(J_ryr != J_ryr){
@@ -232,18 +227,8 @@ double Compute_J_ryr(double ryr_local){
 
   w_counter++;
 
-  vec_J_ryr.push_back(J_ryr*0.001);
-  return(J_ryr*0.001);
-}
-
-double Compute_J_diffuse(double diffuse_local){
-
-  double local_C_cyt = diffuse_local;
-  double J_diffuse;
-
-  J_diffuse = 0.05*(0.0000001 - local_C_cyt);
-
-  return(J_diffuse);
+  vec_J_ryr.push_back(J_ryr*0.01);
+  return(J_ryr*0.01);
 }
 
 // int reset_vecs(int x){
@@ -333,7 +318,7 @@ double Calcium_concentration(double time_range, double delta_T){
   vec_num_open.push_back(0);
   vec_num_closed.push_back(N_Piezo_channels);
   vec_buff_bound.push_back(0);
-  vec_Ca_conc.push_back(0.0000001); //supposed to be 100nM
+  vec_Ca_conc.push_back(0.00000012); //supposed to be 120nM
   // cone_circumference = 2*M_PI*cone_radius;
   // cone_cross_area = M_PI*pow(cone_radius,2);
 
@@ -346,7 +331,7 @@ double Calcium_concentration(double time_range, double delta_T){
 
     //cout << C_cyt << endl;
 
-    Ca_c_dT = delta_T*(scaling_factor*Compute_J_diffuse(C_cyt) + scaling_factor*Piezo_Channel(E_Ca) + scaling_factor*Compute_J_ryr(C_cyt) - scaling_factor*Compute_J_serca(C_cyt) + Compute_J_on(C_cyt));
+    Ca_c_dT = delta_T*(scaling_factor*Piezo_Channel(E_Ca) + scaling_factor*Compute_J_ryr(C_cyt) - scaling_factor*Compute_J_serca(C_cyt) + Compute_J_on(C_cyt));
     vec_Ca_conc.push_back(vec_Ca_conc[Ca_counter] + Ca_c_dT);
     Ca_counter++;
   }
@@ -358,7 +343,7 @@ double voltage_output(double x)
 {
     //reset_vecs(0);
     //Piezo_screen(1000, 10);
-    Calcium_concentration(10, delta_T);
+    Calcium_concentration(1000, delta_T);
 
     // for (int i = 0; i < 3; i++)
     // {

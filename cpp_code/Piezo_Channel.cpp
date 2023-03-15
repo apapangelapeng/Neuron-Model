@@ -197,7 +197,7 @@ double Compute_J_serca(double serc_local){
   return(J_serca*0.01);
 }
 
-double Compute_J_ryr(double ryr_local){
+double Compute_J_ryr(double ryr_local){ // I am almost certain that there is something wrong with the kinetic equations that go beyond the paper
   //cout << "Compute_J_ryr active1" << endl;
 
   double local_C_cyt = 1000*ryr_local; // this is here in case we want to scale 

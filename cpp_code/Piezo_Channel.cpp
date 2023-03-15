@@ -63,7 +63,7 @@ double E_Ca; // 131.373 --> this is for humans, i.e., body temp of 310K etc. Uns
 // Piezo Kinetics %%%%%%%%%%%%%%%%%%%%%%%%%
 double G_Piezo_single = 0.000000000030; 
 double G_Piezo_total;
-int N_Piezo_channels = 5000;
+int N_Piezo_channels = 10000;
 double p_open = 0; 
 vector<int> vec_num_open;
 double p_closed = 1;
@@ -240,14 +240,13 @@ double dynamical_m(double V){
 double Static_WT_AP(double Ca_input){
 
     //vec_Cl_I.push_back(0);
-
     
-        current = Ca_input;
+        current = 20000000*Ca_input;
         //cout << x << endl; 
 
-        if(static_ap_counter >= 1000){
-          current = 5;
-        }
+        // if(static_ap_counter >= 5000){
+        //   current = 5;
+        // }
 
         //cout << "Break point 1" << endl;
 
@@ -343,7 +342,7 @@ double PotentialE(double out, double in, int Z) { //calculated in VOLTS NOT MILL
     cout << "YOUR E FUNCTION IS FAULTING! Probably, the concentration inside went to 0, or you entered z = 0." << endl;
   }
   //THIS IS USED TO TEST POTENTIAL CALCULATION
-  cout << "\n THIS IS E in mV: " << E << endl;
+  cout << "\n THIS IS E in V: " << E << endl;
   return (E);
 }
 
@@ -521,7 +520,9 @@ double Calcium_concentration(double time_range, double delta_T){
     Ca_c_dT = delta_T*(scaling_factor*Piezo_Channel(E_Ca) + scaling_factor*Compute_J_ryr(C_cyt) - scaling_factor*Compute_J_serca(C_cyt) + Compute_J_on(C_cyt));
     vec_Ca_conc.push_back(vec_Ca_conc[Ca_counter] + Ca_c_dT);
     Ca_counter++;
+
     Static_WT_AP(vec_Ca_conc[Ca_counter]);
+    
   }
   return(0);
 }
@@ -530,7 +531,7 @@ double voltage_output(double x)
 {
     //reset_vecs(0);
     //Piezo_screen(1000, 10);
-    Calcium_concentration(1000, delta_T);
+    Calcium_concentration(100, delta_T);
     output_WT_Static_AP(0);
 
     // for (int i = 0; i < 3; i++)

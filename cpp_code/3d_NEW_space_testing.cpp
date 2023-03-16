@@ -64,7 +64,7 @@ int display_vectors(int x){
     cout << "test test " << vec_time[1][0] << endl;
 
     temp = access_coordinates(3,3,3);
-    cout << temp << endl;
+    // cout << temp << endl;
     return(0);
 }
 
@@ -80,7 +80,7 @@ int fill_vectors(int temp){
         for(double j = 0; j <= y_max; j++){
             for(double k = 0; k <= z_max; k++){
                 vec_x.push_back(i);
-                cout << i << vec_x[i] << endl;
+                // cout << i << vec_x[i] << endl;
                 vec_y.push_back(j);
                 vec_z.push_back(k);
                 if((i >= 3 && i <= 6) && (j >= 3 && j <= 6) && (k >= 3 && k <= 6)){
@@ -100,7 +100,6 @@ int fill_vectors(int temp){
         vec_y.clear();
         vec_z.clear();
         vec_valid.clear();
-    //}
 
     cout << "high" << endl;
 
@@ -115,17 +114,17 @@ double output_file(double x)
     ofstream myfile;
     myfile.open(path1);
 
-    cout << "Break point 1" << endl;
+    //cout << "Break point 1" << endl;
 
     fill_vectors(0);
 
     vector<int> sizes;
 
-    cout << "Break point 2" << endl;
+    //cout << "Break point 2" << endl;
 
     sizes.insert(sizes.begin(),vec_time.size());
 
-    cout << "Break point 3" << endl;
+    //cout << "Break point 3" << endl;
 
     sort(sizes.begin(), sizes.end());
     int max_size = sizes.back();

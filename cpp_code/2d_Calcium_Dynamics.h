@@ -41,14 +41,13 @@ double E_Ca; // 131.373 --> this is for humans, i.e., body temp of 310K etc. Uns
 // Piezo Kinetics %%%%%%%%%%%%%%%%%%%%%%%%%
 double G_Piezo_single = 0.000000000030; 
 double G_Piezo_total;
-int N_Piezo_channels = 10000;
+int N_Piezo_channels = 2;
 double p_open = 0; 
-vector<int> vec_num_open;
+vector<vector<vector<double> > > vec_num_open;
 double p_closed = 1;
-vector<int> vec_num_closed;
+vector<vector<vector<double> > > vec_num_closed;
 double Piezo_current;
-vector<double> vec_Piezo_current;
-double placeholder_opening_function;
+vector<vector<vector<double> > > vec_Piezo_current;
 int open_counter = 0;
 // Piezo1 = 29pS https://www.sciencedirect.com/science/article/pii/S0968000416301505
 // The decay rate, according to this paper, is 1ms
@@ -154,5 +153,4 @@ vector<double> vec_J_on;
 
 vector<double> temp_vec;
 vector<double> vec_channel_number;
-vector<double> vec_time;
 vector<double> vec_w;

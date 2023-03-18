@@ -11,7 +11,8 @@
 
 using namespace std;
 
-const char *path1="../data_files/Piezo_Channel.csv";
+const char *path1="../data_files/2d_Piezo_Channel.csv";
+const char *path2="../data_files/2d_Piezo_Channel_test.csv";
 
 default_random_engine generator;
 normal_distribution<double> stochastic_opening(0,0.6);
@@ -76,7 +77,16 @@ double Piezo_Channel(double potential, int time, int x, int y){
     return(Piezo_current);
 }
 
-double Calcium_concentration(int x){
+double Calcium_concentration(double x){
+
+    ofstream create_file(path2);
+    ofstream myfile;
+    myfile.open(path2);
+
+    myfile << "test\n";
+
+
+    myfile.close();
 
     cout << "high" << endl;
 
@@ -106,7 +116,7 @@ double Calcium_concentration(int x){
         for(int i = 0; i <= x_max; i++){
             for(int j = 0; j <= y_max; j++){
 
-                cout << time_temp << "," << i << "," << j << endl;
+                //cout << time_temp << "," << i << "," << j << endl;
 
                 C_cyt = vec_time[time_temp][i][j];
                 
@@ -125,10 +135,21 @@ double Calcium_concentration(int x){
 
 double output_file(double x)
 {
-
     ofstream create_file(path1);
     ofstream myfile;
     myfile.open(path1);
+
+    if (myfile.is_open())
+    {
+        cout << "File successfully open" << endl;
+        myfile << "File successfully open,";
+    }
+    else
+    {
+        cout << "Error opening file";
+    }
+
+    myfile << "time,x,y\n";
 
     //cout << "Break point 1" << endl;
 
@@ -155,24 +176,30 @@ double output_file(double x)
     double time_max = 1;
 
     myfile << "x,y\n";
-for(int time = 0; time < vec_time.size(); time++)
-    {
-    for (int x = 0; x < vec_time[1].size(); x++)
-    {
-        //cout << "Break point 5" << endl;
-        for (int y = 0; y <= y_max; y++)
-        {  
-            if(y < x_max) 
-                myfile << vec_time[time][x][y] << ",";
-            else
-                myfile << vec_time[time][x][y];
 
+    for(int time = 0; time <= vec_time.size(); time++){
+        for (int x = 0; x <= x_max; x++){
+            //cout << "Break point 5" << endl;
+            for (int y = 0; y <= y_max; y++){  
+                if(y < y_max) {
+                    double temp = vec_time[time][x][y]; 
+                    myfile << vec_time[time][x][y] << ",";
+                    //cout << vec_time[time][x][y] << endl;
+                }  
+                else {
+                    myfile << vec_time[time][x][y];
+                    //cout << "high to low" << endl;
+                }
+            myfile << "\n";
         //cout << "Break point 7" << endl;
-        }
+            }
         myfile << "\n";
+        }
+    myfile << "\n";
     }
-    }
+
     myfile.close();
+
     return (x);
 }
 

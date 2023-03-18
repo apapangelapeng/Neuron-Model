@@ -101,6 +101,7 @@ int fill_vectors(int temp){
 double output_file(double x)
 {
     reset_vecs(0);
+    
     ofstream create_file(path1);
     ofstream myfile;
     myfile.open(path1);

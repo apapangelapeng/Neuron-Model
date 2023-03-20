@@ -10,7 +10,7 @@
 using namespace std;
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-// 2d specific things
+// 2d specific thingsc
 vector<double> vec_x;
 vector<double> vec_y; 
 vector<vector<double> > vec_coords;

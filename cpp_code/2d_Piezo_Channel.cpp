@@ -15,7 +15,7 @@ const char *path1="../data_files/2d_Piezo_Channel.csv";
 const char *path2="../data_files/2d_Piezo_Channel_test.csv";
 
 default_random_engine generator;
-normal_distribution<double> stochastic_opening(0,0.6);
+normal_distribution<double> stochastic_opening(0,10);
 
 int reset_vecs(int x){
     vec_x.clear();
@@ -74,25 +74,20 @@ double Piezo_Channel(double potential, int time, int x, int y){
     Piezo_current = (potential*G_Piezo_total)/2; //dividing by 2 because Ca is 2+ charge (affecting current by factor of 2)
     vec_Piezo_current[time + 1][x][y] = Piezo_current;
 
+    cout << abs(stochastic) << endl;
+    cout << Piezo_current << endl;
+
+
     return(Piezo_current);
 }
 
 double Calcium_concentration(double x){
 
-    ofstream create_file(path2);
-    ofstream myfile;
-    myfile.open(path2);
-
-    myfile << "test\n";
-
-
-    myfile.close();
-
     cout << "high" << endl;
 
     double x_max = 9;
     double y_max = 9;
-    double time_max = 1;
+    double time_max = 10;
     E_Ca = PotentialE(0.0024, 0.00000012, 2);
 
     vec_time.push_back(fill_2dvecs(x_max, y_max, 0.00000012));
@@ -124,11 +119,14 @@ double Calcium_concentration(double x){
                 Ca_c_dT = delta_T*(scaling_factor*Piezo_Channel(E_Ca, time_temp, i, j));
                 vec_time[time_temp + 1][i][j] = vec_time[time_temp][i][j] + Ca_c_dT;
 
+                // what will be better is to solve for the number of moles in each cube, then use that to calculate overall concentration
+
             }
         }
     }
 
     cout << "low" << endl;
+
     return(0);
 }
 
@@ -139,29 +137,13 @@ double output_file(double x)
     ofstream myfile;
     myfile.open(path1);
 
-    if (myfile.is_open())
-    {
-        cout << "File successfully open" << endl;
-        myfile << "File successfully open,";
-    }
-    else
-    {
-        cout << "Error opening file";
-    }
-
     myfile << "time,x,y\n";
-
-    //cout << "Break point 1" << endl;
 
     Calcium_concentration(0);
 
     vector<int> sizes;
 
-    //cout << "Break point 2" << endl;
-
     sizes.insert(sizes.begin(),vec_time.size());
-
-    //cout << "Break point 3" << endl;
 
     sort(sizes.begin(), sizes.end());
     int max_size = sizes.back();
@@ -169,20 +151,16 @@ double output_file(double x)
     cout << max_size << endl;
     bool bool_y; 
 
-    cout << "Break point 4" << endl;
-
     double x_max = 9;
     double y_max = 9;
-    double time_max = 1;
+    double time_max = 10;
 
     myfile << "x,y\n";
 
-    for(int time = 0; time <= vec_time.size(); time++){
+    for(int time = 0; time <= time_max; time++){
         for (int x = 0; x <= x_max; x++){
-            //cout << "Break point 5" << endl;
             for (int y = 0; y <= y_max; y++){  
                 if(y < y_max) {
-                    double temp = vec_time[time][x][y]; 
                     myfile << vec_time[time][x][y] << ",";
                     //cout << vec_time[time][x][y] << endl;
                 }  
@@ -190,7 +168,7 @@ double output_file(double x)
                     myfile << vec_time[time][x][y];
                     //cout << "high to low" << endl;
                 }
-            myfile << "\n";
+            //myfile << "\n";
         //cout << "Break point 7" << endl;
             }
         myfile << "\n";
@@ -198,7 +176,7 @@ double output_file(double x)
     myfile << "\n";
     }
 
-    myfile.close();
+    //myfile.close();
 
     return (x);
 }

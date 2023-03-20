@@ -14,6 +14,10 @@ using namespace std;
 const char *path1="../data_files/2d_Piezo_Channel.csv";
 const char *path2="../data_files/2d_Piezo_Channel_test.csv";
 
+double x_max = 9;
+double y_max = 9;
+double time_max = 20;
+
 default_random_engine generator;
 normal_distribution<double> stochastic_opening(0,0.6);
 
@@ -21,6 +25,12 @@ int reset_vecs(int x){
     vec_x.clear();
     vec_y.clear();
     vec_coords.clear();
+    vec_time.clear();
+    vec_num_open.clear();
+    vec_num_closed.clear();
+    vec_Piezo_current.clear();
+    vec_buff_bound.clear();
+    vec_w.clear();
 
     return(0);
 }
@@ -50,6 +60,62 @@ double PotentialE(double out, double in, int Z) { //calculated in VOLTS NOT MILL
   return (E);
 }
 
+double Compute_J_on(double C_cyt, int time, int x, int y){
+  double scaling_factor = 100000; 
+  double local_C_cyt = C_cyt*scaling_factor;
+
+  k_buff_bind = 0.600; //for the buffer BAPTA in mM
+  k_buff_unbind = 0.100;
+
+  J_on = k_buff_bind*local_C_cyt*buff_unbound;
+  J_off = k_buff_unbind*buff_bound; 
+  buff_c_dT = k_buff_bind*local_C_cyt*buff_unbound - k_buff_unbind*buff_bound;
+  vec_buff_bound[time + 1][x][y] = (vec_buff_bound[time][x][y] + buff_c_dT);
+
+  buff_diff = J_off - J_on;
+  buff_diff = buff_diff*pow(scaling_factor,-1);
+  //vec_J_on.push_back(buff_diff);
+
+  buff_counter++;
+  return(buff_diff*0.000001); //*0.000001
+}
+
+double Compute_J_serca(double serc_local, int time, int x, int y){
+
+  double local_C_cyt = 1000*serc_local;
+
+  J_serca = v_serca*(pow(local_C_cyt,2)/(pow(local_C_cyt,2) + pow(K_p,2)));
+  if(J_serca != J_serca){
+    J_serca = 0;
+  }
+  
+  // vec_J_serca.push_back(J_serca*0.0001); //this and ryr are scaled weirdly, I don't know why this works better - otherwise Piezo will dominate
+  
+  return(J_serca*0.00001);
+}
+
+double Compute_J_ryr(double ryr_local, int time, int x, int y){ // I am almost certain that there is something wrong with the kinetic equations that go beyond the paper
+
+  double local_C_cyt = 1000*ryr_local; // this is here in case we want to scale 
+
+  w_inf = ((K_a/pow(local_C_cyt,4)) + 1 + (pow(local_C_cyt,3)/K_b))/((1/K_c) + (K_a/pow(local_C_cyt,4)) + 1 + (pow(local_C_cyt,3)/K_b)); 
+
+  tau_w = w_inf/K_d;
+  w_dt = (w_inf - vec_w[time][x][y])/tau_w;
+
+  vec_w[time + 1][x][y] = (vec_w[time][x][y] + w_dt);
+  P_open = (vec_w[time + 1][x][y]*((1 + pow(local_C_cyt,3))/K_b))/((K_a/pow(local_C_cyt,4)) + 1 + (pow(local_C_cyt,3)/K_b));
+  J_ryr = (v_rel*P_open + v_leak)*(C_er - local_C_cyt); //I do not like the C_er - local_c_cyt
+
+  if(J_ryr != J_ryr){
+    J_ryr = 0;
+  }
+
+  w_counter++;
+
+  return(J_ryr*0.00001);
+}
+
 double Piezo_Channel(double potential, int time, int x, int y){
 
     int stochastic = stochastic_opening(generator);
@@ -74,10 +140,6 @@ double Piezo_Channel(double potential, int time, int x, int y){
     Piezo_current = (potential*G_Piezo_total)/2; //dividing by 2 because Ca is 2+ charge (affecting current by factor of 2)
     vec_Piezo_current[time + 1][x][y] = Piezo_current;
 
-    cout << abs(stochastic) << endl;
-    cout << Piezo_current << endl;
-
-
     return(Piezo_current);
 }
 
@@ -85,11 +147,7 @@ double Calcium_concentration(double x){
 
     cout << "high" << endl;
 
-    double x_max = 9;
-    double y_max = 9;
-    double time_max = 10;
     E_Ca = PotentialE(0.0024, 0.00000012, 2);
-
     
     double divs = (x_max + 1)*(y_max + 1);
     double mols_divs = 0.0000000000001/divs;
@@ -98,10 +156,10 @@ double Calcium_concentration(double x){
     vec_num_open.push_back(fill_2dvecs(x_max, y_max, 0));
     vec_num_closed.push_back(fill_2dvecs(x_max, y_max, N_Piezo_channels));
     vec_Piezo_current.push_back(fill_2dvecs(x_max, y_max, 0));
+    vec_buff_bound.push_back(fill_2dvecs(x_max, y_max, 0));
+    vec_w.push_back(fill_2dvecs(x_max, y_max, 0));
 
     cout << "break point 2" << endl;
-
-    vec_buff_bound.push_back(0);
 
     double scaling_factor = 1;
 
@@ -111,16 +169,15 @@ double Calcium_concentration(double x){
     vec_num_closed.push_back(fill_2dvecs(x_max, y_max, 0));
     vec_time.push_back(fill_2dvecs(x_max, y_max, 0));
     vec_Piezo_current.push_back(fill_2dvecs(x_max, y_max, 0));
+    vec_buff_bound.push_back(fill_2dvecs(x_max, y_max, 0));
+    vec_w.push_back(fill_2dvecs(x_max, y_max, 0));
     
         for(int i = 0; i <= x_max; i++){
             for(int j = 0; j <= y_max; j++){
 
-                //cout << time_temp << "," << i << "," << j << endl;
-
                 C_cyt = vec_time[time_temp][i][j];
-                
 
-                Ca_c_dT = delta_T*(scaling_factor*Piezo_Channel(E_Ca, time_temp, i, j));
+                Ca_c_dT = delta_T*(scaling_factor*Piezo_Channel(E_Ca, time_temp, i, j) + scaling_factor*Compute_J_ryr(C_cyt, time_temp, i, j) - Compute_J_serca(C_cyt, time_temp, i, j) + Compute_J_on(C_cyt, time_temp, i, j));
                 vec_time[time_temp + 1][i][j] = vec_time[time_temp][i][j] + Ca_c_dT;
 
                 // what will be better is to solve for the number of moles in each cube, then use that to calculate overall concentration
@@ -141,8 +198,6 @@ double output_file(double x)
     ofstream myfile;
     myfile.open(path1);
 
-    myfile << "time,x,y\n";
-
     Calcium_concentration(0);
 
     vector<int> sizes;
@@ -155,32 +210,22 @@ double output_file(double x)
     cout << max_size << endl;
     bool bool_y; 
 
-    double x_max = 9;
-    double y_max = 9;
-    double time_max = 10;
-
-    myfile << "x,y\n";
-
     for(int time = 0; time <= time_max; time++){
         for (int x = 0; x <= x_max; x++){
             for (int y = 0; y <= y_max; y++){  
                 if(y < y_max) {
                     myfile << vec_time[time][x][y] << ",";
-                    //cout << vec_time[time][x][y] << endl;
                 }  
                 else {
                     myfile << vec_time[time][x][y];
-                    //cout << "high to low" << endl;
                 }
-            //myfile << "\n";
-        //cout << "Break point 7" << endl;
             }
         myfile << "\n";
         }
     myfile << "\n";
     }
 
-    //myfile.close();
+    myfile.close();
 
     return (x);
 }

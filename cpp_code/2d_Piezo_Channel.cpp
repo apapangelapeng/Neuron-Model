@@ -15,7 +15,7 @@ const char *path1="../data_files/2d_Piezo_Channel.csv";
 const char *path2="../data_files/2d_Piezo_Channel_test.csv";
 
 default_random_engine generator;
-normal_distribution<double> stochastic_opening(0,10);
+normal_distribution<double> stochastic_opening(0,0.6);
 
 int reset_vecs(int x){
     vec_x.clear();
@@ -90,7 +90,11 @@ double Calcium_concentration(double x){
     double time_max = 10;
     E_Ca = PotentialE(0.0024, 0.00000012, 2);
 
-    vec_time.push_back(fill_2dvecs(x_max, y_max, 0.00000012));
+    
+    double divs = (x_max + 1)*(y_max + 1);
+    double mols_divs = 0.0000000000001/divs;
+
+    vec_time.push_back(fill_2dvecs(x_max, y_max, mols_divs)); // 0.0000000000001 = # of moles total in growth cone, 10 = # of divs
     vec_num_open.push_back(fill_2dvecs(x_max, y_max, 0));
     vec_num_closed.push_back(fill_2dvecs(x_max, y_max, N_Piezo_channels));
     vec_Piezo_current.push_back(fill_2dvecs(x_max, y_max, 0));

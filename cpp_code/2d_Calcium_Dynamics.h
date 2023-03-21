@@ -11,7 +11,7 @@ using namespace std;
 
 int x_max = 20;
 int y_max = 20;
-int time_max = 20;
+int time_max = 1000;
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // 2d specific thingsc
@@ -35,7 +35,7 @@ double body_temp = 310.15;
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 //General use %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-double delta_T = 0.01;
+double delta_T = 0.1;
 // calcium concentration: 2.4mM outside, 100nM inside https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3553253/#:~:text=Extracellular%20calcium%2C%20and%20particularly%20the,calcium%20of%201.1%E2%80%931.4%20mM
 double Ca_in, Ca_out;
 double E_Ca; // 131.373 --> this is for humans, i.e., body temp of 310K etc. Unsure what it is for Drosophila

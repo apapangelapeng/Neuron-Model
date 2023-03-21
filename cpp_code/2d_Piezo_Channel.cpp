@@ -146,12 +146,12 @@ double Calcium_concentration(double x){
     E_Ca = PotentialE(0.0024, 0.00000012, 2);
     
     double divs = (x_max + 1)*(y_max + 1);
+
     double mols_divs = 0.0000000000001/divs;
 
     for(int i = 0; i <= x_max; i++){
             for(int j = 0; j <= y_max; j++){
                 vec_time[0][i][j] = mols_divs;
-                vec_time[0][i][j] = 0;
                 vec_num_closed[0][i][j] = N_Piezo_channels;
                 vec_Piezo_current[0][i][j] = 0;
                 vec_buff_bound[0][i][j] = 0;

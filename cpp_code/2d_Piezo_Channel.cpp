@@ -4,7 +4,7 @@ const char *path1="../data_files/2d_Piezo_Channel.csv";
 const char *path2="../data_files/2d_Piezo_Channel_test.csv";
 
 default_random_engine generator;
-normal_distribution<double> stochastic_opening(0,0.6);
+normal_distribution<double> stochastic_opening(0,0.3);
 
 int reset_vecs(int x){
     vec_x.clear();
@@ -46,21 +46,36 @@ double PotentialE(double out, double in, int Z) { //calculated in VOLTS NOT MILL
 }
 
 double Compute_J_diffusion(int time, int x, int y) { 
-    double R= 1;
+    double R = 1;
     double total_diffusion, x_diffusion, y_diffusion;
     if((x >= 1) && (x <= x_max - 1)){
-        x_diffusion = (1/R)*(vec_time[time][y][x + 1] - (2 * vec_time[time][y][x] ) + vec_time[time][y][x - 1]);
+        x_diffusion = (1/R)*(vec_time[time][y][x + 1] - (2 * vec_time[time][y][x]) + vec_time[time][y][x - 1]);
     }
     if((y >= 1) && (y <= y_max - 1)){
-        y_diffusion = (1/R)*(vec_time[time][y + 1][x] - (2 * vec_time[time][y][x] ) + vec_time[time][y - 1][x]);
+        y_diffusion = (1/R)*(vec_time[time][y + 1][x] - (2 * vec_time[time][y][x]) + vec_time[time][y - 1][x]);
     }
+    
+    if((y == 0)){
+        y_diffusion = (1/R)*(vec_time[time][y + 1][x] - (vec_time[time][y][x]));
+    }
+    if((y == y_max)){
+        y_diffusion = (1/R)*(vec_time[time][y - 1][x] - (vec_time[time][y][x]));
+    }
+
+    if((x == 0)){
+        x_diffusion = (1/R)*(vec_time[time][y][x + 1] - (vec_time[time][y][x]));
+    }
+    if((x == x_max)){
+        x_diffusion = (1/R)*(vec_time[time][y][x - 1] - (vec_time[time][y][x]));
+    }
+
     total_diffusion = x_diffusion + y_diffusion;
   return(total_diffusion);
 }
 
 
 double Compute_J_on(double C_cyt, int time, int x, int y){
-  double scaling_factor = 100000; 
+  double scaling_factor = 10000000; 
   double local_C_cyt = C_cyt*scaling_factor;
 
   k_buff_bind = 0.600; //for the buffer BAPTA in mM
@@ -76,7 +91,7 @@ double Compute_J_on(double C_cyt, int time, int x, int y){
   //vec_J_on.push_back(buff_diff);
 
   buff_counter++;
-  return(buff_diff*0.00000001); //*0.000001
+  return(buff_diff*0.0000000001); //*0.000001
 }
 
 double Compute_J_serca(double serc_local, int time, int x, int y){
@@ -138,7 +153,7 @@ double Piezo_Channel(double potential, int time, int x, int y){
     Piezo_current = (potential*G_Piezo_total)/2; //dividing by 2 because Ca is 2+ charge (affecting current by factor of 2)
     vec_Piezo_current[time + 1][x][y] = Piezo_current;
 
-    return(Piezo_current);
+    return(Piezo_current*0.1);
 }
 
 double Calcium_concentration(double x){
@@ -161,12 +176,23 @@ double Calcium_concentration(double x){
         }
     }
 
-    vec_time[0][3][4] = 0.0001;
-    vec_time[0][3][5] = 0.0001;
-    vec_time[0][4][3] = 0.0001;
-    vec_time[0][4][4] = 0.0001;
-    vec_time[0][5][4] = 0.0001;
+    // vec_time[0][3][4] = 0.0000001;
+    // vec_time[0][3][5] = 0.0000002;
+    // vec_time[0][4][3] = 0.0000003;
+    // vec_time[0][4][4] = 0.0000004;
+    // vec_time[0][5][4] = 0.0000005;
 
+    // vec_time[0][3][4] = 0.0000001;
+    // vec_time[0][5][6] = 0.0000002;
+    // vec_time[0][7][7] = 0.0000003;
+    // vec_time[0][0][0] = 0.0000004;
+    // vec_time[0][2][1] = 0.0000005;
+
+    // vec_time[0][18][14] = 0.0000001;
+    // vec_time[0][15][17] = 0.0000002;
+    // vec_time[0][10][x_max] = 0.0000003;
+    // vec_time[0][9][x_max] = 0.0000004;
+    // vec_time[0][7][4] = 0.0000005;
 
     cout << "break point 2" << endl;
 
@@ -180,7 +206,7 @@ double Calcium_concentration(double x){
 
                 //Ca_c_dT = delta_T*(scaling_factor*Piezo_Channel(E_Ca, time_temp, i, j) + scaling_factor*Compute_J_ryr(C_cyt, time_temp, i, j) - Compute_J_serca(C_cyt, time_temp, i, j) + Compute_J_on(C_cyt, time_temp, i, j));
                 
-                Ca_c_dT = delta_T*(Compute_J_diffusion(time_temp, j, i));
+                Ca_c_dT = delta_T*(scaling_factor*Piezo_Channel(E_Ca, time_temp, i, j) + Compute_J_diffusion(time_temp, j, i) + Compute_J_on(C_cyt, time_temp, i, j));
                 
                 vec_time[time_temp + 1][i][j] = vec_time[time_temp][i][j] + Ca_c_dT;
 

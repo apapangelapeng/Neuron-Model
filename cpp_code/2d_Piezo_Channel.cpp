@@ -1,15 +1,4 @@
-#include <cmath>
-#include <fstream>
-#include <iostream>
-#include <sstream>
-#include <string.h>
-#include <vector>
-#include <algorithm>
-#include <random>
-
 #include "2d_Calcium_Dynamics.h"
-
-using namespace std;
 
 const char *path1="../data_files/2d_Piezo_Channel.csv";
 const char *path2="../data_files/2d_Piezo_Channel_test.csv";
@@ -31,15 +20,15 @@ int reset_vecs(int x){
     return(0);
 }
 
-vector<vector<double> > fill_2dvecs(int x_max, int y_max, double value){
-
-    for(double i = 0; i <= x_max; i++){
-        for(double j = 0; j <= y_max; j++){ 
+vector<vector<double> > fill_2dvecs(int x, int y, double value){
+    // this is an optional method to fill 3D vectors with some value
+    // this may be useful if we want an editable size in the future
+    for(double i = 0; i <= x; i++){
+        for(double j = 0; j <= y; j++){ 
             vec_y.push_back(value);
         }
     vec_coords.push_back(vec_y);
     }
-
 
     return(vec_coords);
 
@@ -55,6 +44,20 @@ double PotentialE(double out, double in, int Z) { //calculated in VOLTS NOT MILL
   cout << "\n THIS IS E in V: " << E << endl;
   return (E);
 }
+
+double Compute_J_diffusion(int time, int x, int y) { 
+    double R= 1;
+    double total_diffusion, x_diffusion, y_diffusion;
+    if((x >= 1) && (x <= x_max - 1)){
+        x_diffusion = (1/R)*(vec_time[time][y][x + 1] - (2 * vec_time[time][y][x] ) + vec_time[time][y][x - 1]);
+    }
+    if((y >= 1) && (y <= y_max - 1)){
+        y_diffusion = (1/R)*(vec_time[time][y + 1][x] - (2 * vec_time[time][y][x] ) + vec_time[time][y - 1][x]);
+    }
+    total_diffusion = x_diffusion + y_diffusion;
+  return(total_diffusion);
+}
+
 
 double Compute_J_on(double C_cyt, int time, int x, int y){
   double scaling_factor = 100000; 
@@ -73,12 +76,11 @@ double Compute_J_on(double C_cyt, int time, int x, int y){
   //vec_J_on.push_back(buff_diff);
 
   buff_counter++;
-  return(buff_diff*0.000001); //*0.000001
+  return(buff_diff*0.00000001); //*0.000001
 }
 
 double Compute_J_serca(double serc_local, int time, int x, int y){
-
-  double local_C_cyt = 1000*serc_local;
+  double local_C_cyt = 100000*serc_local;
 
   J_serca = v_serca*(pow(local_C_cyt,2)/(pow(local_C_cyt,2) + pow(K_p,2)));
   if(J_serca != J_serca){
@@ -87,12 +89,12 @@ double Compute_J_serca(double serc_local, int time, int x, int y){
   
   // vec_J_serca.push_back(J_serca*0.0001); //this and ryr are scaled weirdly, I don't know why this works better - otherwise Piezo will dominate
   
-  return(J_serca*0.00001);
+  return(J_serca*0.0000001);
 }
 
 double Compute_J_ryr(double ryr_local, int time, int x, int y){ // I am almost certain that there is something wrong with the kinetic equations that go beyond the paper
 
-  double local_C_cyt = 1000*ryr_local; // this is here in case we want to scale 
+  double local_C_cyt = 100000*ryr_local; // this is here in case we want to scale 
 
   w_inf = ((K_a/pow(local_C_cyt,4)) + 1 + (pow(local_C_cyt,3)/K_b))/((1/K_c) + (K_a/pow(local_C_cyt,4)) + 1 + (pow(local_C_cyt,3)/K_b)); 
 
@@ -109,7 +111,7 @@ double Compute_J_ryr(double ryr_local, int time, int x, int y){ // I am almost c
 
   w_counter++;
 
-  return(J_ryr*0.00001);
+  return(J_ryr*0.0000001);
 }
 
 double Piezo_Channel(double potential, int time, int x, int y){
@@ -150,41 +152,36 @@ double Calcium_concentration(double x){
     double mols_divs = 0.0000000000001/divs;
 
     for(int i = 0; i <= x_max; i++){
-            for(int j = 0; j <= y_max; j++){
-                vec_time[0][i][j] = mols_divs;
-                vec_num_closed[0][i][j] = N_Piezo_channels;
-                vec_Piezo_current[0][i][j] = 0;
-                vec_buff_bound[0][i][j] = 0;
-                vec_w[0][i][j] = 0;
-            }
+        for(int j = 0; j <= y_max; j++){
+            vec_time[0][i][j] = mols_divs;
+            vec_num_closed[0][i][j] = N_Piezo_channels;
+            vec_Piezo_current[0][i][j] = 0;
+            vec_buff_bound[0][i][j] = 0;
+            vec_w[0][i][j] = 0;
         }
+    }
 
-    // vec_time.push_back(fill_2dvecs(x_max, y_max, mols_divs)); // 0.0000000000001 = # of moles total in growth cone, 10 = # of divs
-    // vec_num_open.push_back(fill_2dvecs(x_max, y_max, 0));
-    // vec_num_closed.push_back(fill_2dvecs(x_max, y_max, N_Piezo_channels));
-    // vec_Piezo_current.push_back(fill_2dvecs(x_max, y_max, 0));
-    // vec_buff_bound.push_back(fill_2dvecs(x_max, y_max, 0));
-    // vec_w.push_back(fill_2dvecs(x_max, y_max, 0));
+    vec_time[0][3][4] = 0.0001;
+    vec_time[0][3][5] = 0.0001;
+    vec_time[0][4][3] = 0.0001;
+    vec_time[0][4][4] = 0.0001;
+    vec_time[0][5][4] = 0.0001;
+
 
     cout << "break point 2" << endl;
 
     double scaling_factor = 1;
 
     for(int time_temp = 0; time_temp <= time_max; time_temp++){
-
-    // vec_num_open.push_back(fill_2dvecs(x_max, y_max, 0));
-    // vec_num_closed.push_back(fill_2dvecs(x_max, y_max, 0));
-    // vec_time.push_back(fill_2dvecs(x_max, y_max, 0));
-    // vec_Piezo_current.push_back(fill_2dvecs(x_max, y_max, 0));
-    // vec_buff_bound.push_back(fill_2dvecs(x_max, y_max, 0));
-    // vec_w.push_back(fill_2dvecs(x_max, y_max, 0));
-    
         for(int i = 0; i <= x_max; i++){
             for(int j = 0; j <= y_max; j++){
 
                 C_cyt = vec_time[time_temp][i][j];
 
-                Ca_c_dT = delta_T*(scaling_factor*Piezo_Channel(E_Ca, time_temp, i, j) + scaling_factor*Compute_J_ryr(C_cyt, time_temp, i, j) - Compute_J_serca(C_cyt, time_temp, i, j) + Compute_J_on(C_cyt, time_temp, i, j));
+                //Ca_c_dT = delta_T*(scaling_factor*Piezo_Channel(E_Ca, time_temp, i, j) + scaling_factor*Compute_J_ryr(C_cyt, time_temp, i, j) - Compute_J_serca(C_cyt, time_temp, i, j) + Compute_J_on(C_cyt, time_temp, i, j));
+                
+                Ca_c_dT = delta_T*(Compute_J_diffusion(time_temp, j, i));
+                
                 vec_time[time_temp + 1][i][j] = vec_time[time_temp][i][j] + Ca_c_dT;
 
                 // what will be better is to solve for the number of moles in each cube, then use that to calculate overall concentration

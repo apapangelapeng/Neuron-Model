@@ -9,9 +9,9 @@
 
 using namespace std;
 
-int x_max = 20;
-int y_max = 20;
-int time_max = 1000;
+int x_max = 30;
+int y_max = 30;
+int time_max = 100;
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // 2d specific thingsc
@@ -20,12 +20,7 @@ vector<double> vec_y;
 vector<vector<double> > vec_coords;
 vector<vector<vector<double> > > vec_time(time_max + 2, vector<vector<double>>(y_max + 1, vector<double>(x_max + 1)));
 //vector<vector<vector<double> > > vec_time;
-
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-
 
 //CONSTANTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 double log_convert = 2.303; // to convert from ln to log10
@@ -40,8 +35,6 @@ double delta_T = 0.1;
 double Ca_in, Ca_out;
 double E_Ca; // 131.373 --> this is for humans, i.e., body temp of 310K etc. Unsure what it is for Drosophila
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
 
 // Piezo Kinetics %%%%%%%%%%%%%%%%%%%%%%%%%
 double G_Piezo_single = 0.000000000030; 
@@ -70,7 +63,6 @@ double T_Piezo = 0.016; //16 ms tau
 // SA, then, is 17320.51 A^2, or 173.20 nm^2, or 72658.95
 // If we assume the growth cone of a sphere is 1um, then the SA is 12.57 um^2
 // I think that means that 72658.95 Piezo proteins can be on the surface
-
 
 // Overall Definitions %%%%%%%%%%%%%%%%%%%%%
 vector<double> vec_Ca_conc; //calcium concentration

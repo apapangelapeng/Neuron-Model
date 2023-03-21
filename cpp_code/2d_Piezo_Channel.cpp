@@ -14,10 +14,6 @@ using namespace std;
 const char *path1="../data_files/2d_Piezo_Channel.csv";
 const char *path2="../data_files/2d_Piezo_Channel_test.csv";
 
-double x_max = 9;
-double y_max = 9;
-double time_max = 20;
-
 default_random_engine generator;
 normal_distribution<double> stochastic_opening(0,0.6);
 
@@ -152,12 +148,23 @@ double Calcium_concentration(double x){
     double divs = (x_max + 1)*(y_max + 1);
     double mols_divs = 0.0000000000001/divs;
 
-    vec_time.push_back(fill_2dvecs(x_max, y_max, mols_divs)); // 0.0000000000001 = # of moles total in growth cone, 10 = # of divs
-    vec_num_open.push_back(fill_2dvecs(x_max, y_max, 0));
-    vec_num_closed.push_back(fill_2dvecs(x_max, y_max, N_Piezo_channels));
-    vec_Piezo_current.push_back(fill_2dvecs(x_max, y_max, 0));
-    vec_buff_bound.push_back(fill_2dvecs(x_max, y_max, 0));
-    vec_w.push_back(fill_2dvecs(x_max, y_max, 0));
+    for(int i = 0; i <= x_max; i++){
+            for(int j = 0; j <= y_max; j++){
+                vec_time[0][i][j] = mols_divs;
+                vec_time[0][i][j] = 0;
+                vec_num_closed[0][i][j] = N_Piezo_channels;
+                vec_Piezo_current[0][i][j] = 0;
+                vec_buff_bound[0][i][j] = 0;
+                vec_w[0][i][j] = 0;
+            }
+        }
+
+    // vec_time.push_back(fill_2dvecs(x_max, y_max, mols_divs)); // 0.0000000000001 = # of moles total in growth cone, 10 = # of divs
+    // vec_num_open.push_back(fill_2dvecs(x_max, y_max, 0));
+    // vec_num_closed.push_back(fill_2dvecs(x_max, y_max, N_Piezo_channels));
+    // vec_Piezo_current.push_back(fill_2dvecs(x_max, y_max, 0));
+    // vec_buff_bound.push_back(fill_2dvecs(x_max, y_max, 0));
+    // vec_w.push_back(fill_2dvecs(x_max, y_max, 0));
 
     cout << "break point 2" << endl;
 
@@ -165,12 +172,12 @@ double Calcium_concentration(double x){
 
     for(int time_temp = 0; time_temp <= time_max; time_temp++){
 
-    vec_num_open.push_back(fill_2dvecs(x_max, y_max, 0));
-    vec_num_closed.push_back(fill_2dvecs(x_max, y_max, 0));
-    vec_time.push_back(fill_2dvecs(x_max, y_max, 0));
-    vec_Piezo_current.push_back(fill_2dvecs(x_max, y_max, 0));
-    vec_buff_bound.push_back(fill_2dvecs(x_max, y_max, 0));
-    vec_w.push_back(fill_2dvecs(x_max, y_max, 0));
+    // vec_num_open.push_back(fill_2dvecs(x_max, y_max, 0));
+    // vec_num_closed.push_back(fill_2dvecs(x_max, y_max, 0));
+    // vec_time.push_back(fill_2dvecs(x_max, y_max, 0));
+    // vec_Piezo_current.push_back(fill_2dvecs(x_max, y_max, 0));
+    // vec_buff_bound.push_back(fill_2dvecs(x_max, y_max, 0));
+    // vec_w.push_back(fill_2dvecs(x_max, y_max, 0));
     
         for(int i = 0; i <= x_max; i++){
             for(int j = 0; j <= y_max; j++){

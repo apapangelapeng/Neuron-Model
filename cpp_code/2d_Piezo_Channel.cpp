@@ -4,7 +4,7 @@ const char *path1="../data_files/2d_Piezo_Channel.csv";
 const char *path2="../data_files/2d_Piezo_Channel_test.csv";
 
 default_random_engine generator;
-normal_distribution<double> stochastic_opening(0,0.3);
+normal_distribution<double> stochastic_opening(0,0.25);
 
 int reset_vecs(int x){
     vec_x.clear();

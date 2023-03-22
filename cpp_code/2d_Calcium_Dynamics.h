@@ -9,8 +9,8 @@
 
 using namespace std;
 
-int x_max = 15;
-int y_max = 15;
+int x_max = 100;
+int y_max = 100;
 int time_max = 1000;
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

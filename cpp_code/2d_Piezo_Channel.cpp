@@ -40,8 +40,7 @@ double PotentialE(double out, double in, int Z) { //calculated in VOLTS NOT MILL
   if ((isinf(E)) || (E != E)) {
     cout << "YOUR E FUNCTION IS FAULTING! Probably, the concentration inside went to 0, or you entered z = 0." << endl;
   }
-  //THIS IS USED TO TEST POTENTIAL CALCULATION
-  cout << "\n THIS IS E in V: " << E << endl;
+  //cout << "THIS IS E in V: " << E << endl;
   return (E);
 }
 
@@ -158,7 +157,7 @@ double Piezo_Channel(double potential, int time, int x, int y){
 
 double Calcium_concentration(double x){
 
-    cout << "high" << endl;
+    cout << "  High" << endl;
 
     E_Ca = PotentialE(0.0024, 0.00000012, 2);
     
@@ -176,25 +175,7 @@ double Calcium_concentration(double x){
         }
     }
 
-    // vec_time[0][3][4] = 0.0000001;
-    // vec_time[0][3][5] = 0.0000002;
-    // vec_time[0][4][3] = 0.0000003;
-    // vec_time[0][4][4] = 0.0000004;
-    // vec_time[0][5][4] = 0.0000005;
-
-    // vec_time[0][3][4] = 0.0000001;
-    // vec_time[0][5][6] = 0.0000002;
-    // vec_time[0][7][7] = 0.0000003;
-    // vec_time[0][0][0] = 0.0000004;
-    // vec_time[0][2][1] = 0.0000005;
-
-    // vec_time[0][18][14] = 0.0000001;
-    // vec_time[0][15][17] = 0.0000002;
-    // vec_time[0][10][x_max] = 0.0000003;
-    // vec_time[0][9][x_max] = 0.0000004;
-    // vec_time[0][7][4] = 0.0000005;
-
-    cout << "break point 2" << endl;
+    //cout << "break point 2" << endl;
 
     double scaling_factor = 1;
 
@@ -216,7 +197,7 @@ double Calcium_concentration(double x){
         }
     }
 
-    cout << "low" << endl;
+    cout << "    to Low" << endl;
 
     return(0);
 }
@@ -237,8 +218,7 @@ double output_file(double x)
     sort(sizes.begin(), sizes.end());
     int max_size = sizes.back();
     
-    cout << max_size << endl;
-    bool bool_y; 
+    cout << "Vector length: " << max_size << endl;
 
     for(int time = 0; time <= time_max; time++){
         for (int x = 0; x <= x_max; x++){

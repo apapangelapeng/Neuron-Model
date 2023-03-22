@@ -74,7 +74,7 @@ double Compute_J_diffusion(int time, int x, int y) {
 
 
 double Compute_J_on(double C_cyt, int time, int x, int y){
-  double scaling_factor = 10000000; 
+  double scaling_factor = 1000000000; 
   double local_C_cyt = C_cyt*scaling_factor;
 
   k_buff_bind = 0.600; //for the buffer BAPTA in mM
@@ -108,7 +108,7 @@ double Compute_J_serca(double serc_local, int time, int x, int y){
 
 double Compute_J_ryr(double ryr_local, int time, int x, int y){ // I am almost certain that there is something wrong with the kinetic equations that go beyond the paper
 
-  double local_C_cyt = 100000*ryr_local; // this is here in case we want to scale 
+  double local_C_cyt = 10000000000*ryr_local; // this is here in case we want to scale 
 
   w_inf = ((K_a/pow(local_C_cyt,4)) + 1 + (pow(local_C_cyt,3)/K_b))/((1/K_c) + (K_a/pow(local_C_cyt,4)) + 1 + (pow(local_C_cyt,3)/K_b)); 
 
@@ -125,7 +125,9 @@ double Compute_J_ryr(double ryr_local, int time, int x, int y){ // I am almost c
 
   w_counter++;
 
-  return(J_ryr*0.0000001);
+    double scale_down = 1/10000000000;
+
+  return(J_ryr*scale_down);
 }
 
 double Piezo_Channel(double potential, int time, int x, int y){
@@ -187,7 +189,8 @@ double Calcium_concentration(double x){
 
                 //Ca_c_dT = delta_T*(scaling_factor*Piezo_Channel(E_Ca, time_temp, i, j) + scaling_factor*Compute_J_ryr(C_cyt, time_temp, i, j) - Compute_J_serca(C_cyt, time_temp, i, j) + Compute_J_on(C_cyt, time_temp, i, j));
                 
-                Ca_c_dT = delta_T*(scaling_factor*Piezo_Channel(E_Ca, time_temp, i, j) + Compute_J_diffusion(time_temp, j, i) + Compute_J_on(C_cyt, time_temp, i, j));
+                // scaling_factor*Piezo_Channel(E_Ca, time_temp, i, j) +
+                Ca_c_dT = delta_T*(Compute_J_diffusion(time_temp, j, i) + Compute_J_on(C_cyt, time_temp, i, j) + scaling_factor*Compute_J_ryr(C_cyt, time_temp, i, j) - Compute_J_serca(C_cyt, time_temp, i, j));
                 
                 vec_time[time_temp + 1][i][j] = vec_time[time_temp][i][j] + Ca_c_dT;
 
@@ -234,6 +237,8 @@ double output_file(double x)
         }
     myfile << "\n";
     }
+
+    reset_vecs(0);
 
     myfile.close();
 

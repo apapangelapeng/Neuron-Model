@@ -9,9 +9,9 @@
 
 using namespace std;
 
-int x_max = 100;
-int y_max = 100;
-int time_max = 100;
+int x_max = 10;
+int y_max = 10;
+int time_max = 10;
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // 2d specific thingsc

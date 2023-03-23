@@ -23,20 +23,13 @@ double delta_T = 0.001; // this is in ms
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 // calcium concentration: 2.4mM outside, 100nM inside https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3553253/#:~:text=Extracellular%20calcium%2C%20and%20particularly%20the,calcium%20of%201.1%E2%80%931.4%20mM
-double Ca_in, Ca_out;
 double E_Ca; // 131.373 --> this is for humans, i.e., body temp of 310K etc. Unsure what it is for Drosophila
 
-
 // Piezo Kinetics %%%%%%%%%%%%%%%%%%%%%%%%%
-double G_Piezo_single = 0.000000000030; 
+double G_Piezo_single = 0.000000000030; // something like 30 pS
 double G_Piezo_total;
 
-vector<double> temp_vec;
-vector<double> vec_channel_number;
-vector<double> vec_time;
-
-default_random_engine generator;
-normal_distribution<double> error(1,0.025);
+vector<double> temp_vec, vec_channel_number, vec_time;
 
 double PotentialE(double out, double in, int Z) {
   double E = 1000 * (R_constant * body_temp) / (F * Z) * log(out / in); // log(x) = ln(x) in cpp
@@ -44,38 +37,29 @@ double PotentialE(double out, double in, int Z) {
     cout << "YOUR E FUNCTION IS FAULTING! Probably, the concentration inside went to 0, or you entered z = 0." << endl;
   }
   //THIS IS USED TO TEST POTENTIAL CALCULATION
-  cout << "\n THIS IS E in mV: " << E << endl;
+  cout << "Calculated E_Ca in mV: " << E << endl;
   return (E);
 }
 
-// int reset_vecs(int x){
-//     return(0);
-// }
-
 double Piezo_screen(double channel_number, double time_max){
-  E_Ca = PotentialE(0.0024, 0.0000001, 2); //taking it to be 100nM inside, 2.4mM outside, also this outputs in millivolts
+  E_Ca = PotentialE(0.0024, 0.0000001, 2); //Calculates potential of Ca, taking it to be 100nM inside, 2.4mM outside, also this outputs in millivolts
   double Charge_temp = 0;
   double Charge_temp_dt = 0;
   double Conc_temp = 0;
-  for(double x = 0; x <= channel_number; x += 10){
-    for(double y = 0; y <= time_max; y += delta_T){ // time is in milliseconds, so step with 1/1000 of ms seems good
-      Charge_temp_dt = x*(E_Ca/1000)*G_Piezo_single*0.000001; // the 0.0000001 was added to convert from seconds to 0.001 ms 
-      Charge_temp += Charge_temp_dt;
+  for(double x = 0; x <= channel_number; x += 10){ //scans through the number of channels
+    for(double y = 0; y <= time_max; y += delta_T){ // scans through time is in milliseconds, so step with 1/1000 of ms seems good
+      Charge_temp_dt = x*(E_Ca/1000)*G_Piezo_single*delta_T*0.001; // the 0.0000001 was added to convert from seconds to 0.001 ms, E_ca is divided by 1000 to convert mV to V
+      Charge_temp += Charge_temp_dt; 
       
       Conc_temp = (Charge_temp/F)/((4/3)*M_PI*pow(0.00175,3)); //the radius, in this case, is in centimeters. I do not know why, but this seems to work better
-      //cout << x*(E_Ca/1000)*G_Piezo_single*0.001 << endl;
-      //cout << ((4/3)*M_PI*pow(0.00000175,3)) << endl;
-      //cout << Conc_temp << endl;
-      //cout << Charge_temp/F << endl;
 
-      // C = C + C_dt
       if((Conc_temp >= 0.0000000022) && (Conc_temp <= 0.0000000023)){
-        vec_time.push_back(y);
-        vec_channel_number.push_back(x);
+        vec_time.push_back(y); //stores the time that it took to reach 2.3nM
+        vec_channel_number.push_back(x); //stores # of channels
         //cout << "occured" << endl;
       }
     }
-    Charge_temp = 0;
+    Charge_temp = 0; //resets after each time scan 
     Conc_temp = 0; 
     Charge_temp_dt = 0;
   }
@@ -99,7 +83,7 @@ double voltage_output(double x)
     sort(sizes.begin(), sizes.end());
     int max_size = sizes.back();
     
-    cout << max_size << endl;
+    cout << "Vector size: " << max_size << endl;
 
     bool time_bool;
     bool channel_number_bool;

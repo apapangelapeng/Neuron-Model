@@ -4,7 +4,7 @@ const char *path1="../data_files/2d_Piezo_Channel.csv";
 const char *path2="../data_files/2d_Piezo_Channel_test.csv";
 
 default_random_engine generator;
-normal_distribution<double> stochastic_opening(0,0.25);
+normal_distribution<double> stochastic_opening(0,0.3);
 
 int reset_vecs(int x){
     vec_x.clear();
@@ -74,7 +74,7 @@ double Compute_J_diffusion(int time, int x, int y) {
 
 
 double Compute_J_on(double C_cyt, int time, int x, int y){
-  double scaling_factor = 1000000000; 
+  double scaling_factor = 10000000; 
   double local_C_cyt = C_cyt*scaling_factor;
 
   k_buff_bind = 0.600; //for the buffer BAPTA in mM
@@ -90,7 +90,7 @@ double Compute_J_on(double C_cyt, int time, int x, int y){
   //vec_J_on.push_back(buff_diff);
 
   buff_counter++;
-  return(buff_diff*0.0000000001); //*0.000001
+  return(buff_diff*0.00000001); //*0.000001
 }
 
 double Compute_J_serca(double serc_local, int time, int x, int y){
@@ -103,12 +103,12 @@ double Compute_J_serca(double serc_local, int time, int x, int y){
   
   // vec_J_serca.push_back(J_serca*0.0001); //this and ryr are scaled weirdly, I don't know why this works better - otherwise Piezo will dominate
   
-  return(J_serca*0.0000001);
+  return(J_serca*1000);
 }
 
 double Compute_J_ryr(double ryr_local, int time, int x, int y){ // I am almost certain that there is something wrong with the kinetic equations that go beyond the paper
 
-  double local_C_cyt = 10000000000*ryr_local; // this is here in case we want to scale 
+  double local_C_cyt = 100000000*ryr_local; // this is here in case we want to scale 
 
   w_inf = ((K_a/pow(local_C_cyt,4)) + 1 + (pow(local_C_cyt,3)/K_b))/((1/K_c) + (K_a/pow(local_C_cyt,4)) + 1 + (pow(local_C_cyt,3)/K_b)); 
 
@@ -125,7 +125,7 @@ double Compute_J_ryr(double ryr_local, int time, int x, int y){ // I am almost c
 
   w_counter++;
 
-    double scale_down = 1/10000000000;
+    double scale_down = 1/100000000;
 
   return(J_ryr*scale_down);
 }

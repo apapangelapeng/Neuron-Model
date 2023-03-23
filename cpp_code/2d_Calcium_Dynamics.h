@@ -11,7 +11,7 @@ using namespace std;
 
 int x_max = 20;
 int y_max = 20;
-int time_max = 100;
+int time_max = 1000;
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // 2d specific thingsc

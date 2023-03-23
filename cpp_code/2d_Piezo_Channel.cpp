@@ -1,10 +1,10 @@
 #include "2d_Calcium_Dynamics.h"
 
 const char *path1="../data_files/2d_Piezo_Channel.csv";
-const char *path2="../data_files/2d_Piezo_Channel_test.csv";
+const char *path2="../data_files/2d_Piezo_Channel_avg.csv";
 
 default_random_engine generator;
-normal_distribution<double> stochastic_opening(0,0.3);
+normal_distribution<double> stochastic_opening(0,0.4);
 
 int reset_vecs(int x){
     vec_x.clear();
@@ -180,6 +180,7 @@ double Calcium_concentration(double x){
     //cout << "break point 2" << endl;
 
     double scaling_factor = 1;
+    double avg_temp;
 
     for(int time_temp = 0; time_temp <= time_max; time_temp++){
         for(int i = 0; i <= x_max; i++){
@@ -190,14 +191,18 @@ double Calcium_concentration(double x){
                 //Ca_c_dT = delta_T*(scaling_factor*Piezo_Channel(E_Ca, time_temp, i, j) + scaling_factor*Compute_J_ryr(C_cyt, time_temp, i, j) - Compute_J_serca(C_cyt, time_temp, i, j) + Compute_J_on(C_cyt, time_temp, i, j));
                 
                 // scaling_factor*Piezo_Channel(E_Ca, time_temp, i, j) +
-                Ca_c_dT = delta_T*(Compute_J_diffusion(time_temp, j, i) + Compute_J_on(C_cyt, time_temp, i, j) + scaling_factor*Compute_J_ryr(C_cyt, time_temp, i, j) - Compute_J_serca(C_cyt, time_temp, i, j));
+                Ca_c_dT = delta_T*(scaling_factor*Piezo_Channel(E_Ca, time_temp, i, j) + Compute_J_diffusion(time_temp, j, i) + Compute_J_on(C_cyt, time_temp, i, j) + scaling_factor*Compute_J_ryr(C_cyt, time_temp, i, j) - Compute_J_serca(C_cyt, time_temp, i, j));
                 
                 vec_time[time_temp + 1][i][j] = vec_time[time_temp][i][j] + Ca_c_dT;
 
                 // what will be better is to solve for the number of moles in each cube, then use that to calculate overall concentration
-
+                avg_temp += vec_time[time_temp][i][j];
+                //cout << avg_temp << endl;
             }
         }
+        vec_average.push_back(avg_temp/(x_max*y_max));
+        //cout << avg_temp/(x_max*y_max) << endl;
+        avg_temp = 0;
     }
 
     cout << "    to Low" << endl;
@@ -245,8 +250,49 @@ double output_file(double x)
     return (x);
 }
 
+double output_avg_file(double x)
+{
+    ofstream create_file(path2);
+    ofstream myfile;
+    myfile.open(path2);
+
+    vector<int> sizes;
+
+    sizes.insert(sizes.begin(),vec_average.size());
+
+    sort(sizes.begin(), sizes.end());
+    int max_size = sizes.back();
+    
+    cout << "Vector length: " << max_size << endl;
+
+    bool bool_average;
+
+    //cout << "Break point 4" << endl;
+
+    myfile << "Average\n";
+
+    for (int i = 0; i < max_size; i++)
+    {
+        //cout << "Break point 5" << endl;
+        bool_average = (vec_average.size() > i) ? true : false;
+
+        //cout << "Break point 6" << endl;
+
+        if(bool_average) myfile << vec_average[i];
+
+        myfile << "\n";
+        //cout << "Break point 6" << endl;
+    }
+    reset_vecs(0);
+
+    myfile.close();
+
+    return (x);
+}
+
 int main(void) {
   cout << "Begin" << endl;
   output_file(0);
+  output_avg_file(0);
   cout << "End" << endl;
 }

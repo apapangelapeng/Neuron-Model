@@ -11,7 +11,7 @@ using namespace std;
 
 int x_max = 20;
 int y_max = 20;
-int time_max = 1000;
+int time_max = 10000;
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // 2d specific thingsc
@@ -19,6 +19,7 @@ vector<double> vec_x;
 vector<double> vec_y; 
 vector<vector<double> > vec_coords;
 vector<vector<vector<double> > > vec_time(time_max + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
+vector<double> vec_average;
 //vector<vector<vector<double> > > vec_time;
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

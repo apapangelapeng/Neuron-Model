@@ -4,7 +4,7 @@ const char *path1="../data_files/2d_Piezo_Channel.csv";
 const char *path2="../data_files/2d_Piezo_Channel_avg.csv";
 
 default_random_engine generator;
-normal_distribution<double> stochastic_opening(0,0.4);
+normal_distribution<double> stochastic_opening(0,0.25);
 
 int reset_vecs(int x){
     vec_x.clear();
@@ -103,7 +103,7 @@ double Compute_J_serca(double serc_local, int time, int x, int y){
   
   // vec_J_serca.push_back(J_serca*0.0001); //this and ryr are scaled weirdly, I don't know why this works better - otherwise Piezo will dominate
   
-  return(J_serca*1000);
+  return(J_serca*10);
 }
 
 double Compute_J_ryr(double ryr_local, int time, int x, int y){ // I am almost certain that there is something wrong with the kinetic equations that go beyond the paper

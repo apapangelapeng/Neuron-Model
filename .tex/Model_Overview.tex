@@ -439,7 +439,7 @@ Here she is:
 
 \begin{center}
 
-    $\frac{dCa}{dt} = D_c\frac{\partial^2 Ca}{\partial t^2} + J_{ipr} + \frac{G_{circ}}{G_{CSA}}(J_{in} - J_{pm}) + J_{RyR} - J_{ser} - J_{on} + J_{off}$
+    $\frac{dCa}{dt} = D_c\frac{\partial^2 Ca}{\partial x^2} + J_{ipr} + \frac{G_{circ}}{G_{CSA}}(J_{in} - J_{pm}) + J_{RyR} - J_{ser} - J_{on} + J_{off}$
 
 \end{center}
 
@@ -458,7 +458,13 @@ To briefly go over this, we are solving for the chance in $Ca$ concentration. $D
 \end{center}
 \bigskip
 
-Where $k_+$ is the binding rate constant, $c$ is the concentration, $b_t$ is the total concentration of buffer, $k_-$ is the unbinding rate constant, and $b$ is the concentration of bound buffer. Not so bad! You could also include the concentration of buffer as changing via diffusion under the  equation: $D_b(\partial^2 b / \partial t^2)$. In this instance, I think it is fair to simply assume that the buffer is saturating the growth cone, and therefore it is not relevant to include its flow rate. 
+Where $k_+$ is the binding rate constant, $c$ is the concentration, $b_t$ is the total concentration of buffer, $k_-$ is the unbinding rate constant, and $b$ is the concentration of bound buffer. Not so bad! You could also include the concentration of buffer as changing via diffusion under the  equation: $D_b(\partial^2 b / \partial t^2)$. In this instance, I think it is fair to simply assume that the buffer is saturating the growth cone, and therefore it is not relevant to include its flow rate.\newline
+
+\subsubsection{Buffer Testing} With the knowledge that the number of moles per division is $4\times10^{-12} nmol/div
+$, I began by testing the scenario when there was no $k_+$ at all. Once this was tuned to cause the cell to approach a concentration 100 times that of the resting state, the concentration of unbound could be properly tuned so that the resting state be the desired number of moles.\newline
+
+Some progress has been made, but evidently this will be a more daunting task than described above. A large consideration is the concentration of calcium being multiplied by the $k$ of binding.
+
 
 \subsection{RyR Flux} RyR flux can be written in a number of says, such as the following\footnote{\url{https://www.frontiersin.org/articles/10.3389/fphys.2012.00114/full\#F1}}: 
 
@@ -560,6 +566,70 @@ On Piezo activation:
 
 \subsection{Activation Overview} There are many considerations regarding Piezo activation. We can consider force-from-lipids, which may include things like membrane stretch, compression, or shear. Similarly, another consideration is the fluidity of the membrane. We can consider force-from-proteins, which may involve direct binding of membrane proteins from glia to neurons, which manipulate the membrane. The seemingly stochastic flipodia out-pushing could include all of these interactions. For the sake of this model, it would be best to attempt a few alternative hypotheses, which may explain Piezo activation. For example, we can scan a multitude of membrane fluidities, pressures, etc. and determien which has the biggest affect on Piezo activation. There is also the issue of substrate stiffness, which too may affect Piezo (in this case, this will be analagous to the stiffness of the glia membrane).\newline 
 
-\subsection{Spatial Dealings} The most clear way to heal with the spatial component, to me, is to calculate the amount of moles of Ca$^{2+}$ in each cube, then use that to calculate the total moles. 
+\subsection{Spatial Dealings} The most clear way to heal with the spatial component, to me, is to calculate the amount of moles of Ca$^{2+}$ in each cube, then use that to calculate the total moles.\newline
+
+I am taking this to be: 
+
+\bigskip
+
+\begin{center}
+    $\frac{120nM}{L}\frac{L}{1000mL}\frac{4/3\pi(0.0002cm)^3}{\# of divisions} = 4\times10^{-12} nmol/div$\\
+    This equates to: 
+    $2,400 \: molecules / \# \: of \: div$
+\end{center}
+
+\bigskip
+
+Meaning that there is approx 6 molecules of $Ca^{2+}$ in a 20 $\times$ 20 box.
+
+\subsection{Diffusion} Diffusion is accomplished using some diffusion coefficient. In the \textbf{Overarching Equation} this is stated as $D_c$. This value can be tuned however desired. The important bit is the second derivative of $Ca$ with respect to space. This is done simply in the general form of a second derivative, as written below: 
+
+\begin{center}
+
+    $f'' = \frac{f_{x - 1} - 2f_x + f_{x + 1}}{x^2}$
+    
+\end{center}
+
+\bigskip
+
+In this case, you can simply say that $x$ is one division, and therefore ignore the denominator. 
+
+\subsubsection{Code} The diffusion term is easily accomplished in the following few lines of code: 
+
+\footnotesize
+\begin{verbatim}
+
+
+double R = 1;
+double total_diffusion, x_diffusion, y_diffusion;
+if((x >= 1) && (x <= x_max - 1)){
+    x_diffusion = (1/R)*(vec_time[time][y][x + 1] - (2 * vec_time[time][y][x])
+    + vec_time[time][y][x - 1]);
+}
+if((y >= 1) && (y <= y_max - 1)){
+    y_diffusion = (1/R)*(vec_time[time][y + 1][x] - (2 * vec_time[time][y][x]) 
+    + vec_time[time][y - 1][x]);
+}
+
+\end{verbatim}
+\normalsize
+
+The above code is broken into two likes due to line length. And for the edges, one can do something like this:
+
+\footnotesize
+\begin{verbatim}
+
+if((y == 0)){
+    y_diffusion = (1/R)*(vec_time[time][y + 1][x] - (vec_time[time][y][x]));
+}
+if((y == y_max)){
+    y_diffusion = (1/R)*(vec_time[time][y - 1][x] - (vec_time[time][y][x]));
+}
+
+\end{verbatim}
+
+\normalsize 
+
+In this case, $R$ is more similar to the resistance to movement of particles. It is kind of like the inverse of the diffusion coefficient. Whatever you choose to do is fine, though. 
 
 \end{document}

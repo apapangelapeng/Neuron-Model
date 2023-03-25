@@ -12,6 +12,8 @@ using namespace std;
 int x_max = 20;
 int y_max = 20;
 int time_max = 1000;
+double divide = (y_max + 1) * (x_max + 1);
+double size_scale = 1/divide; 
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // 2d specific thingsc
@@ -138,15 +140,17 @@ vector<vector<vector<double> > > vec_J_serca(time_max + 2, vector<vector<double>
 
 // Buffering Definitions %%%%%%%%%%%%%%%%%
 // Reference includes a list of models published by year: https://www.frontiersin.org/articles/10.3389/fncom.2018.00014/full
-double buff_unbound = 0.1; //concentration of unbound buffer, which we are taking to be b_total
-double buff_bound = 0.4; //concentration of bound buffer
+double buff_unbound = 0.000002*size_scale; //concentration of unbound buffer, which we are taking to be b_total
+double buff_bound = 0.00002*size_scale; //concentration of bound buffer
 vector<vector<vector<double> > > vec_buff_bound(time_max + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
+vector<vector<vector<double> > > vec_buff_unbound(time_max + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
 int buff_counter = 0;
 double k_buff_bind; //binding affinity/Kon of buffer
 double k_buff_unbind; //unbinding affinity/Koff of buffer
 double buff_c_dT; //derivative of concentration of buffer with respect to time
 double buff_c_dT_dT; //second derivative of concentration of buffer with respect to time, we do not really ned this unless we are measuring the diffusion of the buffer
-double buff_diff;
+double buff_diff; //store diff between jon and joff
+vector<double> vec_buff_average; // using to store the average value of buffer bound over the whole area
 vector<vector<vector<double> > > vec_J_on(time_max + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
 // J_on = k_buff_bind*C_cyt*buff_unbound;
 // J_off = k_buff_unbind*buff_bound; 

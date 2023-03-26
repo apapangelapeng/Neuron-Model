@@ -47,19 +47,32 @@ double Compute_J_on(double C_cyt, int time, int x, int y){
     buff_bound = vec_buff_bound[time][x][y]; 
     buff_unbound = vec_buff_unbound[time][x][y]; 
 
-    double local_C_cyt = C_cyt*pow(10,10);
+    double local_C_cyt = C_cyt*pow(10,8);
 
     k_buff_bind = 0.600; //for the buffer BAPTA in mM
     k_buff_unbind = 0.100;
 
     J_on = k_buff_bind*local_C_cyt*buff_unbound;
-    J_off = k_buff_unbind*buff_bound; 
-    buff_c_dT = k_buff_bind*local_C_cyt*buff_unbound - k_buff_unbind*buff_bound;
+    J_off = k_buff_unbind*buff_bound*(1/local_C_cyt);
+    buff_c_dT = k_buff_bind*local_C_cyt*buff_unbound - k_buff_unbind*buff_bound*(1/local_C_cyt);
     
     //buff_c_dT = -(k_buff_unbind*buff_bound);
 
     vec_buff_bound[time + 1][x][y] = (vec_buff_bound[time][x][y] + buff_c_dT);
     vec_buff_unbound[time + 1][x][y] = (vec_buff_unbound[time][x][y] - buff_c_dT);
+
+    if(vec_buff_unbound[time + 1][x][y] < 0){
+        vec_buff_unbound[time + 1][x][y] = 0;
+    }
+    else if(vec_buff_unbound[time + 1][x][y] > buff_total){
+        vec_buff_unbound[time + 1][x][y] = buff_total;
+    }
+    if(vec_buff_bound[time + 1][x][y] < 0){
+        vec_buff_bound[time + 1][x][y] = 0;
+    }
+    else if(vec_buff_bound[time + 1][x][y] > buff_total){
+        vec_buff_bound[time + 1][x][y] = buff_total;
+    }
 
     buff_diff = J_off - J_on;
     //buff_diff = J_off;

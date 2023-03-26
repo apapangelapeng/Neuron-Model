@@ -11,7 +11,7 @@ using namespace std;
 
 int x_max = 20;
 int y_max = 20;
-int time_max = 1000;
+int time_max = 50;
 double divide = (y_max + 1) * (x_max + 1);
 double size_scale = 1/divide; 
 
@@ -142,6 +142,7 @@ vector<vector<vector<double> > > vec_J_serca(time_max + 2, vector<vector<double>
 // Reference includes a list of models published by year: https://www.frontiersin.org/articles/10.3389/fncom.2018.00014/full
 double buff_unbound = 0.0002*size_scale; //concentration of unbound buffer, which we are taking to be b_total
 double buff_bound = 0.00002*size_scale; //concentration of bound buffer
+double buff_total = buff_unbound + buff_bound;
 vector<vector<vector<double> > > vec_buff_bound(time_max + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
 vector<vector<vector<double> > > vec_buff_unbound(time_max + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
 int buff_counter = 0;

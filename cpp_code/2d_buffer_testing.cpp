@@ -47,7 +47,7 @@ double Compute_J_on(double C_cyt, int time, int x, int y){
     buff_bound = vec_buff_bound[time][x][y]; 
     buff_unbound = vec_buff_unbound[time][x][y]; 
 
-    double local_C_cyt = C_cyt*10000000000;
+    double local_C_cyt = C_cyt*pow(10,10);
 
     k_buff_bind = 0.600; //for the buffer BAPTA in mM
     k_buff_unbind = 0.100;

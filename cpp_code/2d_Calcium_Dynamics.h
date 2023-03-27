@@ -9,9 +9,11 @@
 
 using namespace std;
 
-int x_max = 20;
-int y_max = 20;
-int time_max = 50;
+int x_max = 10;
+int y_max = 10;
+int time_max = 10;
+double delta_T = 0.01;
+int time_max_calc = time_max/delta_T; 
 double divide = (y_max + 1) * (x_max + 1);
 double size_scale = 1/divide; 
 
@@ -20,7 +22,7 @@ double size_scale = 1/divide;
 vector<double> vec_x;
 vector<double> vec_y; 
 vector<vector<double> > vec_coords;
-vector<vector<vector<double> > > vec_time(time_max + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
+vector<vector<vector<double> > > vec_time(time_max_calc + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
 vector<double> vec_average;
 //vector<vector<vector<double> > > vec_time;
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -33,7 +35,6 @@ double body_temp = 310.15;
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 //General use %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-double delta_T = 0.1;
 // calcium concentration: 2.4mM outside, 100nM inside https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3553253/#:~:text=Extracellular%20calcium%2C%20and%20particularly%20the,calcium%20of%201.1%E2%80%931.4%20mM
 double Ca_in, Ca_out;
 double E_Ca; // 131.373 --> this is for humans, i.e., body temp of 310K etc. Unsure what it is for Drosophila
@@ -44,11 +45,11 @@ double G_Piezo_single = 0.000000000030;
 double G_Piezo_total;
 int N_Piezo_channels = 2;
 double p_open = 0; 
-vector<vector<vector<double> > > vec_num_open(time_max + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
+vector<vector<vector<double> > > vec_num_open(time_max_calc + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
 double p_closed = 1;
-vector<vector<vector<double> > > vec_num_closed(time_max + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
+vector<vector<vector<double> > > vec_num_closed(time_max_calc + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
 double Piezo_current;
-vector<vector<vector<double> > > vec_Piezo_current(time_max + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
+vector<vector<vector<double> > > vec_Piezo_current(time_max_calc + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
 int open_counter = 0;
 // Piezo1 = 29pS https://www.sciencedirect.com/science/article/pii/S0968000416301505
 // The decay rate, according to this paper, is 1ms
@@ -115,8 +116,8 @@ double K_c = 0.0571; // kinetics c, unitless
 double K_d = 0.0001; // kinetics d, units of ms^-1
 int w_counter = 0;
 
-vector<vector<vector<double> > > vec_J_ryr(time_max + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
-vector<vector<vector<double> > > vec_w(time_max + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
+vector<vector<vector<double> > > vec_J_ryr(time_max_calc + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
+vector<vector<vector<double> > > vec_w(time_max_calc + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
 // J_ryr = (v_rel*P_open + v_leak)(C_er - C_cyt);
 // P_open = (w*((1 + C_cyt^3)/K_b))/((K_a/C_Cyt^4) + 1 + (C_cyt^3/K_b));
 // w_inf = ((K_a/C_Cyt^4) + 1 + (C_cyt^3/K_b))/((1/K_c) + (K_a/C_Cyt^4) + 1 + (C_cyt^3/K_b));
@@ -128,7 +129,7 @@ vector<vector<vector<double> > > vec_w(time_max + 2, vector<vector<double> >(y_m
 // Most SERCA models seem to simply be the Hill function
 double v_serca = 0.12; // some constant, units of muM / ms
 double K_p = 0.3; // kinetics p, units of uM
-vector<vector<vector<double> > > vec_J_serca(time_max + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
+vector<vector<vector<double> > > vec_J_serca(time_max_calc + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
 
 // TECHNICALLY THiS MODEL IS OUTDATED, CHECK PAGE 284 OF MATHEMATICAL PHYS
 // J_serca = v_serca*((C_cyt^2)/(C_cyt^2 + K_p^2));
@@ -143,8 +144,8 @@ vector<vector<vector<double> > > vec_J_serca(time_max + 2, vector<vector<double>
 double buff_unbound = 0.0002*size_scale; //concentration of unbound buffer, which we are taking to be b_total
 double buff_bound = 0.00002*size_scale; //concentration of bound buffer
 double buff_total = buff_unbound + buff_bound;
-vector<vector<vector<double> > > vec_buff_bound(time_max + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
-vector<vector<vector<double> > > vec_buff_unbound(time_max + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
+vector<vector<vector<double> > > vec_buff_bound(time_max_calc + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
+vector<vector<vector<double> > > vec_buff_unbound(time_max_calc + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
 int buff_counter = 0;
 double k_buff_bind; //binding affinity/Kon of buffer
 double k_buff_unbind; //unbinding affinity/Koff of buffer
@@ -152,7 +153,8 @@ double buff_c_dT; //derivative of concentration of buffer with respect to time
 double buff_c_dT_dT; //second derivative of concentration of buffer with respect to time, we do not really ned this unless we are measuring the diffusion of the buffer
 double buff_diff; //store diff between jon and joff
 vector<double> vec_buff_average; // using to store the average value of buffer bound over the whole area
-vector<vector<vector<double> > > vec_J_on(time_max + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
+vector<double> vec_ubuff_average; 
+vector<vector<vector<double> > > vec_J_on(time_max_calc + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
 // J_on = k_buff_bind*C_cyt*buff_unbound;
 // J_off = k_buff_unbind*buff_bound; 
 // buff_c_dT = k_buff_bind*C_cyt*buff_unbound - k_buff_unbind*buff_bound;

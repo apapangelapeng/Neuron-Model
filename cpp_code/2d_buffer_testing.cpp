@@ -48,6 +48,7 @@ double Compute_J_on(double C_cyt, int time, int x, int y){
     buff_unbound = vec_buff_unbound[time][x][y]; 
 
     double local_C_cyt = C_cyt*pow(10,8);
+    //double local_C_cyt = 1.1;
 
     k_buff_bind = 0.600; //for the buffer BAPTA in mM
     k_buff_unbind = 0.100;
@@ -58,8 +59,8 @@ double Compute_J_on(double C_cyt, int time, int x, int y){
     
     //buff_c_dT = -(k_buff_unbind*buff_bound);
 
-    vec_buff_bound[time + 1][x][y] = (vec_buff_bound[time][x][y] + buff_c_dT);
-    vec_buff_unbound[time + 1][x][y] = (vec_buff_unbound[time][x][y] - buff_c_dT);
+    vec_buff_bound[time + 1][x][y] = (vec_buff_bound[time][x][y] + delta_T*buff_c_dT);
+    vec_buff_unbound[time + 1][x][y] = (vec_buff_unbound[time][x][y] - delta_T*buff_c_dT);
 
     if(vec_buff_unbound[time + 1][x][y] < 0){
         vec_buff_unbound[time + 1][x][y] = 0;
@@ -74,11 +75,11 @@ double Compute_J_on(double C_cyt, int time, int x, int y){
         vec_buff_bound[time + 1][x][y] = buff_total;
     }
 
-    buff_diff = J_off - J_on;
+    buff_diff = delta_T*(J_off - J_on);
     //buff_diff = J_off;
     //buff_diff = buff_diff*pow(scaling_factor,-1);
     //vec_J_on.push_back(buff_diff);
-
+    //cout << time << " " << buff_diff << endl;
     return(buff_diff); //*0.000001
 }
 
@@ -98,14 +99,13 @@ double Calcium_concentration(double x){
         }
     }
 
-    //cout << "break point 2" << endl;
-
     double scaling_factor;
     double divide = (y_max + 1) * (x_max + 1);
     scaling_factor = 1/divide; 
-    double avg_temp, avg_buff_temp;
+    double avg_temp, avg_buff_temp, avg_ubuff_temp;
 
-    for(int time_temp = 0; time_temp <= time_max; time_temp++){
+    for(int time_temp = 0; time_temp <= time_max_calc; time_temp++){
+        //cout << "break point 4 " << time_temp << endl;
         for(int i = 0; i <= x_max; i++){
             for(int j = 0; j <= y_max; j++){
 
@@ -113,12 +113,13 @@ double Calcium_concentration(double x){
 
                 Ca_c_dT = delta_T*(scaling_factor*Compute_J_diffusion(time_temp, j, i) + scaling_factor*Compute_J_on(C_cyt, time_temp, i, j));
                 
-                vec_time[time_temp + 1][i][j] = vec_time[time_temp][i][j] + 40*Ca_c_dT;
+                vec_time[time_temp + 1][i][j] = vec_time[time_temp][i][j] + Ca_c_dT;
 
-                // what will be better is to solve for the number of moles in each cube, then use that to calculate overall concentration
                 avg_temp += vec_time[time_temp][i][j];
                 avg_buff_temp += vec_buff_bound[time_temp][i][j];
-                //cout << avg_temp << endl;
+                avg_ubuff_temp += vec_buff_unbound[time_temp][i][j];
+                // avg_buff_temp += 1;
+
             }
         }
         vec_average.push_back(avg_temp/(divide));
@@ -151,7 +152,7 @@ double output_file(double x)
     
     cout << "Vector length: " << max_size << endl;
 
-    for(int time = 0; time <= time_max; time++){
+    for(int time = 0; time <= time_max_calc; time++){
         for (int x = 0; x <= x_max; x++){
             for (int y = 0; y <= y_max; y++){  
                 if(y < y_max) {
@@ -207,8 +208,6 @@ double output_avg_file(double x)
         if(bool_average) myfile << vec_average[i] << ",";
         if(!bool_average) myfile << ",";
         if(bool_average) myfile << vec_buff_average[i];
-
-
 
         myfile << "\n";
         //cout << "Break point 6" << endl;

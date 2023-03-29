@@ -100,7 +100,7 @@ double Calcium_concentration(double x){
     }
 
     double scaling_factor;
-    double divide = (y_max + 1) * (x_max + 1);
+    double divide = (y_max + 1)*(x_max + 1);
     scaling_factor = 1/divide; 
     double avg_temp, avg_buff_temp, avg_ubuff_temp;
 
@@ -124,9 +124,11 @@ double Calcium_concentration(double x){
         }
         vec_average.push_back(avg_temp/(divide));
         vec_buff_average.push_back(avg_buff_temp/(divide));
+        vec_ubuff_average.push_back(avg_ubuff_temp/(divide));
         //cout << avg_temp/(x_max*y_max) << endl;
         avg_temp = 0;
         avg_buff_temp = 0;
+        avg_ubuff_temp = 0;
     }
 
     cout << "    to Low" << endl;
@@ -184,6 +186,7 @@ double output_avg_file(double x)
 
     sizes.insert(sizes.begin(),vec_average.size());
     sizes.insert(sizes.begin(),vec_buff_average.size());
+    sizes.insert(sizes.begin(),vec_ubuff_average.size());
 
     sort(sizes.begin(), sizes.end());
     int max_size = sizes.back();
@@ -192,22 +195,26 @@ double output_avg_file(double x)
 
     bool bool_average;
     bool bool_buff_average;
+    bool bool_ubuff_average;
 
     //cout << "Break point 4" << endl;
 
-    myfile << "Average,buff_average\n";
+    myfile << "Average,buff_average,ubuff_average\n";
 
     for (int i = 0; i < max_size; i++)
     {
         //cout << "Break point 5" << endl;
         bool_average = (vec_average.size() > i) ? true : false;
-        bool_average = (vec_buff_average.size() > i) ? true : false;
+        bool_buff_average = (vec_buff_average.size() > i) ? true : false;
+        bool_ubuff_average = (vec_ubuff_average.size() > i) ? true : false;
 
         //cout << "Break point 6" << endl;
 
         if(bool_average) myfile << vec_average[i] << ",";
         if(!bool_average) myfile << ",";
-        if(bool_average) myfile << vec_buff_average[i];
+        if(bool_average) myfile << vec_buff_average[i] << ",";
+        if(!bool_average) myfile << ",";
+        if(bool_average) myfile << vec_ubuff_average[i];
 
         myfile << "\n";
         //cout << "Break point 6" << endl;

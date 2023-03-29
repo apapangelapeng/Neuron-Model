@@ -4,7 +4,7 @@ const char *path1="../data_files/2d_Piezo_Channel.csv";
 const char *path2="../data_files/2d_Piezo_Channel_avg.csv";
 
 default_random_engine generator;
-normal_distribution<double> stochastic_opening(0,0.025);
+normal_distribution<double> stochastic_opening(0,1);
 
 int reset_vecs(int x){
     vec_time.clear();
@@ -12,6 +12,15 @@ int reset_vecs(int x){
     vec_w.clear();
 
     return(0);
+}
+
+double PotentialE(double out, double in, int Z) { //calculated in VOLTS NOT MILLIVOLTS
+    double E = (R_constant * body_temp) / (F * Z) * log(out / in); // log(x) = ln(x) in cpp
+    if ((isinf(E)) || (E != E)) {
+        cout << "YOUR E FUNCTION IS FAULTING! Probably, the concentration inside went to 0, or you entered z = 0." << endl;
+    }
+    //cout << "THIS IS E in V: " << E << endl;
+    return (E);
 }
 
 double Compute_J_diffusion(int time, int x, int y) { 
@@ -42,6 +51,43 @@ double Compute_J_diffusion(int time, int x, int y) {
   return(total_diffusion);
 }
 
+double Piezo_Channel(double potential, int time, int x, int y){
+
+    int stochastic = stochastic_opening(generator);
+    double open_temp;
+    double P_open_temp;
+
+    open_temp = vec_num_open[time][x][y] + abs(stochastic);
+
+    if(open_temp >= N_Piezo_channels){
+        open_temp = N_Piezo_channels;
+    }
+
+    int local_tau = 1.6/delta_T;
+    if(!(open_counter % local_tau)){
+        open_temp = open_temp*0.9048; //this is the time constant of Piezo, so it is not relevant on a micro s scale 
+    }
+
+    if((time >= 500) && (time <= 600)){
+        open_temp = 500;
+    }
+
+    //cout << open_temp << endl;
+
+    vec_num_open[time + 1][x][y] = open_temp;
+    vec_num_closed[time + 1][x][y] = 1 - open_temp;
+    
+    G_Piezo_total = open_temp*G_Piezo_single;
+
+    //cout << G_Piezo_total << endl;
+
+    Piezo_current = (potential*G_Piezo_total)/2; //dividing by 2 because Ca is 2+ charge (affecting current by factor of 2)
+    vec_Piezo_current[time + 1][x][y] = Piezo_current;
+
+    //cout << Piezo_current << endl;
+
+    return(Piezo_current);
+}
 
 double Compute_J_on(double C_cyt, int time, int x, int y){
     buff_bound = vec_buff_bound[time][x][y]; 
@@ -86,6 +132,8 @@ double Compute_J_on(double C_cyt, int time, int x, int y){
 double Calcium_concentration(double x){
 
     cout << "  High" << endl;
+
+    E_Ca = PotentialE(0.0024, 0.00000012, 2);
     
     double divs = (x_max + 1)*(y_max + 1);
 
@@ -96,6 +144,9 @@ double Calcium_concentration(double x){
             vec_time[0][i][j] = mols_divs;
             vec_buff_bound[0][i][j] = buff_bound;
             vec_buff_unbound[0][i][j] = buff_unbound;
+            vec_num_closed[0][i][j] = N_Piezo_channels;
+            vec_num_open[0][i][j] = 0;
+            vec_Piezo_current[0][i][j] = 0;
         }
     }
 
@@ -111,7 +162,7 @@ double Calcium_concentration(double x){
 
                 C_cyt = vec_time[time_temp][i][j];
 
-                Ca_c_dT = delta_T*(scaling_factor*Compute_J_diffusion(time_temp, j, i) + scaling_factor*Compute_J_on(C_cyt, time_temp, i, j));
+                Ca_c_dT = delta_T*(scaling_factor*Compute_J_diffusion(time_temp, j, i) + scaling_factor*Compute_J_on(C_cyt, time_temp, i, j) + scaling_factor*Piezo_Channel(E_Ca, time_temp, i, j));
                 
                 vec_time[time_temp + 1][i][j] = vec_time[time_temp][i][j] + Ca_c_dT;
 

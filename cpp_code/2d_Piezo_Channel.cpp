@@ -171,6 +171,7 @@ double Calcium_concentration(double x){
         for(int j = 0; j <= y_max; j++){
             vec_time[0][i][j] = mols_divs;
             vec_num_closed[0][i][j] = N_Piezo_channels;
+            vec_num_open[0][i][j] = 0;
             vec_Piezo_current[0][i][j] = 0;
             vec_buff_bound[0][i][j] = 0;
             vec_w[0][i][j] = 0;

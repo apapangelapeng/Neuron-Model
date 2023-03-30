@@ -9,8 +9,8 @@
 
 using namespace std;
 
-int x_max = 10;
-int y_max = 10;
+int x_max = 100;
+int y_max = 100;
 int time_max = 10;
 double delta_T = 0.01;
 int time_max_calc = time_max/delta_T; 

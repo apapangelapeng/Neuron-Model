@@ -4,7 +4,7 @@ const char *path1="../data_files/2d_Piezo_Channel.csv";
 const char *path2="../data_files/2d_Piezo_Channel_avg.csv";
 
 default_random_engine generator;
-normal_distribution<double> stochastic_opening(0,0.35);
+normal_distribution<double> stochastic_opening(0,0.45);
 
 int reset_vecs(int x){
     vec_time.clear();
@@ -48,7 +48,7 @@ double Compute_J_diffusion(int time, int x, int y) {
     }
 
     total_diffusion = x_diffusion + y_diffusion;
-  return(total_diffusion);
+  return(10*total_diffusion);
 }
 
 double Piezo_Channel(double potential, int time, int x, int y, int loc){
@@ -69,7 +69,7 @@ double Piezo_Channel(double potential, int time, int x, int y, int loc){
     }
 
     if((time >= 500) && (time <= 600)){
-        open_temp = 500;
+        open_temp = 100;
     }
 
     if(loc = 2){
@@ -142,7 +142,7 @@ double Compute_efflux(double C_cyt, int time, int x, int y, int loc){
     // efflux can only occur at the barriers, which makes things a bit weirder
 
     double efflux;
-    efflux = -loc*5*C_cyt;
+    efflux = -loc*30*C_cyt;
     
     return(efflux);
 }

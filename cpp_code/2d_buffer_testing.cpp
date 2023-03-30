@@ -4,7 +4,7 @@ const char *path1="../data_files/2d_Piezo_Channel.csv";
 const char *path2="../data_files/2d_Piezo_Channel_avg.csv";
 
 default_random_engine generator;
-normal_distribution<double> stochastic_opening(0,1);
+normal_distribution<double> stochastic_opening(0,0.35);
 
 int reset_vecs(int x){
     vec_time.clear();
@@ -51,7 +51,7 @@ double Compute_J_diffusion(int time, int x, int y) {
   return(total_diffusion);
 }
 
-double Piezo_Channel(double potential, int time, int x, int y){
+double Piezo_Channel(double potential, int time, int x, int y, int loc){
 
     int stochastic = stochastic_opening(generator);
     double open_temp;
@@ -72,6 +72,11 @@ double Piezo_Channel(double potential, int time, int x, int y){
         open_temp = 500;
     }
 
+    if(loc = 2){
+        loc = 1;
+    }
+
+    open_temp = open_temp*loc;
     //cout << open_temp << endl;
 
     vec_num_open[time + 1][x][y] = open_temp;
@@ -129,6 +134,20 @@ double Compute_J_on(double C_cyt, int time, int x, int y){
     return(buff_diff); //*0.000001
 }
 
+// maybe we can just do a simple PID controller for regulating the ER concentration
+// and set the efflux and influx rates to the SERCA pump
+// i guess RyR will need to be independent, obviously
+
+double Compute_efflux(double C_cyt, int time, int x, int y, int loc){
+    // efflux can only occur at the barriers, which makes things a bit weirder
+
+    double efflux;
+    efflux = -loc*5*C_cyt;
+    
+    return(efflux);
+}
+
+
 double Calcium_concentration(double x){
 
     cout << "  High" << endl;
@@ -160,9 +179,24 @@ double Calcium_concentration(double x){
         for(int i = 0; i <= x_max; i++){
             for(int j = 0; j <= y_max; j++){
 
+                int location;
+
+                if(((i == 0) || (i == x_max)) && ((j == 0) || (j == y_max))){
+                    location = 2;
+                }
+                else if((i == 0) || (i == x_max)){
+                    location = 1;
+                }
+                else if((j == 0) || (j == y_max)){
+                    location = 1;
+                }
+                else{
+                    location = 0;
+                }
+
                 C_cyt = vec_time[time_temp][i][j];
 
-                Ca_c_dT = delta_T*(scaling_factor*Compute_J_diffusion(time_temp, j, i) + scaling_factor*Compute_J_on(C_cyt, time_temp, i, j) + scaling_factor*Piezo_Channel(E_Ca, time_temp, i, j));
+                Ca_c_dT = delta_T*(scaling_factor*Compute_J_diffusion(time_temp, j, i) + scaling_factor*Compute_J_on(C_cyt, time_temp, i, j) + scaling_factor*Piezo_Channel(E_Ca, time_temp, i, j, location) + scaling_factor*Compute_efflux(C_cyt, time_temp, i, j, location));
                 
                 vec_time[time_temp + 1][i][j] = vec_time[time_temp][i][j] + Ca_c_dT;
 

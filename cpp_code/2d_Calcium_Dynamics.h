@@ -9,9 +9,12 @@
 
 using namespace std;
 
-int x_max = 100;
-int y_max = 100;
-int time_max = 10;
+int x_max = 50;
+int y_max = 50;
+double divs = (x_max + 1)*(y_max + 1);
+double mols_divs = 0.0000000012/divs;
+
+int time_max = 3;
 double delta_T = 0.01;
 int time_max_calc = time_max/delta_T; 
 double divide = (y_max + 1) * (x_max + 1);
@@ -43,7 +46,7 @@ double E_Ca; // 131.373 --> this is for humans, i.e., body temp of 310K etc. Uns
 // Piezo Kinetics %%%%%%%%%%%%%%%%%%%%%%%%%
 double G_Piezo_single = 0.000000000030; 
 double G_Piezo_total;
-int N_Piezo_channels = 200;
+int N_Piezo_channels = 3;
 double p_open = 0; 
 vector<vector<vector<double> > > vec_num_open(time_max_calc + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
 double p_closed = 1;
@@ -141,8 +144,8 @@ vector<vector<vector<double> > > vec_J_serca(time_max_calc + 2, vector<vector<do
 
 // Buffering Definitions %%%%%%%%%%%%%%%%%
 // Reference includes a list of models published by year: https://www.frontiersin.org/articles/10.3389/fncom.2018.00014/full
-double buff_unbound = 0.0002*size_scale; //concentration of unbound buffer, which we are taking to be b_total
-double buff_bound = 0.00002*size_scale; //concentration of bound buffer
+double buff_unbound = 0.000002*size_scale; //concentration of unbound buffer, which we are taking to be b_total
+double buff_bound = 0.000002*size_scale; //concentration of bound buffer
 double buff_total = buff_unbound + buff_bound;
 vector<vector<vector<double> > > vec_buff_bound(time_max_calc + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
 vector<vector<vector<double> > > vec_buff_unbound(time_max_calc + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));

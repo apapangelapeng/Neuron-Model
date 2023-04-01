@@ -4,7 +4,7 @@ const char *path1="../data_files/2d_Piezo_Channel.csv";
 const char *path2="../data_files/2d_Piezo_Channel_avg.csv";
 
 default_random_engine generator;
-normal_distribution<double> stochastic_opening(0,0.45);
+normal_distribution<double> stochastic_opening(0,0.28);
 
 int reset_vecs(int x){
     vec_time.clear();
@@ -24,6 +24,12 @@ double PotentialE(double out, double in, int Z) { //calculated in VOLTS NOT MILL
 }
 
 double Compute_J_diffusion(int time, int x, int y) { 
+
+    // NOTE: diffusion is not scaled to the size of the cell! this is very important!! 
+    // in the current state, a huge cell will have an over-inflated Ca2+ storage
+    // This is because it is more difficult to diffuse through the greater divisions
+
+
     double R = 1;
     double total_diffusion, x_diffusion, y_diffusion;
     if((x >= 1) && (x <= x_max - 1)){
@@ -47,8 +53,11 @@ double Compute_J_diffusion(int time, int x, int y) {
         x_diffusion = (1/R)*(vec_time[time][y][x - 1] - (vec_time[time][y][x]));
     }
 
-    total_diffusion = x_diffusion + y_diffusion;
-  return(10*total_diffusion);
+    //cout << (x_diffusion + y_diffusion) << " " << (divs/100)*(x_diffusion + y_diffusion) << endl;
+
+    total_diffusion = 1000*(divs/100)*(x_diffusion + y_diffusion);
+
+  return(total_diffusion);
 }
 
 double Piezo_Channel(double potential, int time, int x, int y, int loc){
@@ -69,10 +78,10 @@ double Piezo_Channel(double potential, int time, int x, int y, int loc){
     }
 
     if((time >= 500) && (time <= 600)){
-        open_temp = 100;
+        open_temp = 3;
     }
 
-    if(loc = 2){
+    if(loc == 2){
         loc = 1;
     }
 
@@ -89,24 +98,24 @@ double Piezo_Channel(double potential, int time, int x, int y, int loc){
     Piezo_current = (potential*G_Piezo_total)/2; //dividing by 2 because Ca is 2+ charge (affecting current by factor of 2)
     vec_Piezo_current[time + 1][x][y] = Piezo_current;
 
-    //cout << Piezo_current << endl;
+    //cout << loc << " equals " << Piezo_current << endl;
 
-    return(Piezo_current);
+    return(5*Piezo_current);
 }
 
 double Compute_J_on(double C_cyt, int time, int x, int y){
     buff_bound = vec_buff_bound[time][x][y]; 
     buff_unbound = vec_buff_unbound[time][x][y]; 
 
-    double local_C_cyt = C_cyt*pow(10,8);
+    double local_C_cyt = C_cyt;
     //double local_C_cyt = 1.1;
 
     k_buff_bind = 0.600; //for the buffer BAPTA in mM
     k_buff_unbind = 0.100;
 
-    J_on = k_buff_bind*local_C_cyt*buff_unbound;
-    J_off = k_buff_unbind*buff_bound*(1/local_C_cyt);
-    buff_c_dT = k_buff_bind*local_C_cyt*buff_unbound - k_buff_unbind*buff_bound*(1/local_C_cyt);
+    J_on = (local_C_cyt/mols_divs)*k_buff_bind*buff_unbound;
+    J_off = (mols_divs/local_C_cyt)*k_buff_unbind*buff_bound;
+    buff_c_dT = (local_C_cyt/mols_divs)*k_buff_bind*buff_unbound - (mols_divs/local_C_cyt)*k_buff_unbind*buff_bound;
     
     //buff_c_dT = -(k_buff_unbind*buff_bound);
 
@@ -142,7 +151,18 @@ double Compute_efflux(double C_cyt, int time, int x, int y, int loc){
     // efflux can only occur at the barriers, which makes things a bit weirder
 
     double efflux;
-    efflux = -loc*30*C_cyt;
+    double proportional_error; 
+    double deriative_error; 
+    double integral_error; 
+
+    if(C_cyt > mols_divs){
+        efflux = -1000*loc*(C_cyt - mols_divs);
+    }
+    else{
+        efflux = 0;
+    }
+
+    //efflux = -0.01*C_cyt; 
     
     return(efflux);
 }
@@ -153,10 +173,9 @@ double Calcium_concentration(double x){
     cout << "  High" << endl;
 
     E_Ca = PotentialE(0.0024, 0.00000012, 2);
-    
-    double divs = (x_max + 1)*(y_max + 1);
 
-    double mols_divs = 0.0000000012/divs;
+    cout << divs << endl;
+    cout << mols_divs << endl;
 
     for(int i = 0; i <= x_max; i++){
         for(int j = 0; j <= y_max; j++){
@@ -181,23 +200,27 @@ double Calcium_concentration(double x){
 
                 int location;
 
+        
                 if(((i == 0) || (i == x_max)) && ((j == 0) || (j == y_max))){
                     location = 2;
+                    //cout << true;
                 }
-                else if((i == 0) || (i == x_max)){
+                else if(((i == 0) || (i == x_max))){
                     location = 1;
+                    //cout << true;
                 }
                 else if((j == 0) || (j == y_max)){
                     location = 1;
+                    //cout << true;
                 }
                 else{
                     location = 0;
+                    //cout << false;
                 }
 
                 C_cyt = vec_time[time_temp][i][j];
 
-                Ca_c_dT = delta_T*(scaling_factor*Compute_J_diffusion(time_temp, j, i) + scaling_factor*Compute_J_on(C_cyt, time_temp, i, j) + scaling_factor*Piezo_Channel(E_Ca, time_temp, i, j, location) + scaling_factor*Compute_efflux(C_cyt, time_temp, i, j, location));
-                
+                Ca_c_dT = delta_T*(scaling_factor*Compute_J_diffusion(time_temp, j, i) + scaling_factor*Compute_J_on(C_cyt, time_temp, i, j) + scaling_factor*Compute_efflux(C_cyt, time_temp, i, j, location) + Piezo_Channel(E_Ca, time_temp, i, j, location));
                 vec_time[time_temp + 1][i][j] = vec_time[time_temp][i][j] + Ca_c_dT;
 
                 avg_temp += vec_time[time_temp][i][j];

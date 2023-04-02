@@ -463,7 +463,9 @@ Where $k_+$ is the binding rate constant, $c$ is the concentration, $b_t$ is the
 \subsubsection{Buffer Testing} With the knowledge that the number of moles per division is $4\times10^{-12} nmol/div
 $, I began by testing the scenario when there was no $k_+$ at all. Once this was tuned to cause the cell to approach a concentration 100 times that of the resting state, the concentration of unbound could be properly tuned so that the resting state be the desired number of moles.\newline
 
-Some progress has been made, but evidently this will be a more daunting task than described above. A large consideration is the concentration of calcium being multiplied by the $k$ of binding.
+Some progress has been made, but evidently this will be a more daunting task than described above. A large consideration is the concentration of calcium being multiplied by the $k$ of binding.\newline
+
+This round of testing revealed a remarkable amount of issues, in fact.
 
 
 \subsection{RyR Flux} RyR flux can be written in a number of says, such as the following\footnote{\url{https://www.frontiersin.org/articles/10.3389/fphys.2012.00114/full\#F1}}: 
@@ -519,6 +521,36 @@ And for $J_{ser}$:
 
  All of the kinetic values refer to the different states the SERCA pump may be in. The $\alpha$ values refer to rate functions. One can make many simplifying assumptions regarding the kinetics, such as assuming that binding and unbinding occurs at maximal rates. This takes the very complex $\alpha$ equations and replaces them with corresponding $\beta$ functions, but maintains the same form as the original equation. For the purposes of a relatively multiplexed model already, I find it not super useful to use this in-depth version of the SERCA pump, and will instead use the Hill model most likely.
 
+ 
+\subsection{Spatial Dealings} The most clear way to heal with the spatial component, to me, is to calculate the amount of moles of Ca$^{2+}$ in each cube, then use that to calculate the total moles.\newline
+
+I am taking this to be: 
+
+\bigskip
+
+\begin{center}
+    $\frac{120nM}{L}\frac{L}{1000mL}\frac{4/3\pi(0.0002cm)^3}{\# of divisions} = 4\times10^{-12} nmol/div$\\
+    This equates to: 
+    $2,400 \: molecules / \# \: of \: div$
+\end{center}
+
+\bigskip
+
+Meaning that there is approx 6 molecules of $Ca^{2+}$ in a 20 $\times$ 20 box.
+
+\subsection{Diffusion} Diffusion is accomplished using some diffusion coefficient. In the \textbf{Overarching Equation} this is stated as $D_c$. This value can be tuned however desired. The important bit is the second derivative of $Ca$ with respect to space. This is done simply in the general form of a second derivative, as written below: 
+
+\begin{center}
+
+    $f'' = \frac{f_{x - 1} - 2f_x + f_{x + 1}}{x^2}$
+    
+\end{center}
+
+\bigskip
+
+In this case, you can simply say that $x$ is one division, and therefore ignore the denominator. 
+
+
  \section{Piezo Itself}
 
  \subsection{A Good Model} The rule of a good model is to, before writing any code whatsoever, determine some testable hypotheses. Models make predictions about the world, and if done well, reveal which values are most measurable to validate or invalidate the predictions. As Snyed once said, if someone asks you why you didn't test \textit{this} or \textit{that}, you can safely ignore their comments, as they do not understand the purpose of modeling. So on that note, what are some hypotheses we have regarding Piezo?:\newline
@@ -553,6 +585,8 @@ On $Ca^{2+}$ release:
 
 \bigskip
 
+
+
 On Piezo activation: 
 \begin{enumerate}
     \item Hypothesis 1: Growth cone
@@ -566,70 +600,73 @@ On Piezo activation:
 
 \subsection{Activation Overview} There are many considerations regarding Piezo activation. We can consider force-from-lipids, which may include things like membrane stretch, compression, or shear. Similarly, another consideration is the fluidity of the membrane. We can consider force-from-proteins, which may involve direct binding of membrane proteins from glia to neurons, which manipulate the membrane. The seemingly stochastic flipodia out-pushing could include all of these interactions. For the sake of this model, it would be best to attempt a few alternative hypotheses, which may explain Piezo activation. For example, we can scan a multitude of membrane fluidities, pressures, etc. and determien which has the biggest affect on Piezo activation. There is also the issue of substrate stiffness, which too may affect Piezo (in this case, this will be analagous to the stiffness of the glia membrane).\newline 
 
-\subsection{Spatial Dealings} The most clear way to heal with the spatial component, to me, is to calculate the amount of moles of Ca$^{2+}$ in each cube, then use that to calculate the total moles.\newline
-
-I am taking this to be: 
+\subsection{Voltage Gating} Piezo is voltage gated\footnote{\url{https://www.nature.com/articles/s41467-018-03502-7}}. One can debate the importance of this in general systems. This paper shows half-max activation close to 100 mV. The few cells that may be able to get there are likely to have more to worry about than Piezo (namely the conductance of VGCCs). \textit{Drosophila} Piezo is said to have voltage gating that is much more similar to a standard VGCC. Therefore, we can use the following sigmoid formalism as a contributor to Piezo activation: 
 
 \bigskip
 
 \begin{center}
-    $\frac{120nM}{L}\frac{L}{1000mL}\frac{4/3\pi(0.0002cm)^3}{\# of divisions} = 4\times10^{-12} nmol/div$\\
-    This equates to: 
-    $2,400 \: molecules / \# \: of \: div$
-\end{center}
 
-\bigskip
-
-Meaning that there is approx 6 molecules of $Ca^{2+}$ in a 20 $\times$ 20 box.
-
-\subsection{Diffusion} Diffusion is accomplished using some diffusion coefficient. In the \textbf{Overarching Equation} this is stated as $D_c$. This value can be tuned however desired. The important bit is the second derivative of $Ca$ with respect to space. This is done simply in the general form of a second derivative, as written below: 
-
-\begin{center}
-
-    $f'' = \frac{f_{x - 1} - 2f_x + f_{x + 1}}{x^2}$
+    $P_V = \frac{1}{\exp((100 - V)/20) + 1};$
     
 \end{center}
 
 \bigskip
 
-In this case, you can simply say that $x$ is one division, and therefore ignore the denominator. 
+The units being in $mV$. However, I think that even this is not necessary, as it will only be relevant during an action potential, which, in our case, does not occur. 
 
-\subsubsection{Code} The diffusion term is easily accomplished in the following few lines of code: 
+\subsection{Pressure Gating} Pressure gating is likely the most relevant of the pack. $30mmHg$ seems to be the most accurate half-max pressure\footnote{\url{https://www.sciencedirect.com/science/article/pii/S0968000421000220\#bb0270}}\footnote{\url{https://www.science.org/doi/full/10.1126/science.1193270?casa_token=gKZRiU1R_vAAAAAA\%3AAuhBFZP-QjXckn7G9aBL6A_ZJfCjsRrUIqoXCbBA1887i29wPWtzlMBfdwShr45kBM7Pj-N4NYVlfEQ}}. We can again consider a sigmoid curve as follows: 
 
-\footnotesize
-\begin{verbatim}
+\bigskip
+\begin{center}
 
+    $P_P = \frac{1}{\exp((30 - P)/10) + 1}$
+    
+\end{center}
 
-double R = 1;
-double total_diffusion, x_diffusion, y_diffusion;
-if((x >= 1) && (x <= x_max - 1)){
-    x_diffusion = (1/R)*(vec_time[time][y][x + 1] - (2 * vec_time[time][y][x])
-    + vec_time[time][y][x - 1]);
-}
-if((y >= 1) && (y <= y_max - 1)){
-    y_diffusion = (1/R)*(vec_time[time][y + 1][x] - (2 * vec_time[time][y][x]) 
-    + vec_time[time][y - 1][x]);
-}
+\bigskip
 
-\end{verbatim}
-\normalsize
+The units being in $mmHg$, of course. This is an unavoidable consideration. 
 
-The above code is broken into two likes due to line length. And for the edges, one can do something like this:
+\subsection{Substrate Stiffness} Substrate stiffness is also extremely important. In this case, a Gaussian distribution is appropriate, with values centered on our data as follows: 
 
-\footnotesize
-\begin{verbatim}
+\bigskip
 
-if((y == 0)){
-    y_diffusion = (1/R)*(vec_time[time][y + 1][x] - (vec_time[time][y][x]));
-}
-if((y == y_max)){
-    y_diffusion = (1/R)*(vec_time[time][y - 1][x] - (vec_time[time][y][x]));
-}
+\begin{center}
 
-\end{verbatim}
+    $P_S = \frac{1}{0.25\sqrt{2 \pi}}\exp(-\frac{1}{2}((S - 0.7)/0.25))^2$
+    
+\end{center}
 
-\normalsize 
+\bigskip
 
-In this case, $R$ is more similar to the resistance to movement of particles. It is kind of like the inverse of the diffusion coefficient. Whatever you choose to do is fine, though. 
+The units, in this case, are $kPa$. It is difficult to discern the correct standard deviation. This was selected in order to encompass the $0.3kPa-1.0kPa$ range we saw. 
+
+\subsection{Closing/Inactivation} The $\tau$ values for Piezo vary greatly in both organism and type. As some papers show $6ms$\footnote{\url{https://www.nature.com/articles/nature10812}}, and others $16ms$\footnote{\url{https://www.science.org/doi/full/10.1126/science.1193270?casa_token=WnOGIrz8PbAAAAAA\%3AdA422PZ9tigaVHLD6IxvFlWpQer0KOFm_jvCrohrhgnSzzdEPOXhZo_koo-cZeWbLeNSTFPtSJ3bdtA}} for Piezo1, I am selecting $10ms$ as the time constant $\tau$. Therefore, the probability of closing for any given channel is: 
+
+\bigskip
+
+\begin{center}
+
+$P_{close} = e^{-t/10}$, where $t$ = time since opening
+
+\end{center}
+
+\bigskip
+
+The units being $ms$. Therefore, if a cluster of $N$ channels opens at time $t_0$, at time $t_{10}$ there should be $\approx 0.368 \times N$ still open.  
+
+\subsection{Unification} We can add everything up in the following way: 
+
+\bigskip
+
+\begin{center}
+
+$N_{open} = P_VP_PP_S \times N_{closed} - P_{close}\times N_{open}$
+
+\end{center}
+
+\bigskip
+
+One important liberty I am likely to take is assuming that Piezo opens almost instantly in comparison to the $dT$ value I will select, and that $\tau$ is much slower than the opening speed.
 
 \end{document}

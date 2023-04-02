@@ -14,31 +14,55 @@ const char *path1="../data_files/Piezo_Activation.csv";
 default_random_engine generator;
 normal_distribution<double> stochastic_opening(0,4);
 
-vector<double> vec_P_open1;
-vector<double> vec_P_open2;
-vector<double> vec_P_open3;
+vector<double> vec_P_Substrate;
+vector<double> vec_P_Pressure;
+vector<double> vec_P_Voltage;
 
-double Piezo_kinetics(double i, double j, double k, int time){
-    double P_inf;
+double Piezo_P_Pressure(double i){
+    double F_inf;
+    double force; 
+    
+    F_inf = 1/(exp((30 - i)/10) + 1);
 
-    double i_temp = (70 - i)/10;
-    double j_temp = (1 - j)/10;
-    double k_temp = (30 - k)/10; 
+    vec_P_Pressure.push_back(F_inf);
 
+    return(0);
+}
 
-    P_inf = 1/(exp(i_temp + j_temp + k_temp) + 1);
+double Piezo_P_Substrate(double i){
+    double S_inf;
 
-    if(i > 0){vec_P_open1.push_back(P_inf);}
-    // if(j > 0){vec_P_open2.push_back(P_inf);}
-    // if(k > 0){vec_P_open3.push_back(P_inf);}
+    S_inf = (1/(0.25*pow(2*M_PI,0.5))*exp(-0.5*pow((i - 0.7)/0.25,2)));
+
+    vec_P_Substrate.push_back(S_inf);
+
+    return(0);
+}
+
+double Piezo_P_Voltage(double i){
+    double V_inf;
+
+    V_inf = 1/(exp((100 - i)/20) + 1);
+
+    vec_P_Voltage.push_back(V_inf);
 
     return(0);
 }
 
 double Piezo_activation(double x){
-    for(int temp = 1; temp <= 100; temp++){
-        Piezo_kinetics(temp, 20, 10, 0);
+
+    for(int temp = 0; temp <= 100; temp++){
+        Piezo_P_Pressure(temp);
     }
+
+    for(double temp = 0; temp <= 3; temp += 0.01){
+        Piezo_P_Substrate(temp);
+    }
+
+    for(double temp = 0; temp <= 150; temp += 1){
+        Piezo_P_Voltage(temp);
+    }
+
 
     // for(int temp = 1; temp <= 100; temp++){
     //     Piezo_kinetics(0, temp, 0, 0);
@@ -61,9 +85,9 @@ double output_file(double x)
 
     vector<int> sizes;
 
-    sizes.insert(sizes.begin(),vec_P_open1.size());
-    sizes.insert(sizes.begin(),vec_P_open2.size());
-    sizes.insert(sizes.begin(),vec_P_open3.size());
+    sizes.insert(sizes.begin(),vec_P_Pressure.size());
+    sizes.insert(sizes.begin(),vec_P_Substrate.size());
+    sizes.insert(sizes.begin(),vec_P_Voltage.size());
 
     sort(sizes.begin(), sizes.end());
     int max_size = sizes.back();
@@ -76,22 +100,22 @@ double output_file(double x)
 
     //cout << "Break point 4" << endl;
 
-    myfile << "1,2,3\n";
+    myfile << "Pressure,Substrate,Voltage\n";
 
     for (int i = 0; i < max_size; i++)
     {
         //cout << "Break point 5" << endl;
-        Bool_P_open1 = (vec_P_open1.size() > i) ? true : false;
-        Bool_P_open2 = (vec_P_open2.size() > i) ? true : false;
-        Bool_P_open3 = (vec_P_open3.size() > i) ? true : false;
+        Bool_P_open1 = (vec_P_Pressure.size() > i) ? true : false;
+        Bool_P_open2 = (vec_P_Substrate.size() > i) ? true : false;
+        Bool_P_open3 = (vec_P_Voltage.size() > i) ? true : false;
 
         //cout << "Break point 6" << endl;
 
-        if(Bool_P_open1) myfile << vec_P_open1[i] << ",";
+        if(Bool_P_open1) myfile << vec_P_Pressure[i] << ",";
         if(!Bool_P_open1) myfile <<",";
-        if(Bool_P_open2) myfile << vec_P_open2[i] << ",";
+        if(Bool_P_open2) myfile << vec_P_Substrate[i] << ",";
         if(!Bool_P_open2) myfile <<",";
-        if(Bool_P_open3) myfile << vec_P_open3[i];
+        if(Bool_P_open3) myfile << vec_P_Voltage[i];
 
         //if(!dn_V_0) myfile << vec_tiny_N[i];
 

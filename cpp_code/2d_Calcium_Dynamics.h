@@ -63,6 +63,7 @@ int open_counter = 0;
 // Force gating for Piezo1 is about –30 mmHg or 1.4 mN/m https://www.sciencedirect.com/science/article/pii/S0968000421000220#bb0270
 // Piezo1 half-maximal activation T50 = 2.7 ± 0.1 mN/m https://elifesciences.org/articles/12088
 // Piezo1 P50 of –28.1 ± 2.8 and –31.2 ± 3.5 mmHg https://www.science.org/doi/full/10.1126/science.1193270?casa_token=gKZRiU1R_vAAAAAA%3AAuhBFZP-QjXckn7G9aBL6A_ZJfCjsRrUIqoXCbBA1887i29wPWtzlMBfdwShr45kBM7Pj-N4NYVlfEQ
+// Piezo1 P50 of -60mV voltage gating https://www.nature.com/articles/s41467-018-03502-7
 double T_Piezo = 0.016; //16 ms tau
 
 // Piezo dimensions %%%%%%%%%%%%%%%%%%%%%%%

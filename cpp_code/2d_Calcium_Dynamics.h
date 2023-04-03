@@ -9,11 +9,6 @@
 
 using namespace std;
 
-<<<<<<< HEAD
-int x_max = 100;
-int y_max = 100;
-int time_max = 1000;
-=======
 int x_max = 50;
 int y_max = 50;
 double divs = (x_max + 1)*(y_max + 1);
@@ -24,7 +19,6 @@ double delta_T = 0.01;
 int time_max_calc = time_max/delta_T; 
 double divide = (y_max + 1) * (x_max + 1);
 double size_scale = 1/divide; 
->>>>>>> Calcium_Dynamics
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // 2d specific thingsc

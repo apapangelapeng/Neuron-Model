@@ -20,57 +20,43 @@ vector<double> vec_P_Voltage;
 
 double Piezo_P_Pressure(double i){
     double F_inf;
-    double force; 
-    
-    F_inf = 1/(exp((30 - i)/10) + 1);
-
+    F_inf = 1/(exp((30 - i)/6) + 1);
     vec_P_Pressure.push_back(F_inf);
-
     return(0);
 }
 
 double Piezo_P_Substrate(double i){
     double S_inf;
-
     S_inf = (1/(0.25*pow(2*M_PI,0.5))*exp(-0.5*pow((i - 0.7)/0.25,2)));
-
     vec_P_Substrate.push_back(S_inf);
-
     return(0);
 }
 
 double Piezo_P_Voltage(double i){
     double V_inf;
-
     V_inf = 1/(exp((100 - i)/20) + 1);
-
     vec_P_Voltage.push_back(V_inf);
-
     return(0);
 }
 
 double Piezo_activation(double x){
+    double P_total;
 
     for(int temp = 0; temp <= 100; temp++){
         Piezo_P_Pressure(temp);
     }
-
     for(double temp = 0; temp <= 3; temp += 0.01){
         Piezo_P_Substrate(temp);
     }
-
     for(double temp = 0; temp <= 150; temp += 1){
         Piezo_P_Voltage(temp);
     }
 
 
-    // for(int temp = 1; temp <= 100; temp++){
-    //     Piezo_kinetics(0, temp, 0, 0);
-    // }
 
-    // for(int temp = 1; temp <= 100; temp++){
-    //     Piezo_kinetics(0, 0, temp, 0);
-    // }
+    P_total = vec_P_Pressure[40]*vec_P_Substrate[40]*vec_P_Voltage[40];
+
+
 
     return(0);   
 }

@@ -60,38 +60,67 @@ double Compute_J_diffusion(int time, int x, int y) {
   return(total_diffusion);
 }
 
+double Piezo_P_Pressure(double i){
+    double F_inf;
+    F_inf = 1/(exp((30 - i)/6) + 1);
+    vec_P_Pressure.push_back(F_inf);
+    return(0);
+}
+
+double Piezo_P_Substrate(double i){
+    double S_inf;
+    S_inf = (1/(0.25*pow(2*M_PI,0.5))*exp(-0.5*pow((i - 0.7)/0.25,2)))/1.6;
+    vec_P_Substrate.push_back(S_inf);
+    return(0);
+}
+
+double Piezo_P_Voltage(double i){
+    double V_inf;
+    V_inf = 1/(exp((100 - i)/20) + 1);
+    vec_P_Voltage.push_back(V_inf);
+    return(0);
+}
+
 double Piezo_Channel(double potential, int time, int x, int y, int loc){
 
     int stochastic = stochastic_opening(generator);
-    double open_temp;
-    double P_open_temp;
 
-    open_temp = vec_num_open[time][x][y] + abs(stochastic);
+    int local_N_Piezo, open_local, closed_inactive_local, closed_active_local; 
 
-    if(open_temp >= N_Piezo_channels){
-        open_temp = N_Piezo_channels;
+    double P_opening_temp;
+    double Pressure_input, Substrate_input, Voltage_input; 
+
+    Pressure_input = 30;
+    Substrate_input = 30;
+
+    local_N_Piezo = N_Piezo_channels/(2*x_max + 2*y_max);
+    P_opening_temp = Piezo_P_Pressure(Pressure_input)*Piezo_P_Substrate(Substrate_input)*Piezo_P_Voltage(Voltage_input);
+
+    open_local = vec_num_open[time][x][y] + P_opening_temp*closed_active_local;
+
+    if(open_local >= local_N_Piezo){
+        open_local = local_N_Piezo;
     }
 
     int local_tau = 1.6/delta_T;
+    
     if(!(open_counter % local_tau)){
-        open_temp = open_temp*0.9048; //this is the time constant of Piezo, so it is not relevant on a micro s scale 
-    }
+        closed_inactive_local = vec_num_open[time][x][y]*0.9048; //this is the time constant of Piezo, so it is not relevant on a micro s scale 
+    } //this needs work 
 
-    if((time >= 500) && (time <= 600)){
-        open_temp = 3;
-    }
+    open_local = open_local - closed_inactive_local;
 
     if(loc == 2){
         loc = 1;
     }
 
-    open_temp = open_temp*loc;
+    open_local = open_local*loc;
     //cout << open_temp << endl;
 
-    vec_num_open[time + 1][x][y] = open_temp;
-    vec_num_closed[time + 1][x][y] = 1 - open_temp;
+    vec_num_open[time + 1][x][y] = open_local;
+    vec_num_closed[time + 1][x][y] = closed_inactive_local;
     
-    G_Piezo_total = open_temp*G_Piezo_single;
+    G_Piezo_total = open_local*G_Piezo_single;
 
     //cout << G_Piezo_total << endl;
 
@@ -100,7 +129,7 @@ double Piezo_Channel(double potential, int time, int x, int y, int loc){
 
     //cout << loc << " equals " << Piezo_current << endl;
 
-    return(5*Piezo_current);
+    return(Piezo_current);
 }
 
 double Compute_J_on(double C_cyt, int time, int x, int y){

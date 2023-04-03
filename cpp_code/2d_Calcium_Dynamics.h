@@ -14,7 +14,7 @@ int y_max = 50;
 double divs = (x_max + 1)*(y_max + 1);
 double mols_divs = 0.0000000012/divs;
 
-int time_max = 3;
+int time_max = 10;
 double delta_T = 0.01;
 int time_max_calc = time_max/delta_T; 
 double divide = (y_max + 1) * (x_max + 1);
@@ -46,7 +46,7 @@ double E_Ca; // 131.373 --> this is for humans, i.e., body temp of 310K etc. Uns
 // Piezo Kinetics %%%%%%%%%%%%%%%%%%%%%%%%%
 double G_Piezo_single = 0.000000000030; 
 double G_Piezo_total;
-int N_Piezo_channels = 100;
+int N_Piezo_channels = 10000;
 double p_open = 0; 
 vector<vector<vector<double> > > vec_num_open(time_max_calc + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
 double p_closed = 1;
@@ -57,6 +57,8 @@ int open_counter = 0;
 vector<double> vec_P_Substrate;
 vector<double> vec_P_Pressure;
 vector<double> vec_P_Voltage;
+double avg_piezo_temp;
+vector<double> vec_Piezo_average;
 // Piezo1 = 29pS https://www.sciencedirect.com/science/article/pii/S0968000416301505
 // The decay rate, according to this paper, is 1ms
 // 25-30pS https://anatomypubs.onlinelibrary.wiley.com/doi/full/10.1002/dvdy.401
@@ -148,8 +150,8 @@ vector<vector<vector<double> > > vec_J_serca(time_max_calc + 2, vector<vector<do
 
 // Buffering Definitions %%%%%%%%%%%%%%%%%
 // Reference includes a list of models published by year: https://www.frontiersin.org/articles/10.3389/fncom.2018.00014/full
-double buff_unbound = 0.000002*size_scale; //concentration of unbound buffer, which we are taking to be b_total
-double buff_bound = 0.000002*size_scale; //concentration of bound buffer
+double buff_unbound = 0.02*size_scale; //concentration of unbound buffer, which we are taking to be b_total
+double buff_bound = 0.02*size_scale; //concentration of bound buffer
 double buff_total = buff_unbound + buff_bound;
 vector<vector<vector<double> > > vec_buff_bound(time_max_calc + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
 vector<vector<vector<double> > > vec_buff_unbound(time_max_calc + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));

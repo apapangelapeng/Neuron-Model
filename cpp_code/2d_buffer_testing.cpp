@@ -94,7 +94,12 @@ double Piezo_Channel(double potential, int time, int x, int y, int loc){
     Substrate_input = 30;
 
     local_N_Piezo = N_Piezo_channels/(2*x_max + 2*y_max);
-    P_opening_temp = Piezo_P_Pressure(Pressure_input)*Piezo_P_Substrate(Substrate_input)*Piezo_P_Voltage(Voltage_input);
+    double P_P = Piezo_P_Pressure(Pressure_input);
+    double P_S = Piezo_P_Substrate(Substrate_input);
+    double P_V = Piezo_P_Voltage(Voltage_input);
+    double P_total = P_P*P_S + P_V;
+
+    P_opening_temp = 1/(exp((0.5 - P_total)/0.1) + 1);
 
     open_local = vec_num_open[time][x][y] + P_opening_temp*closed_active_local;
 

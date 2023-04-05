@@ -9,13 +9,13 @@
 
 using namespace std;
 
-int x_max = 50;
-int y_max = 50;
+int x_max = 10;
+int y_max = 10;
 double divs = (x_max + 1)*(y_max + 1);
 double mols_divs = 0.0000000012/divs;
 
-int time_max = 10;
-double delta_T = 0.01;
+int time_max = 1;
+double delta_T = 0.1;
 int time_max_calc = time_max/delta_T; 
 double divide = (y_max + 1) * (x_max + 1);
 double size_scale = 1/divide; 
@@ -27,6 +27,7 @@ vector<double> vec_y;
 vector<vector<double> > vec_coords;
 vector<vector<vector<double> > > vec_time(time_max_calc + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
 vector<double> vec_average;
+vector<double> vec_fold_average;
 //vector<vector<vector<double> > > vec_time;
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -150,8 +151,8 @@ vector<vector<vector<double> > > vec_J_serca(time_max_calc + 2, vector<vector<do
 
 // Buffering Definitions %%%%%%%%%%%%%%%%%
 // Reference includes a list of models published by year: https://www.frontiersin.org/articles/10.3389/fncom.2018.00014/full
-double buff_unbound = 0.02*size_scale; //concentration of unbound buffer, which we are taking to be b_total
-double buff_bound = 0.02*size_scale; //concentration of bound buffer
+double buff_unbound = 0.00002*size_scale; //concentration of unbound buffer, which we are taking to be b_total
+double buff_bound = 0.000002*size_scale; //concentration of bound buffer
 double buff_total = buff_unbound + buff_bound;
 vector<vector<vector<double> > > vec_buff_bound(time_max_calc + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));
 vector<vector<vector<double> > > vec_buff_unbound(time_max_calc + 2, vector<vector<double> >(y_max + 1, vector<double>(x_max + 1)));

@@ -58,7 +58,7 @@ double Compute_J_diffusion(int time, int x, int y) {
 
     //cout << (x_diffusion + y_diffusion) << " " << (divs/100)*(x_diffusion + y_diffusion) << endl;
 
-    total_diffusion = 1000*(divs/100)*(x_diffusion + y_diffusion);
+    total_diffusion = (divs/100)*(x_diffusion + y_diffusion);
 
   return(total_diffusion);
 }
@@ -202,13 +202,8 @@ double Compute_efflux(double C_cyt, int time, int x, int y, int loc){
     double deriative_error; 
     double integral_error; 
 
-    if(C_cyt > mols_divs){
-        efflux = -1000*loc*(C_cyt - mols_divs);
-    }
-    else{
-        efflux = 0;
-    }
-
+    efflux = -10*loc*(C_cyt/mols_divs);
+    //cout << C_cyt << " / " << mols_divs << " = " << C_cyt/mols_divs << endl;
     //efflux = -0.01*C_cyt; 
     
     return(efflux);
@@ -221,24 +216,26 @@ double Calcium_concentration(double x){
 
     E_Ca = PotentialE(0.0024, 0.00000012, 2);
 
-    cout << divs << endl;
-    cout << mols_divs << endl;
+    //cout << divs << endl;
+    //cout << mols_divs << endl;
 
     for(int i = 0; i <= x_max; i++){
         for(int j = 0; j <= y_max; j++){
             vec_time[0][i][j] = mols_divs;
             vec_buff_bound[0][i][j] = buff_bound;
+            //cout << vec_time[0][i][j] << " "; 
             vec_buff_unbound[0][i][j] = buff_unbound;
             vec_num_closed[0][i][j] = N_Piezo_channels;
             vec_num_open[0][i][j] = 0;
             vec_Piezo_current[0][i][j] = 0;
         }
+        //cout << endl; 
     }
 
     double scaling_factor;
     double divide = (y_max + 1)*(x_max + 1);
     scaling_factor = 1/divide; 
-    double avg_temp, avg_buff_temp, avg_ubuff_temp;
+    double avg_temp, avg_buff_temp, avg_ubuff_temp, fold_average_temp;
 
     for(int time_temp = 0; time_temp <= time_max_calc; time_temp++){
         //cout << "break point 4 " << time_temp << endl;
@@ -266,8 +263,13 @@ double Calcium_concentration(double x){
                 }
 
                 C_cyt = vec_time[time_temp][i][j];
+                cout << C_cyt << " ";
 
-                Ca_c_dT = delta_T*(scaling_factor*Compute_J_diffusion(time_temp, j, i) + scaling_factor*Compute_J_on(C_cyt, time_temp, i, j) + scaling_factor*Compute_efflux(C_cyt, time_temp, i, j, location) + Piezo_Channel(E_Ca, time_temp, i, j, location));
+                //Ca_c_dT = delta_T*(scaling_factor*Compute_J_diffusion(time_temp, j, i) + scaling_factor*Compute_J_on(C_cyt, time_temp, i, j) + scaling_factor*Compute_efflux(C_cyt, time_temp, i, j, location) + Piezo_Channel(E_Ca, time_temp, i, j, location));
+                //Ca_c_dT = delta_T*(scaling_factor*Compute_efflux(C_cyt, time_temp, i, j, location));
+                Ca_c_dT = 0;
+
+
                 //vec_time[time_temp + 1][i][j] = vec_time[time_temp][i][j] + Ca_c_dT;
                 vec_time[time_temp + 1][i][j] = vec_time[time_temp][i][j] + Ca_c_dT;
                 
@@ -284,19 +286,24 @@ double Calcium_concentration(double x){
                 avg_buff_temp += vec_buff_bound[time_temp][i][j];
                 avg_ubuff_temp += vec_buff_unbound[time_temp][i][j];
                 avg_piezo_temp += vec_Piezo_current[time_temp][i][j];
+                fold_average_temp += C_cyt/mols_divs; 
                 // avg_buff_temp += 1;
 
             }
+            cout << endl; 
         }
+        cout << endl; 
         vec_average.push_back(avg_temp/(divide));
         vec_buff_average.push_back(avg_buff_temp/(divide));
         vec_ubuff_average.push_back(avg_ubuff_temp/(divide));
         vec_Piezo_average.push_back(avg_piezo_temp/(divide));
+        vec_fold_average.push_back(fold_average_temp/(divide));
         //cout << avg_temp/(x_max*y_max) << endl;
         avg_temp = 0;
         avg_buff_temp = 0;
         avg_ubuff_temp = 0;
         avg_piezo_temp = 0;
+        fold_average_temp = 0; 
     }
 
     cout << "    to Low" << endl;
@@ -365,18 +372,21 @@ double output_avg_file(double x)
     bool bool_buff_average;
     bool bool_ubuff_average;
     bool bool_Piezo_average; 
+    bool bool_fold_average; 
 
     //cout << "Break point 4" << endl;
 
-    myfile << "Average,buff_average,ubuff_average,Piezo_avg\n";
+    myfile << "Average,buff_average,ubuff_average,Piezo_avg,fold_avg\n";
 
     for (int i = 0; i < max_size; i++)
     {
+        if(i > 1000){
         //cout << "Break point 5" << endl;
         bool_average = (vec_average.size() > i) ? true : false;
         bool_buff_average = (vec_buff_average.size() > i) ? true : false;
         bool_ubuff_average = (vec_ubuff_average.size() > i) ? true : false;
         bool_Piezo_average = (vec_Piezo_average.size() > i) ? true : false;
+        bool_fold_average = (vec_fold_average.size() > i) ? true : false;
 
         //cout << "Break point 6" << endl;
         
@@ -386,11 +396,13 @@ double output_avg_file(double x)
         if(!bool_buff_average) myfile << ",";
         if(bool_ubuff_average) myfile << vec_ubuff_average[i] << ",";
         if(!bool_ubuff_average) myfile << ",";
-        if(bool_Piezo_average) myfile << vec_Piezo_average[i];
-        
+        if(bool_Piezo_average) myfile << vec_Piezo_average[i] << ",";
+        if(!bool_Piezo_average) myfile << ",";
+        if(bool_fold_average) myfile << vec_fold_average[i];
 
         myfile << "\n";
         //cout << "Break point 6" << endl;
+        }
     }
     reset_vecs(0);
 

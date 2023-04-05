@@ -619,7 +619,7 @@ The units being in $mV$. However, I think that even this is not necessary, as it
 \bigskip
 \begin{center}
 
-    $P_P = \frac{1}{\exp((30 - P)/10) + 1}$
+    $P_P = \frac{1}{\exp((30 - P)/6) + 1}$
     
 \end{center}
 
@@ -633,7 +633,7 @@ The units being in $mmHg$, of course. This is an unavoidable consideration.
 
 \begin{center}
 
-    $P_S = \frac{1}{0.25\sqrt{2 \pi}}\exp(-\frac{1}{2}((S - 0.7)/0.25))^2$
+    $P_S = \frac{1}{0.25\sqrt{2 \pi}}\exp(\frac{1}{2}((S - 0.7)/0.25))^2$
     
 \end{center}
 
@@ -661,12 +661,32 @@ The units being $ms$. Therefore, if a cluster of $N$ channels opens at time $t_0
 
 \begin{center}
 
-$N_{open} = P_VP_PP_S \times N_{closed} - P_{close}\times N_{open}$
+$N_{open} = P_{total} \times N_{closed} - P_{close}\times N_{open}$
 
 \end{center}
 
 \bigskip
 
+It is likely that voltage can open Piezo independent of the other parameters. I would suspect that the substrate stiffness, however, is a contributor to opening rather than a controller. Therefore, we will multiply the probability of the substrate stiffness to that of the pressure applied. The stiffness of the neuron membrane is also likely very important to the pressure applied. That is, if the membrane is very fluid, no amount of pressure will activate Piezo. \\
+
+To summarize, a the membrane tension alone of the surrounding glia (the substrate) should not be sufficient to activate Piezo. I think we can take the unifying assumption that force acted by glia on Piezo will not be effective if the membrane of the glia is especially fluid. Similarly, receiving that same force will not be effective if the neuron's membrane is too fluid. \\
+
+Perhaps: 
+
+\bigskip
+
+\begin{center}
+
+    $P_{total} = \frac{1}{\exp((0.5 - P_{total})/0.1) + 1}$
+    
+\end{center}
+
+\bigskip
+
+With $P_V$ being the probability of opening due to voltage, $P_P$ being the probability of opening due to pressure and $P_N$ being favorable probability of stiffness of the neuron, and $P_S$ being the substrate.\\
+
 One important liberty I am likely to take is assuming that Piezo opens almost instantly in comparison to the $dT$ value I will select, and that $\tau$ is much slower than the opening speed.
+
+% \frac{1}{e^{(\frac{100-(\frac{f(x)}{0.006})}{10})}+1}
 
 \end{document}

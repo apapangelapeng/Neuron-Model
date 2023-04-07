@@ -154,6 +154,8 @@ double Compute_J_on(double C_cyt, int time, int x, int y){
     buff_bound = vec_buff_bound[time][x][y]; 
     buff_unbound = vec_buff_unbound[time][x][y]; 
 
+    if(C_cyt == 0){
+
     double local_C_cyt = C_cyt;
     //double local_C_cyt = 1.1;
 
@@ -187,6 +189,25 @@ double Compute_J_on(double C_cyt, int time, int x, int y){
     //buff_diff = buff_diff*pow(scaling_factor,-1);
     //vec_J_on.push_back(buff_diff);
     //cout << time << " " << buff_diff << endl;
+    }
+    else{
+        buff_diff = 0;
+        vec_buff_bound[time + 1][x][y] = (vec_buff_bound[time][x][y]);
+        vec_buff_unbound[time + 1][x][y] = (vec_buff_unbound[time][x][y]);
+
+        if(vec_buff_unbound[time + 1][x][y] < 0){
+            vec_buff_unbound[time + 1][x][y] = 0;
+        }
+        else if(vec_buff_unbound[time + 1][x][y] > buff_total){
+            vec_buff_unbound[time + 1][x][y] = buff_total;
+        }
+        if(vec_buff_bound[time + 1][x][y] < 0){
+            vec_buff_bound[time + 1][x][y] = 0;
+        }
+        else if(vec_buff_bound[time + 1][x][y] > buff_total){
+            vec_buff_bound[time + 1][x][y] = buff_total;
+        }
+    }
     return(buff_diff); //*0.000001
 }
 
@@ -198,11 +219,9 @@ double Compute_efflux(double C_cyt, int time, int x, int y, int loc){
     // efflux can only occur at the barriers, which makes things a bit weirder
 
     double efflux;
-    double proportional_error; 
-    double deriative_error; 
-    double integral_error; 
+  
+    efflux = -mols_divs*(1/(exp((pow(10,-10) - C_cyt)/pow(10,-11)) + 1));
 
-    efflux = -10*loc*(C_cyt/mols_divs);
     //cout << C_cyt << " / " << mols_divs << " = " << C_cyt/mols_divs << endl;
     //efflux = -0.01*C_cyt; 
     
@@ -245,11 +264,11 @@ double Calcium_concentration(double x){
                 int location;
 
         
-                if(((i == 0) || (i == x_max)) && ((j == 0) || (j == y_max))){
-                    location = 2;
-                    //cout << true;
-                }
-                else if(((i == 0) || (i == x_max))){
+                // if(((i == 0) || (i == x_max)) && ((j == 0) || (j == y_max))){
+                //     location = 1;
+                //     //cout << true;
+                // }
+                if(((i == 0) || (i == x_max))){
                     location = 1;
                     //cout << true;
                 }
@@ -262,16 +281,23 @@ double Calcium_concentration(double x){
                     //cout << false;
                 }
 
-                C_cyt = vec_time[time_temp][i][j];
-                cout << C_cyt << " ";
+                // C_cyt = vec_time[time_temp][i][j];
+                // cout << C_cyt << " ";
 
-                //Ca_c_dT = delta_T*(scaling_factor*Compute_J_diffusion(time_temp, j, i) + scaling_factor*Compute_J_on(C_cyt, time_temp, i, j) + scaling_factor*Compute_efflux(C_cyt, time_temp, i, j, location) + Piezo_Channel(E_Ca, time_temp, i, j, location));
+                Ca_c_dT = delta_T*(scaling_factor*Compute_J_diffusion(time_temp, j, i) + scaling_factor*Compute_J_on(C_cyt, time_temp, i, j) + scaling_factor*Compute_efflux(C_cyt, time_temp, i, j, location) + Piezo_Channel(E_Ca, time_temp, i, j, location));
+                //Ca_c_dT = delta_T*(Compute_J_diffusion(time_temp, j, i) + Compute_efflux(C_cyt, time_temp, i, j, location) + Piezo_Channel(E_Ca, time_temp, i, j, location));
+                
                 //Ca_c_dT = delta_T*(scaling_factor*Compute_efflux(C_cyt, time_temp, i, j, location));
-                Ca_c_dT = 0;
+                //Ca_c_dT = 0;
 
 
                 //vec_time[time_temp + 1][i][j] = vec_time[time_temp][i][j] + Ca_c_dT;
-                vec_time[time_temp + 1][i][j] = vec_time[time_temp][i][j] + Ca_c_dT;
+                if(vec_time[time_temp][i][j] + Ca_c_dT > 0){
+                    vec_time[time_temp + 1][i][j] = vec_time[time_temp][i][j] + Ca_c_dT;
+                }
+                else{
+                    vec_time[time_temp + 1][i][j] = 0;
+                }
                 
 
                 // if((vec_time[time_temp][i][j] + Ca_c_dT) >= 0){
@@ -290,9 +316,9 @@ double Calcium_concentration(double x){
                 // avg_buff_temp += 1;
 
             }
-            cout << endl; 
+            // cout << endl; 
         }
-        cout << endl; 
+        //cout << endl; 
         vec_average.push_back(avg_temp/(divide));
         vec_buff_average.push_back(avg_buff_temp/(divide));
         vec_ubuff_average.push_back(avg_ubuff_temp/(divide));

@@ -154,7 +154,7 @@ double Compute_J_on(double C_cyt, int time, int x, int y){
     buff_bound = vec_buff_bound[time][x][y]; 
     buff_unbound = vec_buff_unbound[time][x][y]; 
 
-    if(C_cyt == 0){
+    //if(C_cyt >= 0){
 
     double local_C_cyt = C_cyt;
     //double local_C_cyt = 1.1;
@@ -171,43 +171,43 @@ double Compute_J_on(double C_cyt, int time, int x, int y){
     vec_buff_bound[time + 1][x][y] = (vec_buff_bound[time][x][y] + delta_T*buff_c_dT);
     vec_buff_unbound[time + 1][x][y] = (vec_buff_unbound[time][x][y] - delta_T*buff_c_dT);
 
-    if(vec_buff_unbound[time + 1][x][y] < 0){
-        vec_buff_unbound[time + 1][x][y] = 0;
-    }
-    else if(vec_buff_unbound[time + 1][x][y] > buff_total){
-        vec_buff_unbound[time + 1][x][y] = buff_total;
-    }
-    if(vec_buff_bound[time + 1][x][y] < 0){
-        vec_buff_bound[time + 1][x][y] = 0;
-    }
-    else if(vec_buff_bound[time + 1][x][y] > buff_total){
-        vec_buff_bound[time + 1][x][y] = buff_total;
-    }
+    // if(vec_buff_unbound[time + 1][x][y] < 0){
+    //     vec_buff_unbound[time + 1][x][y] = 0;
+    // }
+    // else if(vec_buff_unbound[time + 1][x][y] > buff_total){
+    //     vec_buff_unbound[time + 1][x][y] = buff_total;
+    // }
+    // if(vec_buff_bound[time + 1][x][y] < 0){
+    //     vec_buff_bound[time + 1][x][y] = 0;
+    // }
+    // else if(vec_buff_bound[time + 1][x][y] > buff_total){
+    //     vec_buff_bound[time + 1][x][y] = buff_total;
+    // }
 
-    buff_diff = delta_T*(J_off - J_on);
-    //buff_diff = J_off;
-    //buff_diff = buff_diff*pow(scaling_factor,-1);
-    //vec_J_on.push_back(buff_diff);
-    //cout << time << " " << buff_diff << endl;
-    }
-    else{
-        buff_diff = 0;
-        vec_buff_bound[time + 1][x][y] = (vec_buff_bound[time][x][y]);
-        vec_buff_unbound[time + 1][x][y] = (vec_buff_unbound[time][x][y]);
+    // buff_diff = delta_T*(J_off - J_on);
+    // buff_diff = J_off;
+    // buff_diff = buff_diff*pow(scaling_factor,-1);
+    // vec_J_on.push_back(buff_diff);
+    // cout << time << " " << buff_diff << endl;
+    // }
+    // else{
+        // buff_diff = 0;
+        // vec_buff_bound[time + 1][x][y] = (vec_buff_bound[time][x][y]);
+        // vec_buff_unbound[time + 1][x][y] = (vec_buff_unbound[time][x][y]);
 
-        if(vec_buff_unbound[time + 1][x][y] < 0){
-            vec_buff_unbound[time + 1][x][y] = 0;
-        }
-        else if(vec_buff_unbound[time + 1][x][y] > buff_total){
-            vec_buff_unbound[time + 1][x][y] = buff_total;
-        }
-        if(vec_buff_bound[time + 1][x][y] < 0){
-            vec_buff_bound[time + 1][x][y] = 0;
-        }
-        else if(vec_buff_bound[time + 1][x][y] > buff_total){
-            vec_buff_bound[time + 1][x][y] = buff_total;
-        }
-    }
+        // if(vec_buff_unbound[time + 1][x][y] < 0){
+        //     vec_buff_unbound[time + 1][x][y] = 0;
+        // }
+        // else if(vec_buff_unbound[time + 1][x][y] > buff_total){
+        //     vec_buff_unbound[time + 1][x][y] = buff_total;
+        // }
+        // if(vec_buff_bound[time + 1][x][y] < 0){
+        //     vec_buff_bound[time + 1][x][y] = 0;
+        // }
+        // else if(vec_buff_bound[time + 1][x][y] > buff_total){
+        //     vec_buff_bound[time + 1][x][y] = buff_total;
+        // }
+    // }
     return(buff_diff); //*0.000001
 }
 
@@ -225,7 +225,7 @@ double Compute_efflux(double C_cyt, int time, int x, int y, int loc){
     //cout << C_cyt << " / " << mols_divs << " = " << C_cyt/mols_divs << endl;
     //efflux = -0.01*C_cyt; 
     
-    return(efflux);
+    return(0);
 }
 
 
@@ -284,20 +284,8 @@ double Calcium_concentration(double x){
                 // C_cyt = vec_time[time_temp][i][j];
                 // cout << C_cyt << " ";
 
-                Ca_c_dT = delta_T*(scaling_factor*Compute_J_diffusion(time_temp, j, i) + scaling_factor*Compute_J_on(C_cyt, time_temp, i, j) + scaling_factor*Compute_efflux(C_cyt, time_temp, i, j, location) + Piezo_Channel(E_Ca, time_temp, i, j, location));
-                //Ca_c_dT = delta_T*(Compute_J_diffusion(time_temp, j, i) + Compute_efflux(C_cyt, time_temp, i, j, location) + Piezo_Channel(E_Ca, time_temp, i, j, location));
-                
-                //Ca_c_dT = delta_T*(scaling_factor*Compute_efflux(C_cyt, time_temp, i, j, location));
-                //Ca_c_dT = 0;
-
-
-                //vec_time[time_temp + 1][i][j] = vec_time[time_temp][i][j] + Ca_c_dT;
-                if(vec_time[time_temp][i][j] + Ca_c_dT > 0){
-                    vec_time[time_temp + 1][i][j] = vec_time[time_temp][i][j] + Ca_c_dT;
-                }
-                else{
-                    vec_time[time_temp + 1][i][j] = 0;
-                }
+                //Ca_c_dT = delta_T*(scaling_factor*Compute_J_diffusion(time_temp, j, i) + scaling_factor*Compute_J_on(C_cyt, time_temp, i, j) + scaling_factor*Compute_efflux(C_cyt, time_temp, i, j, location) + Piezo_Channel(E_Ca, time_temp, i, j, location));
+                Ca_c_dT = delta_T*(Compute_J_diffusion(time_temp, j, i) + Piezo_Channel(E_Ca, time_temp, i, j, location));                vec_time[time_temp + 1][i][j] = vec_time[time_temp][i][j] + Ca_c_dT;
                 
 
                 // if((vec_time[time_temp][i][j] + Ca_c_dT) >= 0){
@@ -309,8 +297,8 @@ double Calcium_concentration(double x){
                 // }
 
                 avg_temp += vec_time[time_temp][i][j];
-                avg_buff_temp += vec_buff_bound[time_temp][i][j];
-                avg_ubuff_temp += vec_buff_unbound[time_temp][i][j];
+                // avg_buff_temp += vec_buff_bound[time_temp][i][j];
+                // avg_ubuff_temp += vec_buff_unbound[time_temp][i][j];
                 avg_piezo_temp += vec_Piezo_current[time_temp][i][j];
                 fold_average_temp += C_cyt/mols_divs; 
                 // avg_buff_temp += 1;
@@ -320,8 +308,8 @@ double Calcium_concentration(double x){
         }
         //cout << endl; 
         vec_average.push_back(avg_temp/(divide));
-        vec_buff_average.push_back(avg_buff_temp/(divide));
-        vec_ubuff_average.push_back(avg_ubuff_temp/(divide));
+        // vec_buff_average.push_back(avg_buff_temp/(divide));
+        // vec_ubuff_average.push_back(avg_ubuff_temp/(divide));
         vec_Piezo_average.push_back(avg_piezo_temp/(divide));
         vec_fold_average.push_back(fold_average_temp/(divide));
         //cout << avg_temp/(x_max*y_max) << endl;
@@ -395,22 +383,22 @@ double output_avg_file(double x)
     cout << "Vector length: " << max_size << endl;
 
     bool bool_average;
-    bool bool_buff_average;
-    bool bool_ubuff_average;
+    // bool bool_buff_average;
+    // bool bool_ubuff_average;
     bool bool_Piezo_average; 
     bool bool_fold_average; 
 
     //cout << "Break point 4" << endl;
 
-    myfile << "Average,buff_average,ubuff_average,Piezo_avg,fold_avg\n";
+    myfile << "Average,Piezo_avg,fold_avg\n";
 
     for (int i = 0; i < max_size; i++)
     {
-        if(i > 1000){
+        if(i > 0){
         //cout << "Break point 5" << endl;
         bool_average = (vec_average.size() > i) ? true : false;
-        bool_buff_average = (vec_buff_average.size() > i) ? true : false;
-        bool_ubuff_average = (vec_ubuff_average.size() > i) ? true : false;
+        // bool_buff_average = (vec_buff_average.size() > i) ? true : false;
+        // bool_ubuff_average = (vec_ubuff_average.size() > i) ? true : false;
         bool_Piezo_average = (vec_Piezo_average.size() > i) ? true : false;
         bool_fold_average = (vec_fold_average.size() > i) ? true : false;
 
@@ -418,10 +406,10 @@ double output_avg_file(double x)
         
         if(bool_average) myfile << vec_average[i] << ",";
         if(!bool_average) myfile << ",";
-        if(bool_buff_average) myfile << vec_buff_average[i] << ",";
-        if(!bool_buff_average) myfile << ",";
-        if(bool_ubuff_average) myfile << vec_ubuff_average[i] << ",";
-        if(!bool_ubuff_average) myfile << ",";
+        // if(bool_buff_average) myfile << vec_buff_average[i] << ",";
+        // if(!bool_buff_average) myfile << ",";
+        // if(bool_ubuff_average) myfile << vec_ubuff_average[i] << ",";
+        // if(!bool_ubuff_average) myfile << ",";
         if(bool_Piezo_average) myfile << vec_Piezo_average[i] << ",";
         if(!bool_Piezo_average) myfile << ",";
         if(bool_fold_average) myfile << vec_fold_average[i];

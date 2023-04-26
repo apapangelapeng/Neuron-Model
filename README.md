@@ -1,7 +1,7 @@
 
 # Model_Overview.tex
 
-A more in-depth discussion can be found in the .tex file titled Model_Overview. Here you will find some of the mathematical basis of the code, as well as general concepts in neurbiology that are implemented.  
+Note: To this point, this code had been an entirely "for fun" exploration of some topics in electrophysiology. The ReadMe is mostly out of date and only describes some of the original elements in the project. A more in-depth discussion can be found in the .tex file titled Model_Overview. In this file you will find some of the mathematical basis of the code, as well as general concepts in neurbiology that are implemented.  
 
 
 # Compilation of Executables

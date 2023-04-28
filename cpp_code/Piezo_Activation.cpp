@@ -62,6 +62,17 @@ double Piezo_Channel(double x, double y, double z){
 
     P_opening_temp = 1/(exp((0.5 - P_total)/0.1) + 1);
 
+    // TO DO: %%%%%%%
+    // Add time screen, can add arbitrary force that acts at time x
+    // Fix/add variable names
+    // Make closing mechanism work 
+
+    // int local_tau = 1.6/delta_T;
+    
+    // if(!(open_counter % local_tau)){
+    //     closed_inactive_local = vec_num_open[time][x][y]*0.9048; //this is the time constant of Piezo, so it is not relevant on a micro s scale 
+    // }
+
     vec_P_Total.push_back(P_opening_temp);
 
     return(0);

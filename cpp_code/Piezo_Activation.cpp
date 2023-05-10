@@ -12,9 +12,12 @@ using namespace std;
 const char *path1="../data_files/Piezo_Activation.csv";
 
 default_random_engine generator;
-normal_distribution<double> stochastic_opening(0,4);
+// normal_distribution<double> stochastic_opening(0,4);
 
 
+normal_distribution<double> stiffness(0.7,0.1);
+normal_distribution<double> pressure(30,5);
+normal_distribution<double> voltage(-70,10);
 
 vector<double> vec_P_Substrate;
 vector<double> vec_P_Pressure;
@@ -42,38 +45,43 @@ double Piezo_P_Voltage(double i){
     return(V_inf);
 }
 
-double Piezo_Channel(double x, double y, double z){
+double Piezo_Channel(int time){
 
-    int stochastic = stochastic_opening(generator);
+    double stochastic_stiffness = stiffness(generator);
+    double stochastic_pressure = pressure(generator);
+    double stochastic_voltage = voltage(generator);
+
+    //cout << stochastic_stiffness << " " << stochastic_pressure << " " << stochastic_voltage << endl;
 
     int local_N_Piezo, open_local, closed_inactive_local, closed_active_local; 
+
+    local_N_Piezo = 100;
 
     double P_opening_temp;
     double Pressure_input, Substrate_input, Voltage_input; 
 
-    Pressure_input = x;
-    Substrate_input = y;
-    Voltage_input = z; 
+    Pressure_input = stochastic_pressure;
+    Substrate_input = stochastic_stiffness;
+    Voltage_input = stochastic_voltage;
 
     double P_P = Piezo_P_Pressure(Pressure_input);
     double P_S = Piezo_P_Substrate(Substrate_input);
     double P_V = Piezo_P_Voltage(Voltage_input);
+
     double P_total = P_P*P_S + P_V;
 
     P_opening_temp = 1/(exp((0.5 - P_total)/0.1) + 1);
 
-    // TO DO: %%%%%%%
-    // Add time screen, can add arbitrary force that acts at time x
-    // Fix/add variable names
-    // Make closing mechanism work 
+    open_local = vec_P_Total[time] + P_opening_temp*local_N_Piezo;
 
-    // int local_tau = 1.6/delta_T;
-    
-    // if(!(open_counter % local_tau)){
-    //     closed_inactive_local = vec_num_open[time][x][y]*0.9048; //this is the time constant of Piezo, so it is not relevant on a micro s scale 
-    // }
+    // cout << P_opening_temp << endl;
+    // open_local = vec_num_open[time] + P_opening_temp*closed_active_local;
 
-    vec_P_Total.push_back(P_opening_temp);
+    if(open_local >= local_N_Piezo){
+        open_local = local_N_Piezo;
+    }
+
+    vec_P_Total.push_back(open_local);
 
     return(0);
 }
@@ -84,14 +92,10 @@ double output_file(double x)
     ofstream myfile;
     myfile.open(path1);
 
-    for(double i = 0; i <= 100; i++){
-        Piezo_Channel(i, 0.7, 0);
-    }
-    for(double i = 0; i <= 3; i += 0.1){
-        Piezo_Channel(60, i, 0);
-    }
-    for(double i = 0; i <= 200; i++){
-        Piezo_Channel(0, 0, i);
+     vec_P_Total.push_back(0);
+
+    for(double i = 0; i <= 10000; i++){
+        Piezo_Channel(i);
     }
 
     vector<int> sizes;

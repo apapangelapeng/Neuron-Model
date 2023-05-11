@@ -1,0 +1,4 @@
+1. How do you save the state of an ion channel?
+If there are thousands of channels, how does one save their state?
+2. It would indeed be quite useful to know approxiamtely what the 
+total number of ion channels is. 

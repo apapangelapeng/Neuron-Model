@@ -39,6 +39,7 @@
 \hspace{-2.5pt}}
 \newcommand{\wontfix}{\rlap{$\square$}{\large\hspace{1pt}\xmark}}
 
+\newcommand{\pr}[1]{\left(#1\right)}
 
 \usepackage{xcolor}
 \definecolor{forestgreen}{RGB}{1, 97, 89}
@@ -524,6 +525,16 @@ And for $J_{ser}$:
  
 \subsection{Spatial Dealings} The most clear way to heal with the spatial component, to me, is to calculate the amount of moles of Ca$^{2+}$ in each cube, then use that to calculate the total moles.\newline
 
+
+\bigskip
+
+\begin{center}
+    $\frac{120\mathrm{nM}}{\mathrm{L}} \cdot \frac{\mathrm{L}}{1000\mathrm{mL}} \cdot {\frac{4}{3}\pi(0.000\mathrm{2cm})^3} \cdot 6.022\times 10^{23} \approx 2400$ molecules\\
+\end{center}
+
+
+\bigskip
+
 I am taking this to be: 
 
 \bigskip
@@ -677,7 +688,8 @@ Perhaps:
 
 \begin{center}
 
-    $P_{total} = \frac{1}{\exp((0.5 - P_{total})/0.1) + 1}$
+    $P_T = P_V + P_PP_S$\\
+    $P_{total} = \frac{1}{\exp((0.5 - P_{T})/0.1) + 1}$
     
 \end{center}
 
@@ -688,5 +700,42 @@ With $P_V$ being the probability of opening due to voltage, $P_P$ being the prob
 One important liberty I am likely to take is assuming that Piezo opens almost instantly in comparison to the $dT$ value I will select, and that $\tau$ is much slower than the opening speed.
 
 % \frac{1}{e^{(\frac{100-(\frac{f(x)}{0.006})}{10})}+1}
+
+
+\subsection{Open and Closed Calculating} For the moment, I have three states: defined here as $N_{open}$, $N_{inactive}$, $N_{closed}$. $N_{inactive}$ meaning that the channels are not open, but still cannot be opened for some time. The calculations done for each, thus, are: 
+
+\bigskip
+
+\begin{center}
+
+$N_{open}^{i+1} = P_TN_{closed}^{i}$ \\ 
+\smallskip
+$N_{inactive}^{i+1} = e^{\Delta t / \tau}N_{inactive}^{i} + (N_{open}^{i} - N_{open}^{i}e^{\Delta t / \tau})$ \\ 
+\smallskip
+$N_{closed}^{i+1} = (1 - P_T)N_{closed}^{i} + (N_{inactive}^{i} - N_{inactive}^{i}e^{\Delta t / \tau})$ \\
+
+\end{center}
+
+\bigskip
+
+
+\subsection{Experimental Verification} Experiments that can be used to corroborate or refute the model include: 
+
+ \begin{enumerate}
+ \item NO imaging (as a proxy of Piezo activation)
+     \item Ca$^{2+}$ imaging (new GCaMP seems very powerful)
+     \begin{itemize}
+         \item If need be, patch-clamp is also an option
+     \end{itemize}
+     \item Atomic force microscopy (AFM) \textit{in vivo}
+     \item Growth of neurons on different substrates
+     \item FRET to measure force
+     \item FRAP to measure membrane fluidity
+     \item Axon injury both 
+     \begin{itemize}
+         \item \textit{in vivo} in \textit{Drosophila} or Mice
+         \item \textit{in vitro} with cultured neurons
+     \end{itemize}
+ \end{enumerate}
 
 \end{document}

@@ -15,7 +15,7 @@ default_random_engine generator;
 // normal_distribution<double> stochastic_opening(0,4);
 
 
-normal_distribution<double> stiffness(0.7,0.05);
+normal_distribution<double> stiffness(0.7,0.03);
 normal_distribution<double> pressure(0,1);
 normal_distribution<double> pressure2(0,10);
 normal_distribution<double> voltage(-70,10);
@@ -38,6 +38,13 @@ vector<double> vec_current40;
 vector<double> vec_current50;
 vector<double> vec_current60;
 
+vector<double> vec_P_total10;
+vector<double> vec_P_total20;
+vector<double> vec_P_total30;
+vector<double> vec_P_total40;
+vector<double> vec_P_total50;
+vector<double> vec_P_total60;
+
 double open_local, inactive, closed, tau_inact, tau_open; 
 
 double local_N_Piezo = 100;
@@ -58,7 +65,7 @@ double Reset_vecs(double i){
 
 double Piezo_P_Pressure(double i){
     double F_inf;
-    F_inf = 1/(exp((30 - i)/6) + 1);
+    F_inf = 1/(exp((30 - i)/7) + 1);
     vec_P_Pressure.push_back(F_inf);
     return(F_inf);
 }
@@ -105,10 +112,10 @@ double Piezo_Channel(int time, double pressure_temp){
 
     vec_P_Total.push_back(P_total);
 
-    P_opening_temp = 1/(exp((0.5 - P_total)/0.05) + 1);
+    P_opening_temp = 1/(exp((0.5 - P_total)/0.1) + 1) - 0.00669;
 
     tau_inact = 0.99;
-    tau_open = 0.95; 
+    tau_open = 0.90; 
 
     vec_open1.push_back(tau_open*vec_open1[time] + P_opening_temp*vec_closed[time]);
     vec_open2.push_back((P_total*vec_open2[time]) + (P_total*vec_open1[time])*(1-tau_open));
@@ -129,21 +136,27 @@ double Piezo_Channel(int time, double pressure_temp){
 
     if(pressure_temp == 10){
         vec_current10.push_back(-15*vec_open1[time] + -15*vec_open2[time]);
+        vec_P_total10.push_back(P_opening_temp);
     }
     else if(pressure_temp == 20){
         vec_current20.push_back(-15*vec_open1[time] + -15*vec_open2[time]);
+        vec_P_total20.push_back(P_opening_temp);
     }
     else if(pressure_temp == 30){
         vec_current30.push_back(-15*vec_open1[time] + -15*vec_open2[time]);
+        vec_P_total30.push_back(P_opening_temp);
     }
     else if(pressure_temp == 40){
         vec_current40.push_back(-15*vec_open1[time] + -15*vec_open2[time]);
+        vec_P_total40.push_back(P_opening_temp);
     }
     else if(pressure_temp == 50){
         vec_current50.push_back(-15*vec_open1[time] + -15*vec_open2[time]);
+        vec_P_total50.push_back(P_opening_temp);
     }
     else{
         vec_current60.push_back(-15*vec_open1[time] + -15*vec_open2[time]);
+        vec_P_total60.push_back(P_opening_temp);
     }
 
     return(0);
@@ -202,9 +215,17 @@ double output_file(double x)
     bool Bool_current50;
     bool Bool_current60;
 
+    bool Bool_P_total10;
+    bool Bool_P_total20;
+    bool Bool_P_total30;
+    bool Bool_P_total40;
+    bool Bool_P_total50;
+    bool Bool_P_total60;
+
+
     //cout << "Break point 4" << endl;
 
-    myfile << "Piezo_Open1,Piezo_Open2,Piezo_Inactive,Piezo_Closed,Pressure,Substrate,Voltage,Current,10,20,30,40,50,60\n";
+    myfile << "Piezo_Open1,Piezo_Open2,Piezo_Inactive,Piezo_Closed,Pressure,Substrate,Voltage,Current,10,20,30,40,50,60,P10,P20,P30,P40,P50,P60\n";
 
     for (int i = 0; i < max_size - 1; i++)
     {
@@ -224,6 +245,14 @@ double output_file(double x)
         Bool_current40 = (vec_current40.size() > i) ? true : false;
         Bool_current50 = (vec_current50.size() > i) ? true : false;
         Bool_current60 = (vec_current60.size() > i) ? true : false;
+
+        Bool_P_total10 = (vec_P_total10.size() > i) ? true : false;
+        Bool_P_total20 = (vec_P_total20.size() > i) ? true : false;
+        Bool_P_total30 = (vec_P_total30.size() > i) ? true : false;
+        Bool_P_total40 = (vec_P_total40.size() > i) ? true : false;
+        Bool_P_total50 = (vec_P_total50.size() > i) ? true : false;
+        Bool_P_total60 = (vec_P_total60.size() > i) ? true : false;
+
 
         //cout << "Break point 6" << endl;
 
@@ -254,7 +283,20 @@ double output_file(double x)
         if(!Bool_current40) myfile << ",";
         if(Bool_current50) myfile << vec_current50[i]  << ",";
         if(!Bool_current50) myfile << ",";
-        if(Bool_current60) myfile << vec_current60[i];
+        if(Bool_current60) myfile << vec_current60[i] << ",";
+        if(!Bool_current60) myfile << ",";
+
+        if(Bool_P_total10) myfile << vec_P_total10[i]  << ",";
+        if(!Bool_P_total10) myfile << ",";
+        if(Bool_P_total20) myfile << vec_P_total20[i]  << ",";
+        if(!Bool_P_total20) myfile << ",";
+        if(Bool_P_total30) myfile << vec_P_total30[i]  << ",";
+        if(!Bool_P_total30) myfile << ",";
+        if(Bool_P_total40) myfile << vec_P_total40[i]  << ",";
+        if(!Bool_P_total40) myfile << ",";
+        if(Bool_P_total50) myfile << vec_P_total50[i]  << ",";
+        if(!Bool_P_total50) myfile << ",";
+        if(Bool_P_total60) myfile << vec_P_total60[i];
 
 
         //if(!dn_V_0) myfile << vec_tiny_N[i];

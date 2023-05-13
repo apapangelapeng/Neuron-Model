@@ -702,17 +702,24 @@ One important liberty I am likely to take is assuming that Piezo opens almost in
 % \frac{1}{e^{(\frac{100-(\frac{f(x)}{0.006})}{10})}+1}
 
 
-\subsection{Open and Closed Calculating} For the moment, I have three states: defined here as $N_{open}$, $N_{inactive}$, $N_{closed}$. $N_{inactive}$ meaning that the channels are not open, but still cannot be opened for some time. The calculations done for each, thus, are: 
+\subsection{Open and Closed Calculating} I am postulating 4 states: defined here as $N_{open1}$, $N_{open2}$, $N_{inactive}$, $N_{closed}$. $N_{open1}$ describe ``full open" which characterizes normal activation which prefers to flow into the inactive state after. $N_{open2}$ describes when the ion channel is forced to stay open, despite its time constant lapsing. $N_{inactive}$ meaning that the channels are not open, but still cannot be opened for some time. The calculations done for each, thus, are: 
+
+\begin{equation} \label{eq8}
+\begin{split}
+N_{open1}^{i+1} &=  e^{\Delta t / \tau_{open}}N_{open1}^{i} + P_TN_{closed}^{i} \\ 
+N_{open2}^{i+1} &= P_TN_{open2}^{i} + \pr{P_TN_{open}^{i}\pr{1-e^{\Delta t / \tau_{open}}}} \\ 
+N_{inactive}^{i+1} &= e^{\Delta t / \tau_{inact}}N_{inactive}^{i} + \pr{\pr{1-P_T}N_{open}^{i}\pr{1-e^{\Delta t / \tau_{open}}}} + \pr{\pr{1-P_T}N_{open2}^{i}}\\ 
+N_{closed}^{i+1} &= \pr{1 - P_T}N_{closed}^{i} + \pr{N_{inactive}^{i} - N_{inactive}^{i}e^{\Delta t / \tau_{inact}}} \\
+\end{split}
+\end{equation}
 
 \bigskip
 
+I set $\tau_{inact} \approx 100$ms, and $\tau_{open} \approx 50$ms.
+
 \begin{center}
 
-$N_{open}^{i+1} = P_TN_{closed}^{i}$ \\ 
-\smallskip
-$N_{inactive}^{i+1} = e^{\Delta t / \tau}N_{inactive}^{i} + (N_{open}^{i} - N_{open}^{i}e^{\Delta t / \tau})$ \\ 
-\smallskip
-$N_{closed}^{i+1} = (1 - P_T)N_{closed}^{i} + (N_{inactive}^{i} - N_{inactive}^{i}e^{\Delta t / \tau})$ \\
+
 
 \end{center}
 

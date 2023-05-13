@@ -17,6 +17,7 @@ default_random_engine generator;
 
 normal_distribution<double> stiffness(0.7,0.05);
 normal_distribution<double> pressure(0,1);
+normal_distribution<double> pressure2(0,10);
 normal_distribution<double> voltage(-70,10);
 
 vector<double> vec_P_Substrate;
@@ -92,7 +93,8 @@ double Piezo_Channel(int time, double pressure_temp){
     Voltage_input = stochastic_voltage;
 
     if(time > 100 && time < 600){
-        Pressure_input = pressure_temp;
+        Pressure_input = pressure_temp + ((pressure_temp/100)*pressure2(generator));
+        Pressure_input = abs(Pressure_input);
     }
 
     double P_P = Piezo_P_Pressure(Pressure_input);
@@ -106,7 +108,7 @@ double Piezo_Channel(int time, double pressure_temp){
     P_opening_temp = 1/(exp((0.5 - P_total)/0.05) + 1);
 
     tau_inact = 0.99;
-    tau_open = 0.98; 
+    tau_open = 0.95; 
 
     vec_open1.push_back(tau_open*vec_open1[time] + P_opening_temp*vec_closed[time]);
     vec_open2.push_back((P_total*vec_open2[time]) + (P_total*vec_open1[time])*(1-tau_open));
@@ -126,22 +128,22 @@ double Piezo_Channel(int time, double pressure_temp){
     // }
 
     if(pressure_temp == 10){
-        vec_current10.push_back(-15*vec_open1[time] + -1*vec_open2[time]);
+        vec_current10.push_back(-15*vec_open1[time] + -15*vec_open2[time]);
     }
     else if(pressure_temp == 20){
-        vec_current20.push_back(-15*vec_open1[time] + -1*vec_open2[time]);
+        vec_current20.push_back(-15*vec_open1[time] + -15*vec_open2[time]);
     }
     else if(pressure_temp == 30){
-        vec_current30.push_back(-15*vec_open1[time] + -1*vec_open2[time]);
+        vec_current30.push_back(-15*vec_open1[time] + -15*vec_open2[time]);
     }
     else if(pressure_temp == 40){
-        vec_current40.push_back(-15*vec_open1[time] + -1*vec_open2[time]);
+        vec_current40.push_back(-15*vec_open1[time] + -15*vec_open2[time]);
     }
     else if(pressure_temp == 50){
-        vec_current50.push_back(-15*vec_open1[time] + -1*vec_open2[time]);
+        vec_current50.push_back(-15*vec_open1[time] + -15*vec_open2[time]);
     }
     else{
-        vec_current60.push_back(-15*vec_open1[time] + -1*vec_open2[time]);
+        vec_current60.push_back(-15*vec_open1[time] + -15*vec_open2[time]);
     }
 
     return(0);

@@ -108,24 +108,22 @@ double Piezo_Channel(int time, double pressure_temp){
     tau_inact = 0.99;
     tau_open = 0.98; 
 
+    vec_open1.push_back(tau_open*vec_open1[time] + P_opening_temp*vec_closed[time]);
     vec_open2.push_back((P_total*vec_open2[time]) + (P_total*vec_open1[time])*(1-tau_open));
     vec_inactive.push_back(tau_inact*vec_inactive[time] + ((1 - P_total)*(1-tau_open)*vec_open1[time]) + ((1 - P_total)*vec_open2[time]));
     vec_closed.push_back((1 - P_opening_temp)*vec_closed[time] + (vec_inactive[time] - tau_inact*vec_inactive[time]));
-   
 
     // 0.95 = e^-1/10
 
-    open_local = tau_open*vec_open1[time] + P_opening_temp*vec_closed[time];
+    //open_local = tau_open*vec_open1[time] + P_opening_temp*vec_closed[time];
     // cout << open_local << " and " << P_opening_temp*vec_closed[time] << endl;
 
     // cout << P_opening_temp << endl;
     // open_local = vec_num_open[time] + P_opening_temp*closed;
 
-    if(open_local >= local_N_Piezo){
-        open_local = local_N_Piezo;
-    }
-
-    vec_open1.push_back(open_local);
+    // if(open_local >= local_N_Piezo){
+    //     open_local = local_N_Piezo;
+    // }
 
     if(pressure_temp == 10){
         vec_current10.push_back(-15*vec_open1[time] + -1*vec_open2[time]);

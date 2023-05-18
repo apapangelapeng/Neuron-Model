@@ -15,9 +15,9 @@ default_random_engine generator;
 // normal_distribution<double> stochastic_opening(0,4);
 
 
-normal_distribution<double> stiffness(0.7,0.1);
+normal_distribution<double> stiffness(0.7,0.2);
 normal_distribution<double> pressure(0,5);
-normal_distribution<double> pressure2(0,10);
+normal_distribution<double> pressure2(0,1);
 normal_distribution<double> voltage(-70,10);
 
 vector<double> vec_P_Substrate;
@@ -118,7 +118,7 @@ double Piezo_Channel(int time, double pressure_temp){
 
     tau_inact = 0.99;
     tau_open3 = 0.995;
-    tau_open = 0.95; 
+    tau_open = 0.90; 
 
     vec_open1.push_back(tau_open*vec_open1[time] + P_opening_temp*vec_closed[time]);
     vec_open2.push_back((P_total*vec_open2[time]) + (P_total*vec_open1[time])*(1-tau_open));

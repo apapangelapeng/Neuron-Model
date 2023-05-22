@@ -16,9 +16,9 @@ default_random_engine generator;
 
 
 normal_distribution<double> stiffness(0.2,0.01);
-normal_distribution<double> pressure(0,2);
-normal_distribution<double> pressure2(0,2);
-normal_distribution<double> voltage(-70,10);
+normal_distribution<double> pressure(0,0.01);
+normal_distribution<double> pressure2(0,5);
+normal_distribution<double> voltage(-70,1);
 
 vector<double> vec_P_Substrate;
 vector<double> vec_P_Pressure;
@@ -122,21 +122,22 @@ double Piezo_Channel(int time, double pressure_temp){
 
     P_opening_temp = 1/(exp((0.5 - P_total)/0.1) + 1) - 0.00669;
 
-    tau_inact = 0.9999;
-    tau_open = 0.985; 
+    tau_inact = 0.999;
+    tau_open = 0.9; 
 
     vec_open1.push_back(tau_open*vec_open1[time] + P_opening_temp*vec_closed[time]);
-    vec_inactive_held.push_back((P_total*vec_inactive_held[time]) + (P_total*vec_open1[time])*(1-tau_open));
-    vec_inactive.push_back(tau_inact*vec_inactive[time] + ((1 - P_total)*(1-tau_open)*vec_open1[time]) + ((1 - P_total)*vec_inactive_held[time]));
+    vec_inactive_held.push_back((P_P*vec_inactive_held[time]) + (P_P*vec_open1[time])*(1-tau_open));
+    vec_inactive.push_back(tau_inact*vec_inactive[time] + ((1 - P_P)*(1-tau_open)*vec_open1[time]) + ((1 - P_P)*vec_inactive_held[time]));
     vec_closed.push_back((1 - P_opening_temp)*vec_closed[time] + (vec_inactive[time] - tau_inact*vec_inactive[time]));
 
-    tau_inact2 = 0.999;
-    tau_open2 = 0.999; 
+    tau_inact2 = 0.99;
+    tau_open2 = 0.95; 
 
-    vec_open2.push_back(tau_open2*vec_open2[time] + P_opening_temp*vec_closed2[time]);
-    vec_inactive2.push_back(tau_inact2*vec_inactive2[time] + (1 - tau_open2)*vec_open2[time]);
-    vec_closed2.push_back((1 - P_opening_temp)*vec_closed2[time] + (1 - tau_inact2)*vec_inactive2[time]);
+    // vec_open2.push_back(tau_open2*vec_open2[time] + P_P*vec_closed2[time]);
+    // vec_inactive2.push_back(tau_inact2*vec_inactive2[time] + (1 - tau_open2)*vec_open2[time]);
+    // vec_closed2.push_back((1 - P_P)*vec_closed2[time] + (1 - tau_inact2)*vec_inactive2[time]);
     
+    vec_open2.push_back(P_P*vec_closed2[0]);
 
     //cout << inverse_P_total << " x " << inverse_P_total << "  = " << inverse_P_total*vec_closed2[time] << endl;
     //cout << vec_closed2[time] << " and " << vec_open2[time] << endl;
@@ -156,28 +157,28 @@ double Piezo_Channel(int time, double pressure_temp){
     // }
 
     if(pressure_temp == 10){
-        vec_current10.push_back(-15*vec_open1[time] + -2*vec_open2[time]);
-        vec_P_total10.push_back(P_opening_temp);
+        vec_current10.push_back(-15*vec_open1[time] + -2*vec_inactive_held[time] + -0.25*vec_open2[time]);
+        vec_P_total10.push_back(-0.25*vec_open2[time]);
     }
     else if(pressure_temp == 20){
-        vec_current20.push_back(-15*vec_open1[time] + -2*vec_open2[time]);
-        vec_P_total20.push_back(P_opening_temp);
+        vec_current20.push_back(-15*vec_open1[time] + -2*vec_inactive_held[time] + -0.25*vec_open2[time]);
+        vec_P_total20.push_back(-0.25*vec_open2[time]);
     }
     else if(pressure_temp == 30){
-        vec_current30.push_back(-15*vec_open1[time] + -2*vec_open2[time]);
-        vec_P_total30.push_back(P_opening_temp);
+        vec_current30.push_back(-15*vec_open1[time] + -2*vec_inactive_held[time] + -0.25*vec_open2[time]);
+        vec_P_total30.push_back(-0.25*vec_open2[time]);
     }
     else if(pressure_temp == 40){
-        vec_current40.push_back(-15*vec_open1[time] + -2*vec_open2[time]);
-        vec_P_total40.push_back(P_opening_temp);
+        vec_current40.push_back(-15*vec_open1[time] + -2*vec_inactive_held[time] + -0.25*vec_open2[time]);
+        vec_P_total40.push_back(-0.25*vec_open2[time]);
     }
     else if(pressure_temp == 50){
-        vec_current50.push_back(-15*vec_open1[time] + -2*vec_open2[time]);
-        vec_P_total50.push_back(P_opening_temp);
+        vec_current50.push_back(-15*vec_open1[time] + -2*vec_inactive_held[time] + -0.25*vec_open2[time]);
+        vec_P_total50.push_back(-0.25*vec_open2[time]);
     }
     else{
-        vec_current60.push_back(-15*vec_open1[time] + -2*vec_open2[time]);
-        vec_P_total60.push_back(P_opening_temp);
+        vec_current60.push_back(-15*vec_open1[time] + -2*vec_inactive_held[time] + -0.25*vec_open2[time]);
+        vec_P_total60.push_back(-0.25*vec_open2[time]);
     }
 
     return(0);
